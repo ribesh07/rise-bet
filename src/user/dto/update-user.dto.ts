@@ -14,4 +14,8 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     @IsOptional()
     @IsNotEmpty()
     phone?: string;
+
+    @IsOptional()
+    @IsNotEmpty()
+    balance?: number;
 }

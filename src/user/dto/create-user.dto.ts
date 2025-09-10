@@ -9,4 +9,9 @@ export class CreateUserDto {
   password: string;
 
   name?: string;
+
+  balance?: number;
+
+  username?: string;
+
 }

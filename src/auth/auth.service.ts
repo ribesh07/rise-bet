@@ -32,11 +32,12 @@ export class AuthService {
 
   async signup(email: string, password: string, name?: string) {
     const existing = await this.userService.findByEmail(email);
-    if (existing) return {
-      success: false,
-      message : 'User already exists',
-      data: existing,
-    };
+    if (existing) {
+      return {
+        success: false,
+        message : 'User already exists !',
+      };
+    }
     const user = await this.userService.create(email, password);
     return {
       success: true,
