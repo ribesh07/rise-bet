@@ -1,5 +1,6 @@
 # Use official Node.js image
-FROM node:18-alpine
+# FROM node:18-alpine
+FROM node:20.12.2-alpine
 
 # Set working directory
 WORKDIR /src
@@ -21,6 +22,6 @@ RUN npx prisma migrate deploy
 RUN npm run build
 
 # Expose port if needed
-EXPOSE 3084
+EXPOSE 3000
 
 CMD ["node", "dist/main.js"]
