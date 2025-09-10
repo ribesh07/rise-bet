@@ -1,0 +1,13 @@
+### GET users
+GET http://[::1]:3001/api/v1/users 
+Content-Type: application/json
+
+### POST users
+POST http://[::1]:3001/api/v1/users HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Ganndu",
+  "email": "as@gmail.com"
+}
+
