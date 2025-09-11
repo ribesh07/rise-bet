@@ -177,9 +177,9 @@ export default function PlinkoGame() {
       Events.off(engine, "afterUpdate", onAfterUpdate);
       if (renderRef.current) {
         Render.stop(renderRef.current);
-        // @ts-expect-error - canvas property exists on render
+   
         renderRef.current.canvas.remove();
-        // @ts-expect-error - textures property exists on render
+        
         renderRef.current.textures = {};
       }
       if (runnerRef.current) Runner.stop(runnerRef.current);

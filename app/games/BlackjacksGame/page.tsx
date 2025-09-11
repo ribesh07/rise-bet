@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Suit } from '@/types/card';
+import { Card, Rank, Suit } from '@/types/card';
 
 // Card types and utilities
 const SUITS: Suit[] = ['♠', '♥', '♦', '♣'];
@@ -55,7 +55,7 @@ const BlackjackGame: React.FC = () => {
         newDeck.push({
           id: `${suit}-${rank}-${Math.random()}`,
           suit,
-          rank,
+          rank: rank as Rank,
           value: getCardValue(rank)
         });
       });
@@ -189,14 +189,17 @@ const BlackjackGame: React.FC = () => {
 
   // Dealer's turn
   const dealerTurn = (playerHand: GameCard[], dealerHand: GameCard[], deck: GameCard[]) => {
-    let currentDealerHand = dealerHand.map(card => ({ ...card, hidden: false }));
+    let currentDealerHand = dealerHand.map(card => ({ ...card, hidden: card.hidden === true ? false : false }));
     let currentDeck = [...deck];
     let dealerScore = calculateHandValue(currentDealerHand);
 
     const dealerPlay = () => {
       if (dealerScore < 17) {
         const [newCard, newDeck] = dealCard(currentDeck);
-        currentDealerHand = [...currentDealerHand, newCard];
+        currentDealerHand = [
+          ...currentDealerHand,
+          { ...newCard, hidden: false }
+        ];
         currentDeck = newDeck;
         dealerScore = calculateHandValue(currentDealerHand);
         
