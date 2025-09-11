@@ -65,7 +65,7 @@ const startCountdown: (duration?: number)  => void = useCallback((duration = 7) 
       return prev - 1;
     });
   }, 1000);
-}, [clearAllIntervals, startNewGame]);
+}, [clearAllIntervals]);
 
 
   // Start new game
