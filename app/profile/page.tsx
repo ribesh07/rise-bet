@@ -18,6 +18,13 @@ interface User {
   history: Transaction[];
 }
 
+type HistoryItem = {
+  id: number;
+  type: string;
+  amount: number;
+  date: Date;
+};
+
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
 
@@ -41,7 +48,7 @@ export default function ProfilePage() {
             email: res.data.email || "",
             balance: Number(res.data.balance) || 0,
             history: Array.isArray(res.data.history)
-              ? res.data.history.map((item: any) => ({
+              ? res.data.history.map((item: HistoryItem) => ({
                   id: item.id,
                   type: item.type,
                   amount: Number(item.amount) || 0,

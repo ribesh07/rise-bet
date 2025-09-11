@@ -88,11 +88,12 @@ export default function HiloPage() {
         }
       }, 2000);
 
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Something went wrong');
-      setLoading(false);
-      setGameState('playing');
-    }
+    }catch (err: unknown) {
+        const e = err as string; 
+        alert( "Something went wrong");
+        setLoading(false);
+        setGameState("playing");
+      }
   };
 
   const startNewRound = () => {

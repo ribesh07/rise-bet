@@ -63,12 +63,13 @@ export default function DicePage() {
         setMultiplier(payoutMultiplier);
         setLoading(false);
       }, 3100);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (intervalRef.current !== null) {
     window.clearInterval(intervalRef.current);
     intervalRef.current = null;
   }
-      alert(err.response?.data?.message || "Something went wrong");
+      alert("Something went wrong");
+      console.log("error message :" , err )
       setLoading(false);
     }
   };
