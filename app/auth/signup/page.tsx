@@ -38,7 +38,10 @@ function strengthLabel(score: number) {
 type dataType = {
   success: boolean;
   message: string;
-  data: any;
+  data: {
+    access_token?: string;
+    token_type?: string;
+  } | null;
 };
 
 export default function SignupPage() {
