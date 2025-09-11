@@ -38,10 +38,10 @@ export default function PlinkoGame() {
   const [lastWin, setLastWin] = useState<number | null>(null);
 
   const sceneRef = useRef<HTMLDivElement | null>(null);
-  const engineRef = useRef<Engine | null>(null);
-  const renderRef = useRef<Render | null>(null);
-  const runnerRef = useRef<Runner | null>(null);
-  const ballRef = useRef<Body | null>(null);
+  const engineRef = useRef<Matter.Engine | null>(null);
+  const renderRef = useRef<Matter.Render | null>(null);
+  const runnerRef = useRef<Matter.Runner | null>(null);
+  const ballRef = useRef<Matter.Body | null>(null);
   const worldRef = useRef<Matter.World | null>(null);
 
   // Build the physics world once
@@ -83,7 +83,7 @@ export default function PlinkoGame() {
     Composite.add(world, [leftWall, rightWall, floor]);
 
     // Create pegs grid
-    const pegs: Body[] = [];
+    const pegs: Matter.Body[] = [];
     const usableW = BOARD_W - SIDE_PADDING * 2;
     const colsMax = Math.floor(usableW / COL_SPACING);
 
