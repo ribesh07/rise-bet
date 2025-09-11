@@ -3,5 +3,5 @@ export default Page (){
         <div>
             <h1> Big Bass Bonaza !</h1>
         </div>
-    </>
+    </>;
 }
