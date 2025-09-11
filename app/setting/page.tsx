@@ -230,7 +230,7 @@ export default function SettingsPage() {
             balance: Number(res.data.balance) || 0,
           });
         } else {
-          toast.error(res.message || "Failed to fetch user data!");
+          toast.error(res.message || "Failed to fetch user data !");
         }
       } catch (error) {
         console.error(error);
@@ -321,7 +321,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (!user) return <div className="text-white text-center p-8">Loading...</div>;
+  if (!user) return <div className="flex justify-center align-center self-center text-white text-center p-8">Loading...</div>;
 
   return (
     <main className="min-h-screen bg-black text-white flex justify-center py-12 px-4">

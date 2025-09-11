@@ -4,31 +4,31 @@ import { apiRequest } from "@/utils/ApiHelper";
 import toast from "react-hot-toast";
 import { ArrowDownCircle, ArrowUpCircle, History } from "lucide-react";
 
+
 export default function WalletPage() {
   const [balance, setBalance] = useState<number>(0);
 
+  const fetchBalance = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast.error("Please login to view wallet !");
+      return;
+    }
+    try {
+      const res = await apiRequest("/auth/me", true, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.success && res.data) {
+        setBalance(Number(res.data.balance) || 0);
+      } else {
+        toast.error(res.message || "Failed to fetch balance");
+      }
+    } catch (error) {
+      console.error("Wallet fetch error:", error);
+      toast.error("Error fetching wallet info");
+    }
+  };
   useEffect(() => {
-    const fetchBalance = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error("Please login to view wallet");
-        return;
-      }
-      try {
-        const res = await apiRequest("/auth/me", true, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.success && res.data) {
-          setBalance(Number(res.data.balance) || 0);
-        } else {
-          toast.error(res.message || "Failed to fetch balance");
-        }
-      } catch (error) {
-        console.error("Wallet fetch error:", error);
-        toast.error("Error fetching wallet info");
-      }
-    };
-
     fetchBalance();
   }, []);
 
