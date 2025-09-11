@@ -2,6 +2,12 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+interface ActivePlayers {
+  name: string;
+  amount?: number;      
+  multiplier?: number;  
+}
+
 const CrashGame = () => {
   const [balance, setBalance] = useState(1000);
   const [betAmount, setBetAmount] = useState(10);
@@ -9,11 +15,18 @@ const CrashGame = () => {
   const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
   const [gameState, setGameState] = useState('waiting'); // waiting, betting, flying, crashed
   const [crashPoint, setCrashPoint] = useState(0);
-  const [playerBet, setPlayerBet] = useState(null);
-  const [cashedOut, setCashedOut] = useState(false);
+  const [playerBet, setPlayerBet] = useState([{
+    amount : 0 , multiplier :0
+  }]);
+  const [cashedOut, setCashedOut] = useState<boolean>(false);
   const [history, setHistory] = useState([2.34, 1.23, 5.67, 1.89, 3.45, 7.23, 1.02, 4.56]);
   const [countdown, setCountdown] = useState(7);
-  const [activePlayers, setActivePlayers] = useState([]);
+  const [activePlayers, setActivePlayers] = useState([
+     { name: 'CryptoKing', bet: 50, multiplier: 0 },
+      { name: 'MoonShot', bet: 25, multiplier: 0 },
+      { name: 'DiamondHands', bet: 100, multiplier: 0 },
+      { name: 'RocketMan', bet: 75, multiplier: 0 },
+  ]);
   const [chatMessages, setChatMessages] = useState([
     { user: 'Player123', message: 'Nice win!', time: '12:34' },
     { user: 'CrashMaster', message: 'Going for 10x', time: '12:33' },
@@ -22,8 +35,9 @@ const CrashGame = () => {
   const [gameHash, setGameHash] = useState('loading...');
   const [mounted, setMounted] = useState(false);
 
-  const gameIntervalRef = useRef(null);
-  const countdownIntervalRef = useRef(null);
+  const gameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const gameStartTime = useRef(0);
 
   // Generate crash point using house edge algorithm
@@ -35,35 +49,37 @@ const CrashGame = () => {
   };
 
   // Clear all intervals
-  const clearAllIntervals = useCallback(() => {
-    if (gameIntervalRef.current) {
-      clearInterval(gameIntervalRef.current);
-      gameIntervalRef.current = null;
-    }
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-  }, []);
+const clearAllIntervals = useCallback(() => {
+  if (gameIntervalRef.current) {
+    clearInterval(gameIntervalRef.current);
+    gameIntervalRef.current = null;
+  }
+  if (countdownIntervalRef.current) {
+    clearInterval(countdownIntervalRef.current);
+    countdownIntervalRef.current = null;
+  }
+}, []);
 
-  // Start countdown for next game
-  const startCountdown = useCallback((duration = 7) => {
-    clearAllIntervals();
-    setCountdown(duration);
-    setGameState('waiting');
-    
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
+const startCountdown: (duration?: number)  => void = useCallback((duration = 7) => {
+  clearAllIntervals();
+  setCountdown(duration);
+  setGameState("waiting");
+
+  countdownIntervalRef.current = setInterval(() => {
+    setCountdown((prev) => {
+      if (prev <= 1) {
+        if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
           countdownIntervalRef.current = null;
-          startNewGame();
-          return duration;
         }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
+        startNewGame();
+        return duration; // reset countdown for next round
+      }
+      return prev - 1;
+    });
+  }, 1000);
+}, [clearAllIntervals]);
+
 
   // Start new game
   const startNewGame = useCallback(() => {
@@ -82,10 +98,10 @@ const CrashGame = () => {
     
     // Generate fake active players
     setActivePlayers([
-      { name: 'CryptoKing', bet: 50, multiplier: null },
-      { name: 'MoonShot', bet: 25, multiplier: null },
-      { name: 'DiamondHands', bet: 100, multiplier: null },
-      { name: 'RocketMan', bet: 75, multiplier: null },
+      { name: 'CryptoKing', bet: 50, multiplier: 0 },
+      { name: 'MoonShot', bet: 25, multiplier: 0 },
+      { name: 'DiamondHands', bet: 100, multiplier: 0 },
+      { name: 'RocketMan', bet: 75, multiplier: 0 },
     ]);
 
     // Start multiplier animation
@@ -105,7 +121,7 @@ const CrashGame = () => {
         
         // Reset player bet when game crashes
         setTimeout(() => {
-          setPlayerBet(null); // Reset here after game is over
+          setPlayerBet([]); // Reset here after game is over
         }, 1000);
         
         // Start countdown for next game after a delay
@@ -131,7 +147,7 @@ const CrashGame = () => {
     if (gameState !== 'waiting' || betAmount > balance || countdown <= 3) return;
     
     setBalance(prev => prev - betAmount);
-    setPlayerBet({ amount: betAmount, multiplier: null });
+    setPlayerBet({ amount: betAmount, multiplier: 0 });
     console.log('Bet placed:', { amount: betAmount, balance });
   }, [gameState, betAmount, balance, countdown]);
 
