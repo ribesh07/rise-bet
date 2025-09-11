@@ -2,6 +2,12 @@
 'use client';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+interface ActivePlayers {
+  name: string;
+  amount?: number;      
+  multiplier?: number;  
+}
+
 const CrashGame = () => {
   const [balance, setBalance] = useState(1000);
   const [betAmount, setBetAmount] = useState(10);
@@ -92,10 +98,10 @@ const startCountdown: (duration?: number)  => void = useCallback((duration = 7) 
     
     // Generate fake active players
     setActivePlayers([
-      { name: 'CryptoKing', bet: 50, multiplier: null },
-      { name: 'MoonShot', bet: 25, multiplier: null },
-      { name: 'DiamondHands', bet: 100, multiplier: null },
-      { name: 'RocketMan', bet: 75, multiplier: null },
+      { name: 'CryptoKing', bet: 50, multiplier: 0 },
+      { name: 'MoonShot', bet: 25, multiplier: 0 },
+      { name: 'DiamondHands', bet: 100, multiplier: 0 },
+      { name: 'RocketMan', bet: 75, multiplier: 0 },
     ]);
 
     // Start multiplier animation
