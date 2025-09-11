@@ -214,29 +214,29 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState<boolean>(false);
 
   // Fetch user data on mount
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return toast.error("You are not logged in!");
-      try {
-        const res = await apiRequest("/auth/me", true, {
-          headers: { Authorization: `Bearer ${token}` },
+  const fetchUser = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return toast.error("You are not logged in!");
+    try {
+      const res = await apiRequest("/auth/me", true, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.success && res.data) {
+        // Ensure balance is always a number
+        setUser({
+          username: res.data.username || "",
+          email: res.data.email || "",
+          balance: Number(res.data.balance) || 0,
         });
-        if (res.success && res.data) {
-          // Ensure balance is always a number
-          setUser({
-            username: res.data.username || "",
-            email: res.data.email || "",
-            balance: Number(res.data.balance) || 0,
-          });
-        } else {
-          toast.error(res.message || "Failed to fetch user data!");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed to fetch user data!");
+      } else {
+        toast.error(res.message || "Failed to fetch user data !");
       }
-    };
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch user data!");
+    }
+  };
+  useEffect(() => {
     fetchUser();
   }, []);
 
@@ -321,7 +321,7 @@ export default function SettingsPage() {
     }
   };
 
-  if (!user) return <div className="text-white text-center p-8">Loading...</div>;
+  if (!user) return <div className="flex justify-center align-center self-center text-white text-center p-8">Loading...</div>;
 
   return (
     <main className="min-h-screen bg-black text-white flex justify-center py-12 px-4">
