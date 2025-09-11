@@ -9,11 +9,18 @@ const CrashGame = () => {
   const [currentMultiplier, setCurrentMultiplier] = useState(1.00);
   const [gameState, setGameState] = useState('waiting'); // waiting, betting, flying, crashed
   const [crashPoint, setCrashPoint] = useState(0);
-  const [playerBet, setPlayerBet] = useState(null);
-  const [cashedOut, setCashedOut] = useState(false);
+  const [playerBet, setPlayerBet] = useState([{
+    amount : 0 , multiplier :0
+  }]);
+  const [cashedOut, setCashedOut] = useState<boolean>(false);
   const [history, setHistory] = useState([2.34, 1.23, 5.67, 1.89, 3.45, 7.23, 1.02, 4.56]);
   const [countdown, setCountdown] = useState(7);
-  const [activePlayers, setActivePlayers] = useState([]);
+  const [activePlayers, setActivePlayers] = useState([
+     { name: 'CryptoKing', bet: 50, multiplier: 0 },
+      { name: 'MoonShot', bet: 25, multiplier: 0 },
+      { name: 'DiamondHands', bet: 100, multiplier: 0 },
+      { name: 'RocketMan', bet: 75, multiplier: 0 },
+  ]);
   const [chatMessages, setChatMessages] = useState([
     { user: 'Player123', message: 'Nice win!', time: '12:34' },
     { user: 'CrashMaster', message: 'Going for 10x', time: '12:33' },
@@ -108,7 +115,7 @@ const startCountdown: (duration?: number)  => void = useCallback((duration = 7) 
         
         // Reset player bet when game crashes
         setTimeout(() => {
-          setPlayerBet(null); // Reset here after game is over
+          setPlayerBet([]); // Reset here after game is over
         }, 1000);
         
         // Start countdown for next game after a delay
@@ -134,7 +141,7 @@ const startCountdown: (duration?: number)  => void = useCallback((duration = 7) 
     if (gameState !== 'waiting' || betAmount > balance || countdown <= 3) return;
     
     setBalance(prev => prev - betAmount);
-    setPlayerBet({ amount: betAmount, multiplier: null });
+    setPlayerBet({ amount: betAmount, multiplier: 0 });
     console.log('Bet placed:', { amount: betAmount, balance });
   }, [gameState, betAmount, balance, countdown]);
 
