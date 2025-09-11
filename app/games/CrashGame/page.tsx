@@ -22,8 +22,9 @@ const CrashGame = () => {
   const [gameHash, setGameHash] = useState('loading...');
   const [mounted, setMounted] = useState(false);
 
-  const gameIntervalRef = useRef(null);
+  const gameIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const gameStartTime = useRef(0);
 
   // Generate crash point using house edge algorithm
@@ -35,35 +36,37 @@ const CrashGame = () => {
   };
 
   // Clear all intervals
-  const clearAllIntervals = useCallback(() => {
-    if (gameIntervalRef.current) {
-      clearInterval(gameIntervalRef.current);
-      gameIntervalRef.current = null;
-    }
-    if (countdownIntervalRef.current) {
-      clearInterval(countdownIntervalRef.current);
-      countdownIntervalRef.current = null;
-    }
-  }, []);
+const clearAllIntervals = useCallback(() => {
+  if (gameIntervalRef.current) {
+    clearInterval(gameIntervalRef.current);
+    gameIntervalRef.current = null;
+  }
+  if (countdownIntervalRef.current) {
+    clearInterval(countdownIntervalRef.current);
+    countdownIntervalRef.current = null;
+  }
+}, []);
 
-  // Start countdown for next game
-  const startCountdown = useCallback((duration = 7) => {
-    clearAllIntervals();
-    setCountdown(duration);
-    setGameState('waiting');
-    
-    countdownIntervalRef.current = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
+const startCountdown = useCallback((duration = 7) => {
+  clearAllIntervals();
+  setCountdown(duration);
+  setGameState("waiting");
+
+  countdownIntervalRef.current = setInterval(() => {
+    setCountdown((prev) => {
+      if (prev <= 1) {
+        if (countdownIntervalRef.current) {
           clearInterval(countdownIntervalRef.current);
           countdownIntervalRef.current = null;
-          startNewGame();
-          return duration;
         }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
+        startNewGame();
+        return duration; // reset countdown for next round
+      }
+      return prev - 1;
+    });
+  }, 1000);
+}, [clearAllIntervals, startNewGame]);
+
 
   // Start new game
   const startNewGame = useCallback(() => {
