@@ -30,7 +30,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <div className="flex-shrink-0 font-extrabold tracking-wide cursor-pointer select-none">
-          <img src="logo.png" alt="RISE"/>
+          <img className="w-12 h-12" src="logo.png" alt="RISE"/>
         </div>
 
         {/* Desktop Nav Links */}
