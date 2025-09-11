@@ -15,7 +15,17 @@ export default function BaccaratGame() {
   const [betAmount, setBetAmount] = useState(100);
   const [betOn, setBetOn] = useState<'player' | 'banker' | 'tie'>('player');
   const [loading, setLoading] = useState(false);
-  const [gameResult, setGameResult] = useState<any>(null);
+  interface GameResult {
+    playerHand: Card[];
+    bankerHand: Card[];
+    playerValue: number;
+    bankerValue: number;
+    winner: 'player' | 'banker' | 'tie';
+    win: boolean;
+    payout: number;
+    payoutMultiplier: number;
+  }
+  const [gameResult, setGameResult] = useState<GameResult | null>(null);
   const [animating, setAnimating] = useState(false);
 
   const audioClick = typeof Audio !== "undefined" ? new Audio('/sounds/click.mp3') : null;
@@ -57,10 +67,15 @@ export default function BaccaratGame() {
         setAnimating(false);
         setLoading(false);
       }, 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Return bet amount if there was an error
       setBalance(prev => prev + betAmount);
-      alert(err.response?.data?.message || "Something went wrong");
+      let message = "Something went wrong";
+      if (err && typeof err === "object" && "response" in err && err.response && typeof err.response === "object" && "data" in err.response && err.response.data && typeof err.response.data === "object" && "message" in err.response.data) {
+        // @ts-ignore
+        message = err.response.data.message;
+      }
+      alert(message);
       setLoading(false);
       setAnimating(false);
     }
