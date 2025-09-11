@@ -43,6 +43,7 @@ export default function ProfilePage() {
 
         if (res.success && res.data) {
           // Ensure balance is a number and history exists
+          console.log("Fetched user data:", res.data);
           setUser({
             username: res.data.username || "",
             email: res.data.email || "",

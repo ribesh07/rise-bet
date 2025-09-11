@@ -24,3 +24,28 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+.phone-input input {
+  background-color: #0f0f0f;
+  border: 1px solid #3f3f3f;
+  color: white;
+  padding: 12px;
+  border-radius: 0.5rem;
+  width: 100%;
+  outline: none;
+}
+
+.phone-input input::placeholder {
+  color: #666;
+}
+
+.phone-input .PhoneInputCountry {
+  background: #1a1a1a;
+  border-right: 1px solid #333;
+  padding: 0 8px;
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.phone-input .PhoneInputCountrySelect {
+  background: #1a1a1a;
+  color: white;
+}
