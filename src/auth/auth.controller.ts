@@ -17,12 +17,12 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() dto: CreateUserDto) {
-    return this.authService.signup(dto.email, dto.password);
+    return this.authService.signup(dto.email, dto.password , dto.username , dto.dob , dto.phone , dto.referral);
   }
 
   @Post('login')
   async login(@Body() dto: LoginDto) {
-    const user = await this.authService.validateUser(dto.email, dto.password);
+    const user = await this.authService.validateUser( dto.password , dto.email, dto.username);
     if (!user) {
       return { statusCode: 401, success : false, message: 'Invalid credentials' };
     }
