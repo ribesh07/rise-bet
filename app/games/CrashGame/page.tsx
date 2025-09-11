@@ -23,7 +23,7 @@ const CrashGame = () => {
   const [mounted, setMounted] = useState(false);
 
   const gameIntervalRef = useRef(null);
-  const countdownIntervalRef = useRef(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const gameStartTime = useRef(0);
 
   // Generate crash point using house edge algorithm
