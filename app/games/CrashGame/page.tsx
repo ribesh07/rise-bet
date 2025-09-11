@@ -47,7 +47,7 @@ const clearAllIntervals = useCallback(() => {
   }
 }, []);
 
-const startCountdown = useCallback((duration = 7) => {
+const startCountdown: (duration?: number)  = useCallback((duration = 7) => {
   clearAllIntervals();
   setCountdown(duration);
   setGameState("waiting");
