@@ -17,20 +17,8 @@ interface dataType {
   } | null;
 }
 
-// List of languages
-const languages = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-  { code: "de", label: "Deutsch" },
-  { code: "pt", label: "Português" },
-  { code: "ru", label: "Русский" },
-  { code: "zh", label: "中文" },
-  { code: "ja", label: "日本語" },
-  { code: "ko", label: "한국어" },
-  { code: "ar", label: "العربية" },
-  { code: "hi", label: "हिन्दी" },
-];
+
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -42,26 +30,9 @@ export default function LoginPage() {
 
   const router = useRouter();
 
-  // Language selector
-  const [langDropdown, setLangDropdown] = useState(false);
-  const [selectedLang, setSelectedLang] = useState("en");
-  const dropdownRef = useRef<HTMLDivElement>(null);
+ 
 
-  useEffect(() => {
-    // Load language from localStorage if exists
-    const storedLang = localStorage.getItem("language");
-    if (storedLang) setSelectedLang(storedLang);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setLangDropdown(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+ 
 
   // Simple email validation regex
   const isValidEmail = (email: string) => {
@@ -112,39 +83,11 @@ export default function LoginPage() {
     }
   };
 
-  const selectLanguage = (code: string) => {
-    setSelectedLang(code);
-    localStorage.setItem("language", code);
-    setLangDropdown(false);
-    toast.success(`Language set to ${languages.find(l => l.code === code)?.label}`);
-  };
-
+ 
   return (
     <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center px-4 relative">
       {/* Language Selector Top Right */}
-      <div className="absolute top-4 right-4" ref={dropdownRef}>
-        <button
-          onClick={() => setLangDropdown(!langDropdown)}
-          className="bg-[#1a1a1a] text-white px-3 py-2 rounded-md border border-gray-700 hover:bg-[#333] transition"
-        >
-          {languages.find((l) => l.code === selectedLang)?.label}
-        </button>
-        {langDropdown && (
-          <div className="absolute right-0 mt-2 w-48 bg-[#1a1a1a] rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
-            {languages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => selectLanguage(lang.code)}
-                className={`w-full text-left px-4 py-2 text-white hover:bg-[#333] ${
-                  selectedLang === lang.code ? "bg-[#00c2ff] text-black font-semibold" : ""
-                }`}
-              >
-                {lang.label}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      
 
       <div className="max-w-md w-full bg-[#1a1a1a] rounded-xl p-8 shadow-lg">
         <div className="flex justify-center mb-6">
