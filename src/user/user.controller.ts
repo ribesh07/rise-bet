@@ -51,6 +51,4 @@ export class UserController {
   ) {
     return this.userService.resolveBet(Number(betId), dto.status);
   }
-  
-
 }
