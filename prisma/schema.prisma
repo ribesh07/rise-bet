@@ -22,6 +22,12 @@ enum BetStatus {
   CANCELLED
 }
 
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
 model User {
   id              Int            @id @default(autoincrement())  
   email           String         @unique                      
@@ -47,6 +53,8 @@ model Transaction {
   type      TransactionType
   amount    Decimal          @default(0.00) @db.Decimal(12,2)
   createdAt DateTime         @default(now())
+  status    TransactionStatus @default(PENDING)
+  description String?
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -70,3 +78,5 @@ model Match {
   endTime   DateTime?
   bets      Bet[]
 }
+
+
