@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { TransactionType, BetStatus } from '@prisma/client';
 import { TransactionDto } from './dto/transaction.dto';
 import { BetDto } from './dto/bet.dto';
+import { Decimal } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UserService {
@@ -95,6 +96,43 @@ export class UserService {
       }),
     ]);
   }
+
+  //for withdrawal
+  async createWithdrawal(userId: number, amount: number) {
+  // Get user
+  const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+  if (!user) throw new Error('User not found');
+  // if (user.balance < amount) throw new Error('Insufficient balance');
+  if (user.balance.lt(amount)) {
+    // throw new Error('Insufficient balance');
+    return { success: false, message: 'Insufficient balance' };
+  }
+
+  // Run inside a transaction
+  return this.prisma.$transaction(async (tx) => {
+    // Create transaction record
+    const transaction = await tx.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.WITHDRAW,
+        amount,
+        status: 'SUCCESS',
+        description: 'User withdrawal',
+      },
+    });
+
+    // Update balance safely
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        balance: { decrement: amount },
+      },
+    });
+
+    return transaction;
+  });
+}
 
   // place bet, deduct stake, record transaction
   async placeBet(userId: number, betDto: BetDto) {
