@@ -2,6 +2,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Star } from "lucide-react";
 
 interface ProgressCardProps {
   username: string;
@@ -15,10 +16,11 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
   levelName,
 }) => {
   const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [pulse, setPulse] = useState(false);
 
   useEffect(() => {
     let start = 0;
-    const duration = 1000; // animation duration in ms
+    const duration = 1000;
     const increment = progressPercentage / (duration / 10);
 
     const interval = setInterval(() => {
@@ -30,28 +32,66 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
       setAnimatedProgress(start);
     }, 10);
 
-    return () => clearInterval(interval);
+    // Trigger star pulse when progress changes
+    setPulse(true);
+    const pulseTimeout = setTimeout(() => setPulse(false), 500); // pulse lasts 0.5s
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(pulseTimeout);
+    };
   }, [progressPercentage]);
 
   return (
+    <Card className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-none p-6 shadow-xl rounded-2xl relative overflow-hidden">
+      {/* VIP Star */}
+      <div
+        className={`absolute top-4 right-4 transition-transform duration-300 ${
+          pulse ? "animate-pulse-scale" : ""
+        }`}
+      >
+        <Star className="w-6 h-6 text-yellow-400 stroke-current stroke-2" />
+      </div>
 
-    <Card className="bg-[#1e293b] border-none p-9">
-      <CardContent className="p-2 h-1.580 flex flex-col ">
-        <h2 className="text-base font-semibold">{username}</h2>
-        <p className="text-gray-400 text-xs mt-1">Your VIP Progress</p>
-        <div className="w-full bg-gray-700 h-2 rounded-full mt-2">
+      <CardContent className="p-0 flex flex-col gap-2">
+        <h2 className="text-lg font-bold text-white">{username}</h2>
+        <p className="text-gray-400 text-sm">Your VIP Progress</p>
+
+        {/* Progress Bar */}
+        <div className="w-full bg-gray-700 rounded-full h-3 mt-3 overflow-hidden relative">
           <div
-            className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+            className="h-3 rounded-full bg-yellow-400 shadow-lg transition-all duration-300"
+            style={{ width: `${animatedProgress}%` }}
+          />
+          <div
+            className="absolute h-3 rounded-full bg-yellow-400 blur-xl opacity-40 top-0 left-0"
             style={{ width: `${animatedProgress}%` }}
           />
         </div>
-        <p className="text-gray-500 text-xs mt-1">
-          {animatedProgress.toFixed(2)}% — {levelName}
+
+        <p className="text-gray-300 text-sm mt-1 font-medium">
+          {animatedProgress.toFixed(1)}% — {levelName}
         </p>
       </CardContent>
+
+      {/* Custom Tailwind Animation */}
+      <style jsx>{`
+        @keyframes pulseScale {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.4);
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+        .animate-pulse-scale {
+          animation: pulseScale 0.5s ease-in-out;
+        }
+      `}</style>
     </Card>
-    // </div>
-    
   );
 };
 

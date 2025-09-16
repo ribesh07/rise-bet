@@ -50,18 +50,42 @@ body {
   color: white;
 }
 
+
+
+.header-gradient {
+  background: linear-gradient(
+    rgba(15, 23, 42, 0.7),
+    rgba(15, 23, 42, 0.7)
+  );
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* Frosted glass effect for mobile */
+.scroll-container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;             /* Chrome, Safari, Opera */
+}
+
+
 .header-bg {
-  background-image: url('/images/header_bg.png');
+  background-image: url('/images/header_bg.png'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
+.frosted-card-bg {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  transition: backdrop-filter 0.3s ease, opacity 0.3s ease;
 }
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-
 
