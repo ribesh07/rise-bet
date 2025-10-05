@@ -1,32 +1,4 @@
-// 'use client';
-// import React from 'react';
-// import { useRouter } from 'next/navigation';
-// import ImageHeadHome from '@/components/ui/imageheadhome';
 
-// export const HeroSection: React.FC = () => {
-//   const router = useRouter();
-//   return (
-//     <div className="header-bg w-full relative">
-//       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 max-w-[2400px] mx-auto">
-//         <div className="text-center lg:text-left space-y-4">
-//           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2 leading-tight">
-//             World's Largest Online<br />Casino and Sportsbook
-//           </h1>
-//           <button
-//             onClick={() => router.push('/auth/signup')}
-//             className="bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl px-6 py-2 rounded-lg text-white font-medium transition-all duration-300"
-//           >
-//             Register
-//           </button>
-//         </div>
-//         <div className="md:col-span-2 grid grid-cols-2 gap-3 sm:gap-6 top-20 z-10">
-//           <ImageHeadHome title="Casino" count={32339} image="/images/risebet_casino.png" />
-//           <ImageHeadHome title="Sports (soon...)" count={0} image="/images/risebet_sports.png" />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
