@@ -1,3 +1,6 @@
+
+
+
 "use client";
 import React from "react";
 import { Search, Wallet, Bell } from "lucide-react";
@@ -11,14 +14,25 @@ interface TopNavbarProps {
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) => {
   return (
-    <header className="sticky flex justify-between items-center px-3 md:px-4 py-2 border-b border-gray-700 bg-[#0f172a]">
+    <header
+      className="
+        sticky 
+        top-0 
+        z-[20] 
+        flex justify-between items-center 
+        px-3 md:px-4 py-2 
+        border-b border-gray-700 
+        bg-[#0f172a]/95 
+        backdrop-blur-md
+      "
+    >
       {/* Logo */}
       <div className="relative w-28 h-15 px-2">
         <img src="/logo.png" alt="Logo" className="w-38 h-20" />
       </div>
 
       {/* Wallet */}
-      <div className="self-center h-full items-center bg-[#1e293b] px-2 py-1 rounded-md flex gap-1">
+      <div className="self-center h-full items-center bg-[#1e293b] px-2 py-1 rounded-md flex gap-1 shadow-md">
         <span className="text-xs font-mono">0.00000000</span>
         <Wallet size={25} />
         <Button
@@ -30,10 +44,10 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) =>
       </div>
 
       {/* Right Icons */}
-      <div className="flex items-center gap-2">
-        <Search className="cursor-pointer" size={25} />
+      <div className="flex items-center gap-3">
+        <Search className="cursor-pointer hover:text-blue-400 transition" size={22} />
         <UserDropdown />
-        <Bell className="cursor-pointer" size={25} />
+        <Bell className="cursor-pointer hover:text-blue-400 transition" size={22} />
       </div>
     </header>
   );
