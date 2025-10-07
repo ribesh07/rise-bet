@@ -1,7 +1,9 @@
 
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import UserVipCard from "@/components/form/vip";
 import {
   User,
   CreditCard,
@@ -14,21 +16,25 @@ import {
   HelpCircle,
   LogOut,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const UserDropdown: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [showVipForm, setShowVipForm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
+  // Close dropdown if clicked outside
+ 
+
+  // Prevent background scroll when modal is open
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    if (showVipForm) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }, [showVipForm]);
 
   const menuItems = [
     { label: "Wallet Vault", icon: CreditCard },
@@ -40,28 +46,29 @@ const UserDropdown: React.FC = () => {
     { label: "Settings", icon: Settings },
     { label: "Stake Smart", icon: HeartHandshakeIcon },
     { label: "Live Support", icon: HelpCircle },
-    { label: "Logout", icon: LogOut, route: "/" }, // absolute path
+    { label: "Logout", icon: LogOut, route: "/" },
   ];
 
   const handleClick = (item: typeof menuItems[number]) => {
     if (item.label === "Logout") {
-      // Clear auth tokens or session data here
-      localStorage.removeItem("token"); // example
-      // You can also clear cookies or other storage if used
+      localStorage.removeItem("token");
     }
 
-    if (item.route) {
-      router.push(item.route); // Navigate to route
-    } else {
-      console.log(item.label);
+    if (item.label === "VIP") {
+      setShowVipForm(true);
+    } else if (item.route) {
+      router.push(item.route);
     }
 
-    setOpen(false); // close dropdown
+    setOpen(false);
   };
 
   return (
     <div className="relative" ref={dropdownRef}>
+      {/* User icon */}
       <User size={25} className="cursor-pointer" onClick={() => setOpen(!open)} />
+
+      {/* Dropdown menu */}
       {open && (
         <div className="absolute right-0 mt-2 w-48 bg-[#1e293b] border border-gray-700 rounded-lg shadow-lg z-50">
           {menuItems.map((item, idx) => (
@@ -76,6 +83,33 @@ const UserDropdown: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* VIP Modal Portal */}
+      {typeof window !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {showVipForm && (
+              <motion.div
+                className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) {
+                    setShowVipForm(false);
+                  }
+                }}
+                // click on backdrop closes modal
+              >
+                  {/* Modal content */}
+                  
+                  <UserVipCard onClose={() => setShowVipForm(false)} />
+                
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </div>
   );
 };

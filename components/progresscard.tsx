@@ -55,7 +55,12 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
 
       <CardContent className="p-0 flex flex-col gap-2">
         <h2 className="text-lg font-bold text-white">{username}</h2>
-        <p className="text-gray-400 text-sm">Your VIP Progress</p>
+        <div className="flex justify-between items-center text-white text-sm mt-1">
+  <span>Your VIP Progress</span>
+  <span className="font-medium">{animatedProgress.toFixed(1)}%</span>
+</div>
+         
+        
 
         {/* Progress Bar */}
         <div className="w-full bg-gray-700 rounded-full h-3 mt-3 overflow-hidden relative">
@@ -69,9 +74,16 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
           />
         </div>
 
-        <p className="text-gray-300 text-sm mt-1 font-medium">
-          {animatedProgress.toFixed(1)}% — {levelName}
+       
+
+        <div className="flex justify-between items-center mt-3 text-sm text-gray-400">
+                   <p className="text-gray-300 text-sm mt-1 font-medium">
+          
         </p>
+                  <span className="flex items-center gap-1 text-yellow-400">
+                    <span>★</span> {levelName}
+                  </span>
+                </div>
       </CardContent>
 
       {/* Custom Tailwind Animation */}

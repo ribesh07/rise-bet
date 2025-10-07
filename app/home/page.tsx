@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/sidebar";
@@ -9,6 +8,7 @@ import ImageHead from "@/components/ui/imagehead";
 import GamingGrid, { GameGridHandles } from "@/components/gaminggrid";
 import SearchBar from "@/components/ui/search";
 import MobileBottomBar from "@/components/mobilebuttombar";
+import UserVipCard from "@/components/form/vip";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 
@@ -18,6 +18,7 @@ const Dashboard: React.FC = () => {
   const [category, setCategory] = useState("casino");
   const [search, setSearch] = useState("");
   const [isMobile, setIsMobile] = useState(false);
+  const [showVipForm, setShowVipForm] = useState(false); // VIP modal state
 
   const gamingGridRef = useRef<GameGridHandles>(null);
 
@@ -32,7 +33,7 @@ const Dashboard: React.FC = () => {
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative">
       {/* Desktop Sidebar (Fixed) */}
       {!isMobile && (
         <motion.div
@@ -51,7 +52,7 @@ const Dashboard: React.FC = () => {
         </motion.div>
       )}
 
-      {/* Navbar slides horizontally but fixed vertically */}
+      {/* Navbar */}
       <motion.div
         className="fixed top-0 left-0 right-0 z-40"
         animate={{
@@ -98,7 +99,6 @@ const Dashboard: React.FC = () => {
               isMobile ? "grid-cols-1" : "grid-cols-3"
             }`}
           >
-            {/* Progress Card */}
             <div className="w-full flex justify-center">
               <div className="w-full max-w-sm frosted-card-bg p-4">
                 <ProgressCard
@@ -227,6 +227,21 @@ const Dashboard: React.FC = () => {
           className="fixed inset-0 bg-black z-40"
           onClick={() => setSidebarOpen(false)}
         />
+      )}
+
+      {/* VIP Modal */}
+      {showVipForm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 overflow-auto">
+          <div className="relative w-full max-w-md bg-[#1e293b] p-6 rounded-lg shadow-lg">
+            <button
+              className="absolute top-2 right-2 text-gray-400 hover:text-white"
+              onClick={() => setShowVipForm(false)}
+            >
+              ✕
+            </button>
+            <UserVipCard />
+          </div>
+        </div>
       )}
     </div>
   );
