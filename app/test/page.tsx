@@ -4,9 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/vipcard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ProgressCard from "@/components/progresscard";
-import { ChevronDown, Star, Gem, X, Gift, ArrowUpRight, Zap, RefreshCw, Lock} from "lucide-react";
-import {  } from "lucide-react";
-
+import { ChevronDown, Star, Gem, X } from "lucide-react";
 
 interface UserVipCardProps {
   username?: string;
@@ -205,91 +203,11 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
               </TabsContent>
     
           {/* Rewards Tab */}
-         <TabsContent
-  value="rewards"
-  className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar"
->
-  {/* Monthly Bonus - Unlocked */}
-  <details className="bg-[#151b23]/90 rounded-xl p-4 backdrop-blur-md group cursor-pointer">
-    <summary className="flex items-center justify-between select-none">
-      <div className="flex items-center gap-3">
-        <div className="bg-[#1f2733] p-2 rounded-lg">
-          <Gift className="w-5 h-5 text-orange-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold">Monthly Bonus</p>
-          <p className="text-gray-400 text-xs">Released once a month.</p>
-        </div>
-      </div>
-      <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180" />
-    </summary>
-    <p className="mt-3 text-gray-400 leading-relaxed">
-      The Monthly Bonus is randomly released. Eligible players will be notified via email. Your
-      bonus is based on your gameplay throughout the month. The more you play, the bigger the
-      bonus.
-    </p>
-  </details>
-
-  {/* Rakeback - Locked */}
-  <details
-    className="bg-[#151b23]/90 rounded-xl p-4 backdrop-blur-md relative opacity-50 group cursor-pointer"
-  >
-    <summary className="flex items-center justify-between select-none">
-      <div className="flex items-center gap-3">
-        <div className="bg-[#1f2733] p-2 rounded-lg">
-          <ArrowUpRight className="w-5 h-5 text-blue-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold">Rakeback</p>
-          <p className="text-gray-400 text-xs">Unlocked at Bronze VIP.</p>
-        </div>
-      </div>
-      
-    </summary>
-    <Lock className="absolute top-4 right-4 w-4 h-4 text-gray-500" />
-  </details>
-
-  {/* Weekly Boost - Locked */}
-  <details
-    className="bg-[#151b23]/90 rounded-xl p-4 backdrop-blur-md relative opacity-50 group cursor-pointer"
-  >
-    <summary className="flex items-center justify-between select-none">
-      <div className="flex items-center gap-3">
-        <div className="bg-[#1f2733] p-2 rounded-lg">
-          <Zap className="w-5 h-5 text-purple-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold">Weekly Boost</p>
-          <p className="text-gray-400 text-xs">Unlocked at Bronze VIP.</p>
-        </div>
-      </div>
-      
-    </summary>
-    <Lock className="absolute top-4 right-4 w-4 h-4 text-gray-500" />
-  </details>
-
-  {/* Reload - Locked */}
-  <details
-    className="bg-[#151b23]/90 rounded-xl p-4 backdrop-blur-md relative opacity-50 group cursor-pointer"
-  >
-    <summary className="flex items-center justify-between select-none">
-      <div className="flex items-center gap-3">
-        <div className="bg-[#1f2733] p-2 rounded-lg">
-          <RefreshCw className="w-5 h-5 text-green-400" />
-        </div>
-        <div>
-          <p className="text-white font-semibold">Reload</p>
-          <p className="text-gray-400 text-xs">Unlocked at Platinum VIP.</p>
-        </div>
-      </div>
-      
-    </summary>
-    <Lock className="absolute top-4 right-4 w-4 h-4 text-gray-500" />
-  </details>
-</TabsContent>
-
-
-
+          <TabsContent value="rewards" className="mt-4">
+            <Card className="bg-[#151b23]/90 border-none rounded-2xl p-5 text-center text-gray-300 backdrop-blur-md">
+              Rewards and cashback information will appear here.
+            </Card>
+          </TabsContent>
         </Tabs>
      
 </div>
