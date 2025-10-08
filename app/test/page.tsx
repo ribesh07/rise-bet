@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/sidebar";
@@ -11,6 +12,7 @@ import MobileBottomBar from "@/components/mobilebuttombar";
 import UserVipCard from "@/components/form/vip";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import Footer from "@/components/footer"; // ✅ footer imported here
 
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -33,86 +35,111 @@ const Dashboard: React.FC = () => {
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative">
-      {/* Desktop Sidebar (Fixed) */}
-      {!isMobile && (
+    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        {!isMobile && (
+          <motion.div
+            animate={{
+              width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
+          >
+            <Sidebar
+              collapsed={sidebarCollapsed}
+              setCollapsed={setSidebarCollapsed}
+              open={true}
+              setOpen={() => {}}
+            />
+          </motion.div>
+        )}
+
+        {/* Navbar */}
         <motion.div
+          className="fixed top-0 left-0 right-0 z-40"
           animate={{
-            width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+            marginLeft: !isMobile
+              ? sidebarCollapsed
+                ? collapsedWidth * 4
+                : sidebarWidth * 4
+              : 0,
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
         >
-          <Sidebar
-            collapsed={sidebarCollapsed}
-            setCollapsed={setSidebarCollapsed}
-            open={true}
-            setOpen={() => {}}
-          />
+          <AnimatePresence>
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -50, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-0 left-0 w-full z-30"
+            >
+              <NotificationBar />
+            </motion.div>
+          </AnimatePresence>
+          <TopNavbar searchValue={search} onSearchChange={setSearch} />
         </motion.div>
-      )}
 
-      {/* Navbar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 z-40"
-        animate={{
-          marginLeft: !isMobile
-            ? sidebarCollapsed
-              ? collapsedWidth * 4
-              : sidebarWidth * 4
-            : 0,
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <AnimatePresence>
-          <motion.div
-            initial={{ y: -50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -50, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="absolute top-0 left-0 w-full z-30"
-          >
-            <NotificationBar />
-          </motion.div>
-        </AnimatePresence>
-        <TopNavbar searchValue={search} onSearchChange={setSearch} />
-      </motion.div>
+        {/* Main Content */}
+        <motion.main
+          className="flex-1 flex flex-col overflow-auto pt-[112px] pb-16 px-3 py-12 md:px-8"
+          animate={{
+            marginLeft: !isMobile
+              ? sidebarCollapsed
+                ? collapsedWidth * 4
+                : sidebarWidth * 4
+              : 0,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          {/* Header Section */}
+          <div className="w-full py-6 relative header-bg">
+            <div className="absolute inset-0 bg-[#0f172a]/60 z-0"></div>
 
-      {/* Scrollable Main content */}
-      <motion.main
-        className="flex-1 flex flex-col overflow-auto pt-[112px] pb-16 px-3 md:px-8"
-        animate={{
-          marginLeft: !isMobile
-            ? sidebarCollapsed
-              ? collapsedWidth * 4
-              : sidebarWidth * 4
-            : 0,
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        {/* Header Section */}
-        <div className="w-full py-6 relative header-bg">
-          <div className="absolute inset-0 bg-[#0f172a]/60 z-0"></div>
-
-          <div
-            className={`grid gap-4 w-full max-w-full mx-auto relative z-10 ${
-              isMobile ? "grid-cols-1" : "grid-cols-3"
-            }`}
-          >
-            <div className="w-full flex justify-center">
-              <div className="w-full max-w-sm frosted-card-bg p-4">
-                <ProgressCard
-                  username="shark491"
-                  progressPercentage={45}
-                  levelName="Bronze"
-                />
+            <div
+              className={`grid gap-4 w-full max-w-full mx-auto relative z-10 ${
+                isMobile ? "grid-cols-1" : "grid-cols-3"
+              }`}
+            >
+              <div className="w-full flex justify-center">
+                <div className="w-full max-w-sm frosted-card-bg p-4">
+                  <ProgressCard
+                    username="shark491"
+                    progressPercentage={45}
+                    levelName="Bronze"
+                  />
+                </div>
               </div>
+
+              {!isMobile && (
+                <>
+                  <div className="w-full flex justify-center">
+                    <div className="w-full max-w-sm">
+                      <ImageHead
+                        title="Casino"
+                        count={32339}
+                        image="/images/risebet_casino.png"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full flex justify-center">
+                    <div className="w-full max-w-sm">
+                      <ImageHead
+                        title="Sports (soon...)"
+                        count={0}
+                        image="/images/risebet_sports.png"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
-            {!isMobile && (
-              <>
-                <div className="w-full flex justify-center">
-                  <div className="w-full max-w-sm">
+            {isMobile && (
+              <div className="grid grid-cols-2 gap-1 mt-3 relative z-10">
+                <div className="flex justify-center">
+                  <div className="w-full max-w-[160px] frosted-card-bg p-1">
                     <ImageHead
                       title="Casino"
                       count={32339}
@@ -120,8 +147,8 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="w-full flex justify-center">
-                  <div className="w-full max-w-sm">
+                <div className="flex justify-center">
+                  <div className="w-full max-w-[160px] frosted-card-bg p-1">
                     <ImageHead
                       title="Sports (soon...)"
                       count={0}
@@ -129,67 +156,49 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                 </div>
-              </>
+              </div>
             )}
           </div>
 
-          {isMobile && (
-            <div className="grid grid-cols-2 gap-1 mt-3 relative z-10">
-              <div className="flex justify-center">
-                <div className="w-full max-w-[160px] frosted-card-bg p-1">
-                  <ImageHead
-                    title="Casino"
-                    count={32339}
-                    image="/images/risebet_casino.png"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-center">
-                <div className="w-full max-w-[160px] frosted-card-bg p-1">
-                  <ImageHead
-                    title="Sports (soon...)"
-                    count={0}
-                    image="/images/risebet_sports.png"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Search Bar */}
-        <div className="mt-4">
-          <SearchBar
-            category={category}
-            onCategoryChange={setCategory}
-            searchValue={search}
-            onSearchChange={setSearch}
-          />
-        </div>
-
-        {/* Trending Games */}
-        <section className="mt-4 relative">
-          <div className="flex items-center mb-2">
-            <h3 className="text-base md:text-lg font-semibold">Trending Games</h3>
-            <div className="ml-auto flex gap-2">
-              <button
-                onClick={() => gamingGridRef.current?.scroll("left")}
-                className="bg-[#1e293b] hover:bg-[#243249] text-white p-2 rounded-full shadow"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <button
-                onClick={() => gamingGridRef.current?.scroll("right")}
-                className="bg-[#1e293b] hover:bg-[#243249] text-white p-2 rounded-full shadow"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
+          {/* Search Bar */}
+          <div className="mt-4">
+            <SearchBar
+              category={category}
+              onCategoryChange={setCategory}
+              searchValue={search}
+              onSearchChange={setSearch}
+            />
           </div>
 
-          <GamingGrid ref={gamingGridRef} search={search} />
-        </section>
-      </motion.main>
+          {/* Trending Games */}
+          <section className="mt-4 relative mb-8">
+            <div className="flex items-center mb-2">
+              <h3 className="text-base md:text-lg font-semibold">
+                Trending Games
+              </h3>
+              <div className="ml-auto flex gap-2">
+                <button
+                  onClick={() => gamingGridRef.current?.scroll("left")}
+                  className="bg-[#1e293b] hover:bg-[#243249] text-white p-2 rounded-full shadow"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={() => gamingGridRef.current?.scroll("right")}
+                  className="bg-[#1e293b] hover:bg-[#243249] text-white p-2 rounded-full shadow"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+
+            <GamingGrid ref={gamingGridRef} search={search} />
+          </section>
+
+          {/* ✅ Footer added here */}
+          <Footer />
+        </motion.main>
+      </div>
 
       {/* Mobile Bottom Bar */}
       {isMobile && (

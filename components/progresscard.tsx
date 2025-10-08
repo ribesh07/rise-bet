@@ -80,9 +80,12 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
                    <p className="text-gray-300 text-sm mt-1 font-medium">
           
         </p>
-                  <span className="flex items-center gap-1 text-yellow-400">
+                  {/* <span className="flex items-center gap-1 text-yellow-400">
                     <span>★</span> {levelName}
-                  </span>
+                  </span> */}
+                  <p className="font-semibold text-white flex items-center gap-2">
+                                        <Star className="w-4 h-4 text-[#cd7f32]" />{levelName}
+                                      </p>
                 </div>
       </CardContent>
 
