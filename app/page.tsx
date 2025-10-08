@@ -10,6 +10,7 @@ import { Promotions } from '@/components/dashboard/pormotion';
 import { RecentBets } from '@/components/dashboard/recentbet';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import { motion, AnimatePresence } from 'framer-motion';
+import Footer from '@/components/footer';
 
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop collapse
@@ -87,8 +88,9 @@ const Dashboard: React.FC = () => {
         <section>
           <RecentBets />
         </section>
+        <Footer />
       </motion.main>
-
+      
       {/* Mobile Bottom Bar */}
       {isMobile && (
         <div className="fixed bottom-0 w-full z-50 h-16">

@@ -9,7 +9,7 @@ const promotions = [
 
 export const Promotions: React.FC = () => (
   <section>
-    <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">🎁 Promotions</h2>
+    <h2 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-4">🎁 Promotions</h2>
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
       {promotions.map((promo, index) => (
         <div key={index} className="bg-slate-800 rounded-xl p-4 sm:p-6 hover:bg-slate-700 transform hover:scale-105 hover:shadow-lg transition-all duration-300">

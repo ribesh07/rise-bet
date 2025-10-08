@@ -13,6 +13,7 @@ import UserVipCard from "@/components/form/vip";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import Footer from "@/components/footer"; // ✅ footer imported here
+import { RecentBets } from "@/components/dashboard/recentbet";
 
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -113,51 +114,52 @@ const Dashboard: React.FC = () => {
               </div>
 
               {!isMobile && (
-                <>
-                  <div className="w-full flex justify-center">
-                    <div className="w-full max-w-sm">
-                      <ImageHead
-                        title="Casino"
-                        count={32339}
-                        image="/images/risebet_casino.png"
-                      />
-                    </div>
-                  </div>
-                  <div className="w-full flex justify-center">
-                    <div className="w-full max-w-sm">
-                      <ImageHead
-                        title="Sports (soon...)"
-                        count={0}
-                        image="/images/risebet_sports.png"
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {isMobile && (
-              <div className="grid grid-cols-2 gap-1 mt-3 relative z-10">
-                <div className="flex justify-center">
-                  <div className="w-full max-w-[160px] frosted-card-bg p-1">
+              <>
+                <div className="w-full flex justify-center">
+                  <div className="w-full max-w-sm">
                     <ImageHead
                       title="Casino"
                       count={32339}
-                      image="/images/risebet_casino.png"
+                      image="/images/casino.jpg"
                     />
                   </div>
                 </div>
-                <div className="flex justify-center">
-                  <div className="w-full max-w-[160px] frosted-card-bg p-1">
+                <div className="w-full flex justify-center">
+                  <div className="w-full max-w-sm">
                     <ImageHead
                       title="Sports (soon...)"
                       count={0}
-                      image="/images/risebet_sports.png"
+                      image="/images/sports.jpg"
                     />
                   </div>
                 </div>
-              </div>
+              </>
             )}
+          </div>
+
+          {isMobile && (
+            <div className="grid grid-cols-2 gap-0.5 mt-3 relative z-10">
+              <div className="flex justify-center">
+                <div className="w-full max-w-[160px] frosted-card-bg p-1">
+                  <ImageHead
+                    title="Casino"
+                    count={32339}
+                    image="/images/casino.jpg"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-center">
+                <div className="w-full max-w-[160px] frosted-card-bg p-1">
+                  <ImageHead
+                    title="Sports (soon...)"
+                    count={0}
+                    image="/images/sports.jpg"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           </div>
 
           {/* Search Bar */}
@@ -196,6 +198,7 @@ const Dashboard: React.FC = () => {
           </section>
 
           {/* ✅ Footer added here */}
+          <RecentBets />
           <Footer />
         </motion.main>
       </div>

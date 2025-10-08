@@ -16,8 +16,8 @@ const trendingGames = [
 export const TrendingGames: React.FC = () => {
   return (
     <section>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 flex items-center">
-                  <TrendingUp className="mr-2" size={20} /> Trending Games
+                <h2 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-4 flex items-center">
+                  <TrendingUp className="mr-2 mt-4" size={20} /> Trending Games
                 </h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
                   {trendingGames.map((game) => (

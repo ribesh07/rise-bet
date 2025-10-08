@@ -40,21 +40,21 @@ export const HeroSection: React.FC = () => {
             onClick={() => router.push('/auth/signup')}
             className="bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl px-6 py-2 rounded-lg text-white font-medium transition-all duration-300"
           >
-            Register
-          </button>
-        </div>
+               Register
+              </button>
+              </div>
               
               </div>
             </div>
 
-            {!isMobile && (
+             {!isMobile && (
               <>
                 <div className="w-full flex justify-center">
                   <div className="w-full max-w-sm">
                     <ImageHead
                       title="Casino"
                       count={32339}
-                      image="/images/risebet_casino.png"
+                      image="/images/casino.jpg"
                     />
                   </div>
                 </div>
@@ -63,7 +63,7 @@ export const HeroSection: React.FC = () => {
                     <ImageHead
                       title="Sports (soon...)"
                       count={0}
-                      image="/images/risebet_sports.png"
+                      image="/images/sports.jpg"
                     />
                   </div>
                 </div>
@@ -78,7 +78,7 @@ export const HeroSection: React.FC = () => {
                   <ImageHead
                     title="Casino"
                     count={32339}
-                    image="/images/risebet_casino.png"
+                    image="/images/casino.jpg"
                   />
                 </div>
               </div>
@@ -87,7 +87,7 @@ export const HeroSection: React.FC = () => {
                   <ImageHead
                     title="Sports (soon...)"
                     count={0}
-                    image="/images/risebet_sports.png"
+                    image="/images/sports.jpg"
                   />
                 </div>
               </div>

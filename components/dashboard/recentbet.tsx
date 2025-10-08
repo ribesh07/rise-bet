@@ -11,7 +11,7 @@ const recentBets = [
 
 export const RecentBets: React.FC = () => (
   <section>
-    <h2 className="text-xl sm:text-2xl font-bold text-white mb-4">🎲 Recent Bets</h2>
+    <h2 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-4">🎲 Recent Bets</h2>
     <div className="overflow-hidden relative bg-slate-800 rounded-xl p-2 sm:p-4">
       <div className="flex animate-marquee whitespace-nowrap">
         {recentBets.map((bet, index) => (
