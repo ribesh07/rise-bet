@@ -30,14 +30,14 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) 
     { name: "Plinko", image: "/images/plinko.jpg", playing: 436, route: "/games/PlinkoGame" },
     { name: "Roulette", image: "/images/roulette.jpg", playing: 202, route: "/games/RouletteGame" },
     { name: "Mines", image: "/images/mines.jpg", playing: 370, route: "/games/MinesGame" },
-    { name: "Hi-Lo", image: "/images/hi_lo.jpg", playing: 232, route: "/games/HiLoGame" },
+    { name: "Hi-Lo", image: "/images/hi_lo.jpg", playing: 232, route: "/games/HiloGame" },
     { name: "Baccarat", image: "/images/baccarat.jpg", playing: 191, route: "/games/BaccaratGame" },
     { name: "Blackjack", image: "/images/blackjack.jpg", playing: 284, route: "/games/BlackjackGame" },
     { name: "Poker", image: "/images/poker.jpg", playing: 436, route: "/games/PokerGame" },
-    { name: "Big Bass Bonanza", image: "/images/Big_Bass_Bonanza.jpg", playing: 1738, route: "/games/Big_Bass_BonanzaGame" },
+    { name: "Big Bass Bonanza", image: "/images/Big_Bass_Bonanza.jpg", playing: 1738, route: "/games/Big_bass_bonanzaGame" },
     { name: "Sweet Bonanza", image: "/images/sweet_bonanza.jpg", playing: 384, route: "/games/Sweet_bonanzaGame" },
-    { name: "Gate Of Olympus", image: "/images/Gates_of_olympus.jpg", playing: 0, route: "/games/GateOfOlympusGame" },
-    { name: "Dual At Dawn", image: "/images/dual_at_dawn.jpg", playing: 0, route: "/games/DualAtDawnGame" },
+    { name: "Gate Of Olympus", image: "/images/Gates_of_olympus.jpg", playing: 0, route: "/games/Gate_of_olympusGame" },
+    { name: "Dual At Dawn", image: "/images/dual_at_dawn.jpg", playing: 0, route: "/games/Dual_at_dawnGame" },
   ];
 
   const filteredGames = games.filter((game) =>
