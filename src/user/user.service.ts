@@ -61,7 +61,6 @@ export class UserService {
   async getUserWithDetails(userId: number) {
     return this.prisma.user.findUnique({
       where: { id: userId },
-
       include: {
         transactions: true,
         bets: {

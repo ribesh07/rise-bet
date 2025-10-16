@@ -34,9 +34,13 @@ async validateUser(pass: string, email?: string, username?: string) {
 
   async login(user: any) {
     const payload = { sub: user.id, email: user.email , username : user.username };
+    const details = await this.userService.getUserWithDetails(Number(user.id));
+
+     const { password, ...rest } = details as any;
     return {
       success: true,
       message: 'Login successful',
+      data: rest,
       access_token: this.jwtService.sign(payload),
     };
   }
