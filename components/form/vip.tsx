@@ -288,8 +288,6 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
   </details>
 </TabsContent>
 
-
-
         </Tabs>
      
 </div>

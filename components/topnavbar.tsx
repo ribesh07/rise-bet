@@ -33,7 +33,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) =>
 
       {/* Wallet */}
       <div className="self-center h-full items-center bg-[#1e293b] px-2 py-1 rounded-md flex gap-1 shadow-md">
-        <span className="text-xs font-mono">0.00000000</span>
+        <span className="text-xs font-mono">0.000000</span>
         <Wallet size={25} />
         <Button
           variant="default"
