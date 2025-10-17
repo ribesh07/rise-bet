@@ -58,7 +58,7 @@ const PokerGame = () => {
   // Bet amounts for chips
   const chipValues = [1, 5, 10, 25, 50, 100];
 
-  // Paytable - matches Stake's Jacks or Better paytable
+  // Paytable - matches Rise's Jacks or Better paytable
   const paytable: Record<HandRank, { multiplier: number; description: string }> = {
     'high-card': { multiplier: 0, description: 'High Card' },
     'pair': { multiplier: 1, description: 'Jacks or Better' },

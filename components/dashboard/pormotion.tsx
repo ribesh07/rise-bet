@@ -3,7 +3,7 @@ import React from 'react';
 
 const promotions = [
   { type: "Promotion", title: "Frankie's St Leger Raffle", description: "Share in $40,000", image: "🎟️" },
-  { type: "Announcement", title: "Chicken", description: "New Stake Original!", image: "🐔" },
+  { type: "Announcement", title: "Chicken", description: "New rise Original!", image: "🐔" },
   { type: "Promotion", title: "EuroBasket", description: "Overtime Insurance", image: "🏀" }
 ];
 

@@ -317,7 +317,7 @@ const BlackjackGame: React.FC = () => {
     }
   };
 
-  // Card component - Stake style
+  // Card component - Rise style
   const CardComponent: React.FC<{ card: GameCard }> = ({ card }) => {
     const suitColor = card.suit === '♥' || card.suit === '♦' ? '#ff4757' : '#2f3542';
     

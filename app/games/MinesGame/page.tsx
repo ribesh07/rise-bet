@@ -54,9 +54,9 @@ export default function MinesGame() {
   const [previousMultiplier, setPreviousMultiplier] = useState(1);
   const [multiplierChanged, setMultiplierChanged] = useState(false);
 
-  // Modified multiplier calculation with mines and stake consideration
-  const calculateMultiplier = useCallback((workingGems: number, totalMines: number, stakeAmount: number) => {
-    console.log(`calculateMultiplier called: workingGems=${workingGems}, totalMines=${totalMines}, stakeAmount=${stakeAmount}`);
+  // Modified multiplier calculation with mines and Rise consideration
+  const calculateMultiplier = useCallback((workingGems: number, totalMines: number, RiseAmount: number) => {
+    console.log(`calculateMultiplier called: workingGems=${workingGems}, totalMines=${totalMines}, RiseAmount=${RiseAmount}`);
     
     if (workingGems === 0) return 1.00;
     
@@ -78,20 +78,20 @@ export default function MinesGame() {
     // Apply mines bonus - more mines = higher multiplier
     const minesBonus = 1 + (totalMines * 0.15); // 15% bonus per mine
     
-    // Apply stake bonus - higher stakes get slight multiplier boost
-    const stakeBonus = 1 + Math.log10(Math.max(1, stakeAmount)) * 0.05; // Logarithmic stake bonus
+    // Apply Rise bonus - higher Rises get slight multiplier boost
+    const RiseBonus = 1 + Math.log10(Math.max(1, RiseAmount)) * 0.05; // Logarithmic Rise bonus
     
-    console.log(`Base multiplier: ${multiplier}, Mines bonus: ${minesBonus}, Stake bonus: ${stakeBonus}`);
+    console.log(`Base multiplier: ${multiplier}, Mines bonus: ${minesBonus}, Rise bonus: ${RiseBonus}`);
     
-    // Apply house edge (1% - Stake's actual edge)
-    const finalMultiplier = multiplier * minesBonus * stakeBonus * 0.99;
+    // Apply house edge (1% - Rise's actual edge)
+    const finalMultiplier = multiplier * minesBonus * RiseBonus * 0.99;
     
     console.log(`Final multiplier: ${finalMultiplier}`);
     
     return parseFloat(finalMultiplier.toFixed(4));
   }, []);
 
-  // Initialize empty grid (Stake style - mines placed on first click)
+  // Initialize empty grid (Rise style - mines placed on first click)
   const initializeGame = useCallback(() => {
     const grid: Cell[] = Array.from({ length: GRID_SIZE }, (_, index) => ({
       id: index,
@@ -111,7 +111,7 @@ export default function MinesGame() {
     });
   }, [minesCount]);
 
-  // Stake style - place bet and prepare for first click
+  // Rise style - place bet and prepare for first click
   const startGame = useCallback(() => {
     if (bet <= 0 || bet > balance) return;
     
@@ -128,7 +128,7 @@ export default function MinesGame() {
     setGameState(prev => ({ ...prev, gameStatus: 'playing', isGameStarted: true }));
   }, [bet, balance, initializeGame]);
 
-  // Stake style - place mines on first click, ensure first click is never a mine
+  // Rise style - place mines on first click, ensure first click is never a mine
   const placeMines = useCallback((firstClickId: number, mineCount: number) => {
     const minePositions = new Set<number>();
     const availablePositions = Array.from({ length: GRID_SIZE }, (_, i) => i)
@@ -145,7 +145,7 @@ export default function MinesGame() {
     return minePositions;
   }, []);
 
-  // Reveal cell with Stake's exact behavior
+  // Reveal cell with Rise's exact behavior
   const revealCell = useCallback((cellId: number) => {
     setGameState(prev => {
       if (prev.gameStatus !== 'playing') return prev;
@@ -185,7 +185,7 @@ export default function MinesGame() {
         
         setIsProcessing(false);
         
-        // Stake style - no auto reset, show game over state
+        // Rise style - no auto reset, show game over state
         return {
           ...prev,
           grid: newGrid,
@@ -202,7 +202,7 @@ export default function MinesGame() {
         // Determine maximum working gems based on mines count
         const maxWorkingGems = Math.max(1, Math.floor((GRID_SIZE - prev.totalMines) / 2)); // Half of safe cells or minimum 1
         
-        // All gems are working gems (like real Stake)
+        // All gems are working gems (like real Rise)
         const newWorkingGemsCount = newRevealedCount;
         
         console.log(`Debug: Revealed ${newRevealedCount}, All gems working: ${newWorkingGemsCount}`);
@@ -238,7 +238,7 @@ export default function MinesGame() {
     });
   }, [isProcessing, clickedCells, calculateMultiplier, placeMines, bet]);
 
-  // Stake style cash out
+  // Rise style cash out
   const cashOut = useCallback(() => {
     setIsProcessing(false);
     
@@ -257,7 +257,7 @@ export default function MinesGame() {
     });
   }, [bet]);
 
-  // Stake style reset
+  // Rise style reset
   const resetGame = useCallback(() => {
     setClickedCells(new Set());
     setIsProcessing(false);
@@ -272,7 +272,7 @@ export default function MinesGame() {
     initializeGame();
   }, [initializeGame]);
 
-  // Stake's bet values
+  // Rise's bet values
   const chipValues = [0.1, 1, 10, 100];
 
   // Potential payout with exact precision
@@ -653,7 +653,7 @@ export default function MinesGame() {
               <p>• Click tiles to reveal gems and avoid mines</p>
               <p>• Each gem increases your multiplier</p>
               <p>• More mines = higher multiplier bonus</p>
-              <p>• Higher stakes get multiplier boost</p>
+              <p>• Higher Rises get multiplier boost</p>
               <p>• Cash out anytime to secure your winnings</p>
             </div>
           </div>

@@ -1,5 +1,7 @@
 
+'use client';
 import React from "react";
+import { useRouter } from "next/navigation";
 import {
   Home,
   Trophy,
@@ -23,6 +25,21 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, open, setOpen }) => {
+  const router = useRouter();
+
+  const menuItems = [
+    { icon: <Home size={28} />, label: "Casino", route: "/home", },
+    { icon: <Trophy size={28} />, label: "Sports", route: "/sports" },
+    { icon: <Gift size={28} />, label: "Promotions", route: "/promotions" },
+    { icon: <Users size={28} />, label: "Affiliate", route: "/affiliate" },
+    { icon: <Crown size={28} />, label: "VIP Club", route: "/vipsidebar" }, // 👈 important one
+    { icon: <BookOpen size={28} />, label: "Blog", route: "/blog" },
+    { icon: <MessageSquare size={28} />, label: "Forum", route: "/forum" },
+    { icon: <HeartHandshake size={28} />, label: "Responsible Gambling", route: "/responsible-gambling" },
+    { icon: <LifeBuoy size={28} />, label: "Live Support", route: "/live-support" },
+    { icon: <Globe size={28} />, label: "Language: English", route: "/language" },
+  ];
+
   return (
     <aside
       className={`fixed md:static top-0 left-0 h-full bg-[#101620db] flex flex-col py-3 z-50 transition-all duration-300 ease-in-out
@@ -41,16 +58,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ collapsed, setCollapsed, open,
 
       {/* Sidebar Nav */}
       <nav className="flex flex-col gap-2 text-gray-300 relative">
-        <SidebarItem icon={<Home size={28} />} label="casino" active collapsed={collapsed} />
-        <SidebarItem icon={<Trophy size={28} />} label="Sports" collapsed={collapsed} />
-        <SidebarItem icon={<Gift size={28} />} label="Promotions" collapsed={collapsed} />
-        <SidebarItem icon={<Users size={28} />} label="Affiliate" collapsed={collapsed} />
-        <SidebarItem icon={<Crown size={28} />} label="VIP Club" collapsed={collapsed} />
-        <SidebarItem icon={<BookOpen size={28} />} label="Blog" collapsed={collapsed} />
-        <SidebarItem icon={<MessageSquare size={28} />} label="Forum" collapsed={collapsed} />
-        <SidebarItem icon={<HeartHandshake size={28} />} label="Responsible Gambling" collapsed={collapsed} />
-        <SidebarItem icon={<LifeBuoy size={28} />} label="Live Support" collapsed={collapsed} />
-        <SidebarItem icon={<Globe size={28} />} label="Language: English" collapsed={collapsed} />
+        {menuItems.map((item) => (
+          <SidebarItem
+            key={item.label}
+            icon={item.icon}
+            label={item.label}
+            collapsed={collapsed}
+            onClick={() => router.push(item.route)}
+          />
+        ))}
       </nav>
     </aside>
   );
@@ -62,12 +78,14 @@ interface SidebarItemProps {
   label: string;
   active?: boolean;
   collapsed?: boolean;
+  onClick?: () => void;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, active, collapsed }) => (
+const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, active, collapsed, onClick }) => (
   <div className="relative group">
     <div
-      className={`flex items-center gap-2 px-2 py-3 rounded-md cursor-pointer 
+      onClick={onClick}
+      className={`flex items-center gap-2 px-2 py-3 rounded-md cursor-pointer hover:bg-[#243249] transition-colors
         ${active ? "bg-[#243249] text-white" : ""} 
         ${collapsed ? "justify-center" : "justify-start"}`}
     >

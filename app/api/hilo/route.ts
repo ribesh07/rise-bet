@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       win = false;
     }
 
-    // Calculate payout (simple 1.9x multiplier for now, similar to Stake)
+    // Calculate payout (simple 1.9x multiplier for now, similar to Rise)
     const payoutMultiplier = win ? 1.9 : 0;
     const payout = win ? parseFloat((betAmount * payoutMultiplier).toFixed(2)) : 0;
 

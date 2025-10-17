@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Sidebar } from '@/components/sidebar';
+import { Sidebar } from '@/components/dashboard/sidebar';
 
 interface Props {
   sidebarOpen: boolean;

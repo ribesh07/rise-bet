@@ -81,6 +81,14 @@ body {
   position: relative;
 }
 
+.vip-header-bg {
+  background-image: url('/images/vip_header.jpg'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
 .frosted-card-bg {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
@@ -88,4 +96,14 @@ body {
   border-radius: 1rem;
   transition: backdrop-filter 0.3s ease, opacity 0.3s ease;
 }
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 
