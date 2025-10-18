@@ -1,27 +1,23 @@
-# Use official Node.js image
-# FROM node:18-alpine
 FROM node:20.12.2-alpine
 
-# Set working directory
 WORKDIR /src
 
-# Copy package files first (for caching)
+# Install dependencies first for caching
 COPY package*.json ./
+RUN npm ci --legacy-peer-deps
 
-# Ensure clean install
-RUN rm -rf node_modules && npm install --legacy-peer-deps
-
-# Copy the rest of the project
+# Copy rest of source code
 COPY . .
+
 # Generate Prisma client
 RUN npx prisma generate
 
-# Run Prisma migrations (optional: only in production or at build time)
-RUN npx prisma migrate deploy
-
+# Build the app
 RUN npm run build
 
-# Expose port if needed
+# Expose API port
 EXPOSE 3084
 
-CMD ["node", "dist/main.js"]
+# Use an environment variable for DATABASE_URL (Coolify injects it)
+# Run migrations at container startup (safer for DB initialization)
+CMD npx prisma migrate deploy && node dist/main.js
