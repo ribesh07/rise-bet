@@ -1,4 +1,5 @@
-// import React from 'react';
+
+// import React from "react";
 
 // interface Props {
 //   categories: string[];
@@ -8,15 +9,15 @@
 
 // export default function CategoryTabs({ categories, activeTab, setActiveTab }: Props) {
 //   return (
-//     <div className="flex flex-wrap gap-3 mb-8 mt-10">
+//     <div className="flex items-start gap-4 bg-[#102131]   px-4 py-3 rounded-full w-fit mx-auto mt-3 mb-2">
 //       {categories.map((tab) => (
 //         <button
 //           key={tab}
 //           onClick={() => setActiveTab(tab)}
-//           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+//           className={`text-[15px] font-semibold px-6 py-2 rounded-full transition-all duration-200 ${
 //             activeTab === tab
-//               ? 'bg-gradient-to-r from-[#00C9A7] to-[#0057FF] text-white shadow-lg'
-//               : 'bg-[#121F38] border border-[#1f3358] text-gray-300 hover:bg-[#1b2d4f]'
+//               ? "bg-[#25374A] text-white shadow-inner"
+//               : "text-[#AEB8C4] hover:text-white"
 //           }`}
 //         >
 //           {tab}
@@ -25,7 +26,7 @@
 //     </div>
 //   );
 // }
-import React from 'react';
+import React from "react";
 
 interface Props {
   categories: string[];
@@ -35,15 +36,15 @@ interface Props {
 
 export default function CategoryTabs({ categories, activeTab, setActiveTab }: Props) {
   return (
-    <div className="flex flex-wrap gap-3 mb-8 mt-10">
+    <div className="flex items-center gap-4 bg-[#102131] px-4 py-3 rounded-full mt-3 mb-3 w-fit">
       {categories.map((tab) => (
         <button
           key={tab}
           onClick={() => setActiveTab(tab)}
-          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+          className={`text-[15px] font-semibold px-6 py-2 rounded-full transition-all duration-200 ${
             activeTab === tab
-              ? 'bg-gradient-to-r from-[#00C9A7] to-[#0057FF] text-white shadow-lg'
-              : 'bg-[#121F38] border border-[#1f3358] text-gray-300 hover:bg-[#1b2d4f]'
+              ? "bg-[#25374A] text-white shadow-inner"
+              : "text-[#AEB8C4] hover:text-white"
           }`}
         >
           {tab}

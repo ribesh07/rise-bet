@@ -42,7 +42,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { icon: <Crown size={28} />, label: "VIP Club", route: "/mainsidebarroutes/vipsidebar" },
     { icon: <BookOpen size={28} />, label: "Blog", route: "/blog" },
     { icon: <MessageSquare size={28} />, label: "Forum", route: "/forum" },
-    { icon: <HeartHandshake size={28} />, label: "Responsible Gambling", route: "/responsible-gambling" },
+    { icon: <HeartHandshake size={28} />, label: "Responsible Gambling", route: "/responsiblegambling" },
     { icon: <LifeBuoy size={28} />, label: "Live Support", route: "/live-support" },
     { icon: <Globe size={28} />, label: "Language: English", route: "/language" },
   ];

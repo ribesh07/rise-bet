@@ -241,8 +241,8 @@ const AffiliateProgram: React.FC = () => {
                   </div>
 
                   <p className="text-gray-300 mt-6 leading-relaxed">
-                    To register your interest in becoming a Stake Affiliate, please login to your Stake account.{' '}
-                    Don’t have a Stake account yet? Tap the{' '}
+                    To register your interest in becoming a Risebet Affiliate, please login to your Risebet account.{' '}
+                    Don’t have a Risebet account yet? Tap the{' '}
                     <span
                       className="font-semibold text-blue-400 cursor-pointer hover:underline"
                       onClick={() => {
@@ -279,7 +279,7 @@ const AffiliateProgram: React.FC = () => {
                   <div className="bg-[#0f172a] rounded-xl p-4 mt-6 flex items-center gap-4 border border-slate-700 hover:border-green-500 transition-colors duration-300">
                     <PlayCircle className="w-10 h-10 text-green-400" />
                     <div>
-                      <p className="font-semibold">Stake.com Affiliate Program</p>
+                      <p className="font-semibold">Risebet.com Affiliate Program</p>
                       <p className="text-gray-400 text-sm">Creative Department</p>
                     </div>
                   </div>
@@ -360,8 +360,8 @@ const AffiliateProgram: React.FC = () => {
                 </p>
               </div>
               <img
-                src="https://stake.com/_app/immutable/assets/affiliate-banner.png"
-                alt="Stake Banner"
+                src="https://Risebet.com/_app/immutable/assets/affiliate-banner.png"
+                alt="Risebet Banner"
                 className="w-48 mt-4 md:mt-0 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
               />
             </div>
