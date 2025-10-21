@@ -258,10 +258,10 @@ const ResponsibleGamblingPage = () => {
                                 {active === "Risebet Smart" && (
                                   <div className="max-w-4xl mx-auto">
                                     <img
-              src="/images/responsible1.png"
-              alt="Risebet Smart"
-              className="w-full h-auto rounded-lg"
-            />
+                                         src="/images/responsible1.png"
+                                         alt="Risebet Smart"
+                                         className="w-full h-auto rounded-lg"
+                                         />
                                             <div className="flex items-center justify-between mt-2 mb-6">
                                               <div>
                                                 <h1 className="text-xl font-semibold mb-2">Mission Statement</h1>
