@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Blog } from '@/app/blog/page';
+import type { Blog } from '@/app/homesidebarroutes/blog/page';
 
 export default function BlogCard({ promo }: { promo: Blog }) {
   return (

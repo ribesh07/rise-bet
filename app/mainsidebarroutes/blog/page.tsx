@@ -9,7 +9,7 @@ import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import HeroBanner from '@/components/blog/herobanner';
 import CategoryTabs from '@/components/blog/categorytabs';
-import BlogList from '@/components/blog/bloglist';
+import BlogList from '@/components/blog/bloglisthome';
 
 // ✅ Type for Blog
 export type Blog = {

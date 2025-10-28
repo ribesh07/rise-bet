@@ -1,7 +1,7 @@
 
 import React from 'react';
-import type { Blog } from '@/app/blog/page';
-import BlogCard from './blogcard';
+import type { Blog } from '@/app/mainsidebarroutes/blog/page';
+import BlogCard from './blogcardhome';
 
 export default function BlogList({ Blogs }: { Blogs: Blog[] }) {
   return (
