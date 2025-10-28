@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Promotion } from '@/app/promotions/page';
+import type { Promotion } from '@/app/mainsidebarroutes/promotions/page';
 
 export default function PromotionCard({ promo }: { promo: Promotion }) {
   return (

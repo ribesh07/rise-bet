@@ -1,3 +1,4 @@
+
 "use client";
 import React from "react";
 
@@ -10,20 +11,40 @@ const VipHero = () => {
   };
 
   return (
-    <section className="text-left py-20 px-4 vip-header-bg">
+    <section
+      className="
+        text-left 
+        py-10 md:py-14 
+        px-4 
+        vip-header-bg 
+        min-h-[40vh] md:min-h-[45vh] 
+        flex flex-col justify-center
+      "
+    >
       <h1 className="text-3xl md:text-5xl font-bold mb-4">
         The unrivalled VIP experience
       </h1>
-      <p className="text-left text-gray-300 mb-8 max-w-xl">
+
+      <p className="text-left text-gray-300 mb-6 max-w-xl">
         Unlock exclusive benefits and receive instantly withdrawable bonuses
         without any strings attached.
       </p>
-      <button
-        onClick={handleRegisterClick}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
-      >
-        Sign up
-      </button>
+
+      <div className="w-fit">
+        <button
+          onClick={handleRegisterClick}
+          className="
+            bg-blue-600 hover:bg-blue-700 
+            text-white 
+            px-6 py-3 
+            rounded-lg 
+            font-semibold 
+            transition
+          "
+        >
+          Sign up
+        </button>
+      </div>
     </section>
   );
 };

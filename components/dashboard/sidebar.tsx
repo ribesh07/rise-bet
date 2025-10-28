@@ -37,14 +37,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { icon: <Home size={28} />, label: "Casino", route: "/" },
     { icon: <Trophy size={28} />, label: "Sports", route: "/sports", comingSoon: true }, // 👈 trigger modal
-    { icon: <Gift size={28} />, label: "Promotions", route: "/promotions" },
+    { icon: <Gift size={28} />, label: "Promotions", route: "/mainsidebarroutes/promotions" },
     { icon: <Users size={28} />, label: "Affiliate", route: "/mainsidebarroutes/affiliates" },
     { icon: <Crown size={28} />, label: "VIP Club", route: "/mainsidebarroutes/vipsidebar" },
-    { icon: <BookOpen size={28} />, label: "Blog", route: "/blog" },
-    { icon: <MessageSquare size={28} />, label: "Forum", route: "/forum" },
-    { icon: <HeartHandshake size={28} />, label: "Responsible Gambling", route: "/responsiblegambling" },
-    { icon: <LifeBuoy size={28} />, label: "Live Support", route: "/live-support" },
-    { icon: <Globe size={28} />, label: "Language: English", route: "/language" },
+    { icon: <BookOpen size={28} />, label: "Blog", route: "/mainsidebarroutes/blog" },
+    { icon: <MessageSquare size={28} />, label: "Forum", route: "/mainsidebarroutes/forum" },
+    { icon: <HeartHandshake size={28} />, label: "Responsible Gambling", route: "/mainsidebarroutes/responsiblegambling" },
+    { icon: <LifeBuoy size={28} />, label: "Live Support", route: "/mainsidebarroutes/live-support" },
+    { icon: <Globe size={28} />, label: "Language: English", route: "/mainsidebarroutes/language" },
   ];
 
   return (

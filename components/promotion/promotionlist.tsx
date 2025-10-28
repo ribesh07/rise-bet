@@ -1,6 +1,6 @@
 
 import React from 'react';
-import type { Promotion } from '@/app/promotions/page';
+import type { Promotion } from '@/app/mainsidebarroutes/promotions/page';
 import PromotionCard from './promotioncard';
 
 export default function PromotionList({ promotions }: { promotions: Promotion[] }) {
