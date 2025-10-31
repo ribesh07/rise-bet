@@ -10,13 +10,19 @@ import Image from 'next/image';
 import { LoginForm } from '@/components/auths/loginform';
 import { SignupForm } from '@/components/auths/signupform';
 import {
-  PlayCircle,
-  Percent,
   DollarSign,
-  Settings,
-  Globe2,
-  Clock,
+  HelpCircle,
+  BarChart2,
+  Users,
+  ChevronDown,
 } from 'lucide-react';
+
+// ✅ Import your affiliate subpages
+import Overview from '@/components/affiliates/overview';
+import Refer from '@/components/affiliates/campaigns';
+import Commissions from '@/components/affiliates/commission';
+import FAQ from '@/components/affiliates/faq';
+import ReferredUsers from '@/components/affiliates/refer';
 
 // ✅ Auth Modal
 const AuthModal: React.FC<{
@@ -103,7 +109,9 @@ const AffiliateProgram: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authType, setAuthType] = useState<'login' | 'register'>('login');
-  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState("Overview");
+    const [search, setSearch] = useState('');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -114,6 +122,14 @@ const AffiliateProgram: React.FC = () => {
 
   const sidebarWidth = 64;
   const collapsedWidth = 20;
+
+  const menuItems = [
+    { label: "Overview"},
+    { label: "Campaigns" },
+    { label: "Commissions" },
+    { label: "Referred Users" },
+    { label: "FAQ" },
+  ];
 
   return (
     <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
@@ -164,167 +180,90 @@ const AffiliateProgram: React.FC = () => {
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-            {/* Overview Sidebar */}
-            <aside className="w-full md:w-1/5 h-fit md:sticky md:top-6 bg-[#1e293b] rounded-2xl p-4 shadow-lg shadow-black/30">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                👥 Affiliate Program
-              </h2>
-              <div className="bg-[#0f172a] border-l-2 border-blue-500 rounded-r-lg px-3 py-2 text-sm font-medium text-gray-100 shadow-inner">
-                Overview
-              </div>
-            </aside>
-
-            {/* Main Info */}
-            <main className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
-              <section>
-                   <h1 className="text-2xl font-bold mb-2">Affiliate Program</h1>
-                   <p className="text-gray-300 mb-4">
-                     Earn commission for all bets placed by your referrals across Casino and Sportsbook.
-                   </p>
-
-                   <div className="flex flex-wrap gap-6 mt-4 text-center">
-                     {[
-                      { value: '35.8M', label: 'Worldwide Customers' },
-                      { value: '42', label: 'Payment Methods' },
-                      { value: '17', label: 'Languages Supported' },
-                    ].map((item, i) => (
-                      <div key={i} className="group cursor-default transition-transform hover:-translate-y-1">
-                        <p className="text-3xl font-bold text-green-400 group-hover:text-green-300 transition-colors">
-                          {item.value}
-                        </p>
-                        <p className="text-gray-400 text-sm group-hover:text-gray-200 transition-colors">
-                          {item.label}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="text-gray-300 mt-6 leading-relaxed">
-                    To register your interest in becoming a Risebet Affiliate, please login to your Risebet account.{' '}
-                    Don’t have a Risebet account yet? Tap the{' '}
-                    <span
-                      className="font-semibold text-blue-400 cursor-pointer hover:underline"
-                      onClick={() => {
-                        setAuthType('register');
-                        setAuthOpen(true);
-                      }}
-                    >
-                      'Register'
-                    </span>{' '}
-                    button below to get started.
-                  </p>
-
-                  <div className="flex gap-4 mt-6">
-                    <button
-                      onClick={() => {
-                        setAuthType('login');
-                        setAuthOpen(true);
-                      }}
-                      className="bg-green-500 text-white px-6 py-2 rounded-xl font-semibold hover:bg-green-600 hover:shadow-[0_0_12px_#22c55e] transition-all duration-300"
-                    >
-                      Login
-                    </button>
-                    <button
-                      onClick={() => {
-                        setAuthType('register');
-                        setAuthOpen(true);
-                      }}
-                      className="bg-blue-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-blue-700 hover:shadow-[0_0_12px_#3b82f6] transition-all duration-300"
-                    >
-                      Register Now
-                    </button>
-                  </div>
-
-                  <div className="bg-[#0f172a] rounded-xl p-4 mt-6 flex items-center gap-4 border border-slate-700 hover:border-green-500 transition-colors duration-300">
-                    <PlayCircle className="w-10 h-10 text-green-400" />
-                    <div>
-                      <p className="font-semibold">Risebet.com Affiliate Program</p>
-                      <p className="text-gray-400 text-sm">Creative Department</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Advantages */}
-                <section>
-                  <h2 className="text-xl font-semibold mb-3">Exclusive Advantages</h2>
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {[
-                      { icon: DollarSign, title: 'Instant Payout', desc: 'Skip the wait. See earnings instantly.' },
-                      { icon: Clock, title: 'Lifetime Commission', desc: 'Keep earning as your referrals play.' },
-                      { icon: Percent, title: 'Top Market Rates', desc: 'Earn more with competitive commissions.' },
-                      { icon: Settings, title: 'Customise Your Plan', desc: 'Choose the best commission model.' },
-                      { icon: Globe2, title: 'Crypto & Local Currencies', desc: 'Earn in your preferred currency.' },
-                      { icon: Globe2, title: '24/7 Multi Language Support', desc: 'Support in your language anytime.' },
-                    ].map((item, i) => (
-                      <div
-                        key={i}
-                        className="bg-[#0f172a] p-4 rounded-xl flex gap-3 items-start border border-slate-700 hover:border-green-400 hover:shadow-[0_0_12px_#22c55e55] hover:-translate-y-1 transition-all duration-300"
-                      >
-                        <item.icon className="w-6 h-6 text-green-400 mt-1" />
-                        <div>
-                          <p className="font-semibold">{item.title}</p>
-                          <p className="text-gray-400 text-sm">{item.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-                <section>
-               <h2 className="text-xl font-semibold mb-3">Commission Rules</h2>
-                <p className="text-gray-300">
-                  Our default commission rate is <span className="font-semibold text-green-400">10%</span> but you can calculate specific rates for our products using the formulas below.
-                </p>
-
-                <div className="grid md:grid-cols-3 gap-4 mt-4">
-                {[
-                {
-                  title: "🎰 Casino",
-                  desc: "All of our games have a different house edge. You can derive your commission using:",
-                  formula: "(Edge as decimal * wagered / 2) * commission rate",
-                },
-                {
-                  title: "🏈 Sportsbook",
-                  desc: "All sports bets are applied at 3% theoretical house edge. Use:",
-                  formula: "(0.03 * wagered / 2) * commission rate",
-                },
-                {
-                  title: "♠️ Poker",
-                  desc: "You collect a small % of each pot (Rake). Commission formula:",
-                  formula: "Rake * commission rate",
-                },
-              ].map((rule, i) => (
-                <div
-                  key={i}
-                  className="bg-[#0f172a] rounded-xl p-4 border border-slate-700 transition-all duration-300 hover:border-green-400 hover:shadow-[0_0_10px_#22c55e55] hover:-translate-y-1"
-                >
-                  <h3 className="font-semibold mb-1 text-green-400">{rule.title}</h3>
-                  <p className="text-gray-400 text-sm mb-2">{rule.desc}</p>
-                  <code className="bg-slate-800 p-2 rounded block text-sm text-gray-200">
-                    {rule.formula}
-                  </code>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Templates Banner */}
-          <section>
-            <div className="bg-gradient-to-r from-green-500 to-blue-600 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between text-white hover:shadow-[0_0_25px_#3b82f6aa] transition-all duration-300">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  Templates to Help Your Campaign Stand Out
+            {/* Left Sidebar */}
+            <>
+              {/* 🖥️ Desktop Sidebar Menu */}
+              <aside className="hidden md:flex md:flex-col md:w-1/5 h-fit md:sticky md:top-6 bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_0_15px_rgba(0,0,0,0.3)]">
+                <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100">
+                  👥 Affiliate Program
                 </h2>
-                <p className="text-sm text-white/90 mt-1">
-                  We've created digital banner templates to make it easier to promote your campaigns online.
-                </p>
+                <nav className="flex flex-col space-y-2">
+                  {menuItems.map(({ label }) => (
+                    <button
+                      key={label}
+                      onClick={() => setActive(label)}
+                      className={`flex items-center gap-3 w-full text-left px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-300 ease-in-out
+                        ${
+                          active === label
+                            ? "bg-blue-600/50 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+                            : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
+                        }`}
+                    >
+                      
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </nav>
+              </aside>
+
+              {/* 📱 Mobile Dropdown Menu */}
+              <div className="md:hidden w-full bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-[0_0_10px_rgba(0,0,0,0.4)]">
+                <button
+                  onClick={() => setOpen(!open)}
+                  className="flex items-center justify-between w-full px-4 py-2 rounded-lg text-gray-100 font-medium bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 transition-all duration-300"
+                >
+                  <span>{active}</span>
+                  <ChevronDown
+                    className={`transform transition-transform duration-300 ${
+                      open ? "rotate-180" : ""
+                    }`}
+                    size={18}
+                  />
+                </button>
+                {open && (
+                  <div className="mt-3 flex flex-col space-y-2">
+                    {menuItems.map(({ label}) => (
+                      <button
+                        key={label}
+                        onClick={() => {
+                          setActive(label);
+                          setOpen(false);
+                        }}
+                        className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-300 ease-in-out
+                          ${
+                            active === label
+                              ? "bg-blue-600/50 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)]"
+                              : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
+                          }`}
+                      >
+                       
+                        <span>{label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <img
-                src="https://Risebet.com/_app/immutable/assets/affiliate-banner.png"
-                alt="Risebet Banner"
-                className="w-48 mt-4 md:mt-0 rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          </section>
+            </>
+
+            {/* ✅ Main Dynamic Section */}
+           
+            <main className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40 mb-3 w-fit">
+              {active === "Overview" && (
+                <Overview
+                  onLogin={() => {
+                    setAuthType('login');
+                    setAuthOpen(true);
+                  }}
+                  onRegister={() => {
+                    setAuthType('register');
+                    setAuthOpen(true);
+                  }}
+                />
+              )}
+              {active === "Campaigns" && <Refer />}
+              {active === "Commissions" && <Commissions />}
+              {active === "Referred Users" && <ReferredUsers />}
+              {active === "FAQ" && <FAQ />}
             </main>
           </div>
 
@@ -358,17 +297,6 @@ const AffiliateProgram: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {isMobile && sidebarOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black z-40"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
 
       {/* ✅ Auth Modal */}
       <AuthModal
