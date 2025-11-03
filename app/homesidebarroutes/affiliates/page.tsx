@@ -117,7 +117,7 @@ const AffiliateProgram: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarWidth = 64;
+  const sidebarWidth = 52;
   const collapsedWidth = 20;
 
   const menuItems = [

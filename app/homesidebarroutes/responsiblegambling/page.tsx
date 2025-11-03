@@ -111,7 +111,7 @@ const ResponsibleGamblingPage = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const mainRef = useRef<HTMLDivElement | null>(null);
-  const sidebarWidth = 64;
+  const sidebarWidth = 52;
   const collapsedWidth = 20;
 
   useEffect(() => {

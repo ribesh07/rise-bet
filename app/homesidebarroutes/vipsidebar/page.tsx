@@ -120,7 +120,7 @@ export default function VipPage() {
     return () => window.removeEventListener('openAuthModal', handleAuthEvent);
   }, []);
 
-  const sidebarWidth = 64;
+  const sidebarWidth = 52;
   const collapsedWidth = 20;
 
   return (

@@ -177,7 +177,7 @@ export default function BlogsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentBlogs = filteredBlogs.slice(startIndex, startIndex + itemsPerPage);
 
-  const sidebarWidth = 64;
+  const sidebarWidth = 52;
   const collapsedWidth = 20;
 
   return (
