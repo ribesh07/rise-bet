@@ -9,17 +9,15 @@ import MobileBottomBar from '@/components/mobilebuttombar';
 import Image from 'next/image';
 import { LoginForm } from '@/components/auths/loginform';
 import { SignupForm } from '@/components/auths/signupform';
-import {
-  
-  ChevronDown,
-} from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
-// ✅ Import your affiliate subpages
-import Overview from '@/components/affiliates/overview';
-import Refer from '@/components/affiliates/campaigns';
-import Commissions from '@/components/affiliates/commission';
-import FAQ from '@/components/affiliates/faq';
-import ReferredUsers from '@/components/affiliates/refer';
+// ✅ Import transaction tables
+import DepositTable from '@/components/transactions/deposit';
+import WithdrawalsTable from '@/components/transactions/withdrawal';
+import RaffleTable from '@/components/transactions/raffle';
+import RaceTable from '@/components/transactions/race';
+import BonusHistory from '@/components/transactions/bonus';
+import OtherHistory from '@/components/transactions/other';
 
 // ✅ Auth Modal
 const AuthModal: React.FC<{
@@ -64,19 +62,13 @@ const AuthModal: React.FC<{
           >
             <div
               className={`relative z-50 w-full ${
-                isMobile ? 'h-full rounded-none' : 'max-w-md max-h-screen rounded-xl'
+                isMobile ? 'h-full rounded-none' : 'max-w-md rounded-xl'
               } overflow-auto bg-[#0f172a] p-6`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-4">
                 <div className="relative w-32 h-12">
-                  <Image
-                    src="/logo.png"
-                    alt="Logo"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    priority
-                  />
+                  <Image src="/logo.png" alt="Logo" fill style={{ objectFit: 'contain' }} priority />
                 </div>
                 <button
                   onClick={onClose}
@@ -99,16 +91,16 @@ const AuthModal: React.FC<{
   );
 };
 
-// ✅ Main Affiliate Program Page
-const AffiliateProgram: React.FC = () => {
+// ✅ Main Transactions Page
+const Transactions: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authType, setAuthType] = useState<'login' | 'register'>('login');
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("Overview");
-    const [search, setSearch] = useState('');
+  const [active, setActive] = useState("Deposits");
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -117,28 +109,44 @@ const AffiliateProgram: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarWidth = 64;
-  const collapsedWidth = 20;
+  const sidebarWidth = 256;
+  const collapsedWidth = 80;
 
   const menuItems = [
-    { label: "Overview"},
-    { label: "Campaigns" },
-    { label: "Commissions" },
-    { label: "Referred Users" },
-    { label: "FAQ" },
+    { label: "Deposits" },
+    { label: "Withdrawals" },
+    { label: "Bonuses" },
+    { label: "Raffles" },
+    { label: "Races" },
+    { label: "Others" },
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
-      <div className="flex flex-1">
+    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-hidden relative flex-col">
+      {/* ✅ Top Navbar */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 z-40"
+        animate={{
+          marginLeft: !isMobile
+            ? sidebarCollapsed
+              ? collapsedWidth
+              : sidebarWidth
+            : 0,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      >
+        <TopNavbar searchValue={search} onSearchChange={setSearch} />
+      </motion.div>
+
+      <div className="flex flex-1 pt-[80px]">
         {/* ✅ Sidebar (Desktop) */}
         {!isMobile && (
-          <motion.div
+          <motion.aside
             animate={{
-              width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+              width: sidebarCollapsed ? collapsedWidth : sidebarWidth,
             }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
+            className="fixed top-0 left-0 h-full bg-[#0f172a] shadow-lg z-50"
           >
             <Sidebar
               collapsed={sidebarCollapsed}
@@ -146,43 +154,28 @@ const AffiliateProgram: React.FC = () => {
               open={true}
               setOpen={() => {}}
             />
-          </motion.div>
+          </motion.aside>
         )}
-
-        {/* ✅ Navbar */}
-        <motion.div
-          className="fixed top-0 left-0 right-0 z-40"
-          animate={{
-            marginLeft: !isMobile
-              ? sidebarCollapsed
-                ? collapsedWidth * 4
-                : sidebarWidth * 4
-              : 0,
-          }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        >
-          <TopNavbar searchValue={search} onSearchChange={setSearch} />
-        </motion.div>
 
         {/* ✅ Main Content */}
         <motion.main
-          className="flex-1 flex flex-col overflow-auto pt-[112px] pb-16 px-3 py-12 md:px-8"
+          className="flex-1 flex flex-col overflow-y-auto md:overflow-y-visible px-3 md:px-8 pb-20"
           animate={{
             marginLeft: !isMobile
               ? sidebarCollapsed
-                ? collapsedWidth * 4
-                : sidebarWidth * 4
+                ? collapsedWidth
+                : sidebarWidth
               : 0,
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6">
-            {/* Left Sidebar */}
-            <>
-              {/* 🖥️ Desktop Sidebar Menu */}
-              <aside className="hidden md:flex md:flex-col md:w-1/5 h-fit md:sticky md:top-6 bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_0_15px_rgba(0,0,0,0.3)]">
+          <div className="flex flex-col md:flex-row gap-6 w-full h-full">
+            {/* Sidebar Menu (Transactions Tabs) */}
+            <div className="w-full md:w-64 shrink-0">
+              {/* Desktop Menu */}
+              <aside className="hidden md:flex flex-col bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100">
-                  👥 Affiliate Program
+                  👥 Transactions
                 </h2>
                 <nav className="flex flex-col space-y-2">
                   {menuItems.map(({ label }) => (
@@ -196,15 +189,14 @@ const AffiliateProgram: React.FC = () => {
                             : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
                         }`}
                     >
-                      
                       <span>{label}</span>
                     </button>
                   ))}
                 </nav>
               </aside>
 
-              {/* 📱 Mobile Dropdown Menu */}
-              <div className="md:hidden w-full bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-[0_0_10px_rgba(0,0,0,0.4)]">
+              {/* Mobile Dropdown Menu */}
+              <div className="md:hidden bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-lg">
                 <button
                   onClick={() => setOpen(!open)}
                   className="flex items-center justify-between w-full px-4 py-2 rounded-lg text-gray-100 font-medium bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 transition-all duration-300"
@@ -219,7 +211,7 @@ const AffiliateProgram: React.FC = () => {
                 </button>
                 {open && (
                   <div className="mt-3 flex flex-col space-y-2">
-                    {menuItems.map(({ label}) => (
+                    {menuItems.map(({ label }) => (
                       <button
                         key={label}
                         onClick={() => {
@@ -233,35 +225,49 @@ const AffiliateProgram: React.FC = () => {
                               : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
                           }`}
                       >
-                       
                         <span>{label}</span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-            </>
+            </div>
 
-            {/* ✅ Main Dynamic Section */}
-           
-            <main className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40 mb-3 w-fit">
-              {active === "Overview" && (
-                <Overview
-                  onLogin={() => {
-                    setAuthType('login');
-                    setAuthOpen(true);
-                  }}
-                  onRegister={() => {
-                    setAuthType('register');
-                    setAuthOpen(true);
-                  }}
-                />
-              )}
-              {active === "Campaigns" && <Refer />}
-              {active === "Commissions" && <Commissions />}
-              {active === "Referred Users" && <ReferredUsers />}
-              {active === "FAQ" && <FAQ />}
-            </main>
+            {/* ✅ Dynamic Section (FULL HEIGHT) */}
+            <div className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40 w-full flex flex-col min-h-[calc(100vh-160px)]">
+              <div className="flex-1 w-full overflow-auto">
+                {active === "Deposits" && (
+                  <div className="h-full w-full flex flex-col">
+                    <DepositTable />
+                  </div>
+                )}
+                {active === "Withdrawals" && (
+                  <div className="h-full w-full flex flex-col">
+                    <WithdrawalsTable />
+                  </div>
+                )}
+                {active === "Bonuses" && (
+                  <div className="h-full w-full flex flex-col">
+                    <BonusHistory />
+                  </div>
+                )}
+                {active === "Raffles" && (
+                  <div className="h-full w-full flex flex-col">
+                    <RaffleTable />
+                  </div>
+                )}
+                {active === "Races" && (
+                  <div className="h-full w-full flex flex-col">
+                    <RaceTable />
+                  </div>
+                )}
+                {active === "Others" && (
+                  <div className="h-full w-full flex items-center justify-center text-gray-300">
+                    <OtherHistory />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <Footer />
@@ -306,4 +312,4 @@ const AffiliateProgram: React.FC = () => {
   );
 };
 
-export default AffiliateProgram;
+export default Transactions;
