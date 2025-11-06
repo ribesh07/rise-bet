@@ -107,7 +107,7 @@ const Accordion: React.FC<{ data: AccordionItemType[] }> = ({ data }) => {
         >
           <button
             onClick={() => toggleItem(index)}
-            className="w-full text-left bg-[#132230] p-4 font-semibold hover:bg-[#1a2e42] flex justify-between items-center"
+            className="w-full text-left bg-[#1e293b] p-4 font-semibold hover:bg-[#1a2e42] flex justify-between items-center"
           >
             <span className="text-sm sm:text-base">{item.title}</span>
             <motion.div

@@ -3,8 +3,8 @@ import type { Promotion } from '@/app/mainsidebarroutes/promotions/page';
 
 export default function PromotionCard({ promo }: { promo: Promotion }) {
   return (
-    <div className="bg-[#152642] rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-      <div className="w-full h-40 bg-[#0E192D]">
+    <div className="bg-[#101b22dd] rounded-xl overflow-hidden shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+      <div className="w-full h-40 bg-[#48667e33]">
         <img src={promo.image} alt={promo.title} className="w-full h-full object-cover" />
       </div>
       <div className="p-4">

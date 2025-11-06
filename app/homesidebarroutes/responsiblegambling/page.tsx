@@ -13,7 +13,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
-import { Sidebar } from '@/components/sidebar';
+import Sidebar from "@/components/sidebar";
 import  TopNavbar  from '@/components/topnavbar';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import Footer from '@/components/footer';
@@ -111,7 +111,7 @@ const ResponsibleGamblingPage = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [search, setSearch] = useState("");
   const mainRef = useRef<HTMLDivElement | null>(null);
-  const sidebarWidth = 52;
+  const sidebarWidth = 62;
   const collapsedWidth = 20;
 
   useEffect(() => {
@@ -145,7 +145,7 @@ const ResponsibleGamblingPage = () => {
   const sidebarItems = ['Risebet Smart', 'Recognise the Signs', "Responsible Gambling FAQ's"];
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden">
      {/* Sidebar */}
              {!isMobile && (
                <motion.div
@@ -181,7 +181,7 @@ const ResponsibleGamblingPage = () => {
       {/* ===== Main Content Area ===== */}
       <motion.main
        ref={mainRef}
-        className="flex-1 flex flex-col pt-[100px] pb-16 px-3 md:px-8 bg-[#0f172a]"
+        className="flex-1 flex flex-col pt-[100px] pb-16 px-3 md:px-8 bg-[#1a2c38]"
         animate={{
           marginLeft: !isMobile
             ? sidebarCollapsed
@@ -194,7 +194,7 @@ const ResponsibleGamblingPage = () => {
         <div className="flex flex-col  md:flex-row gap-6 py-10 min-h-screen">
           {/* ===== Sticky Sidebar ===== */}
           <aside className="hidden md:block w-[220px] ml-4">
-            <div className="sticky top-20 bg-[#0f172a]/95 rounded-md p-2 shadow-md">
+            <div className="sticky top-20 bg-[#101b22dd]/95 rounded-md p-2 shadow-md">
               {sidebarItems.map((item) => (
                 <div
                   key={item}

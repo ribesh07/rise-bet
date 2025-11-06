@@ -177,11 +177,11 @@ export default function BlogsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentBlogs = filteredBlogs.slice(startIndex, startIndex + itemsPerPage);
 
-  const sidebarWidth = 52;
+  const sidebarWidth = 62;
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
         {/* Sidebar */}
         {!isMobile && (
@@ -252,7 +252,7 @@ export default function BlogsPage() {
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               className={`px-6 py-2 rounded-full font-semibold ${
                 currentPage === 1
-                  ? 'bg-[#1e293b] text-gray-500 cursor-not-allowed'
+                   ? 'bg-[#1e293b] text-gray-500 cursor-not-allowed'
                   : 'bg-[#25374A] hover:bg-[#31475C]'
               }`}
             >

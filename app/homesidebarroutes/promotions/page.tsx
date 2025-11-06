@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sidebar } from '@/components/sidebar';
+import Sidebar from "@/components/sidebar";
 import TopNavbar from '@/components/topnavbar';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
@@ -80,11 +80,11 @@ export default function PromotionsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentPromotions = filteredPromotions.slice(startIndex, startIndex + itemsPerPage);
 
-  const sidebarWidth = 52;
+  const sidebarWidth = 64;
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
         {/* Sidebar */}
         {!isMobile && (
@@ -120,7 +120,7 @@ export default function PromotionsPage() {
         {/* Main Content */}
         <motion.main
           ref={mainRef}
-          className="flex-1 flex flex-col overflow-auto pt-[120px] pb-16 px-4 md:px-8"
+          className="flex-1 flex flex-col overflow-auto pt-[120px] pb-16 md:px-8"
           animate={{
             marginLeft: !isMobile
               ? sidebarCollapsed
@@ -130,6 +130,7 @@ export default function PromotionsPage() {
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
+          
           <HeroBanner />
 
           {/* ✅ Scrollable Category Tabs */}

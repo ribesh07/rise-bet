@@ -232,7 +232,7 @@ const CampaignsPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#0f172a] min-h-screen text-white p-4 sm:p-6">
+    <div className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
       <h2 className="text-2xl font-bold mb-2">Campaigns</h2>
       <p className="text-gray-400 mb-6 text-sm sm:text-base">
         See the performance of all your campaigns in one simple view below.

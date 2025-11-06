@@ -316,7 +316,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sidebar } from "@/components/sidebar";
+import Sidebar from "@/components/sidebar";
 import TopNavbar from '@/components/topnavbar';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
@@ -415,7 +415,7 @@ const Transactions: React.FC = () => {
   const [active, setActive] = useState("Deposits");
   const [search, setSearch] = useState('');
 
-  const sidebarWidth = 205;
+  const sidebarWidth = 252;
   const collapsedWidth = 80;
 
   useEffect(() => {
@@ -435,7 +435,7 @@ const Transactions: React.FC = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white relative overflow-hidden">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white relative overflow-hidden">
       {/* ✅ Sidebar (Desktop) */}
       {!isMobile && (
         <motion.aside
@@ -484,7 +484,7 @@ const Transactions: React.FC = () => {
         <div className="flex flex-col md:flex-row gap-6 w-full h-full">
           {/* Left Menu (Transactions Tabs) */}
           <div className="w-full md:w-64 shrink-0">
-            <aside className="hidden md:flex flex-col bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
+            <aside className="hidden md:flex flex-col bg-[#101b22dd]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-lg">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100">
                 👥 Transactions
               </h2>
@@ -497,7 +497,7 @@ const Transactions: React.FC = () => {
                       ${
                         active === label
                           ? "bg-blue-600/50 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"
-                          : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
+                          : "text-gray-300 bg-[#101b22dd]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
                       }`}
                   >
                     <span>{label}</span>
@@ -507,10 +507,10 @@ const Transactions: React.FC = () => {
             </aside>
 
             {/* Mobile Dropdown Menu */}
-            <div className="md:hidden bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-lg">
+            <div className="md:hidden bg-[#101b22dd]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 shadow-lg">
               <button
                 onClick={() => setOpen(!open)}
-                className="flex items-center justify-between w-full px-4 py-2 rounded-lg text-gray-100 font-medium bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 transition-all duration-300"
+                className="flex items-center justify-between w-full px-4 py-2 rounded-lg text-gray-100 font-medium bg-#101b22dd/60 hover:bg-[#1e3a8a]/40 transition-all duration-300"
               >
                 <span>{active}</span>
                 <ChevronDown

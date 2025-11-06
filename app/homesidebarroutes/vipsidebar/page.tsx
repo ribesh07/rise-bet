@@ -7,7 +7,7 @@ import Image from 'next/image';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import TopNavbar from '@/components/topnavbar';
-import { Sidebar } from '@/components/sidebar';
+import Sidebar from "@/components/sidebar";
 
 
 // VIP components
@@ -120,11 +120,11 @@ export default function VipPage() {
     return () => window.removeEventListener('openAuthModal', handleAuthEvent);
   }, []);
 
-  const sidebarWidth = 52;
+  const sidebarWidth = 62;
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
         {/* Sidebar */}
         {!isMobile && (

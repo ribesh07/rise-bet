@@ -6,7 +6,7 @@ export default function HeroBanner() {
       <img
          src="/images/blog.png"
          alt="Risebet Smart"
-         className="relative w-full   bg-gradient-to-r from-[#14233D] to-[#0E192D] flex items-center justify-center overflow-hidden rounded-2xl"
+         className=" w-full   bg-gradient-to-r from-[#14233D] to-[#0E192D] flex items-center justify-center overflow-hidden "
          />
       
     </div>

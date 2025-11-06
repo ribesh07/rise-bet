@@ -2,7 +2,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sidebar } from "@/components/sidebar";
+import Sidebar from "@/components/sidebar";
 import TopNavbar from '@/components/topnavbar';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
@@ -20,6 +20,7 @@ import Refer from '@/components/affiliates/campaigns';
 import Commissions from '@/components/affiliates/commission';
 import FAQ from '@/components/affiliates/faq';
 import ReferredUsers from '@/components/affiliates/refer';
+import { clsx } from 'clsx';
 
 // ✅ Auth Modal
 const AuthModal: React.FC<{
@@ -117,7 +118,7 @@ const AffiliateProgram: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarWidth = 52;
+  const sidebarWidth = 62;
   const collapsedWidth = 20;
 
   const menuItems = [
@@ -129,7 +130,7 @@ const AffiliateProgram: React.FC = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen bg-[#172630] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
         {/* ✅ Sidebar (Desktop) */}
         {!isMobile && (
@@ -180,7 +181,7 @@ const AffiliateProgram: React.FC = () => {
             {/* Left Sidebar */}
             <>
               {/* 🖥️ Desktop Sidebar Menu */}
-              <aside className="hidden md:flex md:flex-col md:w-1/5 h-fit md:sticky md:top-6 bg-[#111827]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_0_15px_rgba(0,0,0,0.3)]">
+              <aside className="hidden md:flex md:flex-col md:w-1/5 h-fit md:sticky md:top-6 bg-[#101b22dd] backdrop-blur-xl  border-white/10 rounded-2xlborder p-4 shadow-[0_0_15px_rgba(0,0,0,0.3)]">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-100">
                   👥 Affiliate Program
                 </h2>
@@ -189,12 +190,12 @@ const AffiliateProgram: React.FC = () => {
                     <button
                       key={label}
                       onClick={() => setActive(label)}
-                      className={`flex items-center gap-3 w-full text-left px-4 py-2 rounded-xl text-sm font-medium border transition-all duration-300 ease-in-out
-                        ${
-                          active === label
-                            ? "bg-blue-600/50 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.5)]"
-                            : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
-                        }`}
+                     className={clsx(
+                                         'cursor-pointer px-3 py-2 rounded-sm text-sm font-semibold transition-all',
+                                         active === label
+                                           ? 'bg-[#122334] text-white border-l-2 border-[#2b8eff]'
+                                           : 'text-gray-300 hover:bg-[#122334] hover:text-white'
+                                       )}
                     >
                       
                       <span>{label}</span>
@@ -226,12 +227,12 @@ const AffiliateProgram: React.FC = () => {
                           setActive(label);
                           setOpen(false);
                         }}
-                        className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium border transition-all duration-300 ease-in-out
-                          ${
-                            active === label
-                              ? "bg-blue-600/50 text-white border-blue-500 shadow-[0_0_10px_rgba(37,99,235,0.4)]"
-                              : "text-gray-300 bg-[#0f172a]/60 hover:bg-[#1e3a8a]/40 hover:text-white hover:border-blue-500 border-transparent"
-                          }`}
+                        className={clsx(
+                                         'cursor-pointer px-3 py-2 rounded-sm text-sm font-semibold transition-all',
+                                         active === label
+                                           ? 'bg-[#122334] text-white border-l-2 border-[#2b8eff]'
+                                           : 'text-gray-300 hover:bg-[#122334] hover:text-white'
+                                       )}
                       >
                        
                         <span>{label}</span>
@@ -244,7 +245,7 @@ const AffiliateProgram: React.FC = () => {
 
             {/* ✅ Main Dynamic Section */}
            
-            <main className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40 mb-3 w-fit">
+            <main className="flex-1 bg-[#151c28] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40 mb-3 w-fit">
               {active === "Overview" && (
                 <Overview
                   onLogin={() => {

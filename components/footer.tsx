@@ -89,7 +89,8 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-[#0A1B2E] text-gray-300 px-6 md:px-20 py-10 text-sm">
+    <footer className=" relative  bg-[#101b22dd] 
+        backdrop-blur-md text-gray-300 px-6 md:px-20 py-10 text-sm">
 
       {/* Mobile Accordion */}
       <div className="md:hidden space-y-2">

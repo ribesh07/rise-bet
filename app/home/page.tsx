@@ -1,7 +1,7 @@
 
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { Sidebar } from "@/components/sidebar";
+import Sidebar from "@/components/sidebar";
 import TopNavbar from "@/components/topnavbar";
 import NotificationBar from "@/components/notificationbar";
 import ProgressCard from "@/components/progresscard";
@@ -32,11 +32,11 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const sidebarWidth = 52;
+  const sidebarWidth = 64;
   const collapsedWidth = 20;
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
         {/* Sidebar */}
         {!isMobile && (
@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
 
         {/* Main Content */}
         <motion.main
-          className="flex-1 flex flex-col overflow-auto pt-[112px] pb-16 px-3 py-12 md:px-8"
+          className="flex-1 flex flex-col overflow-auto pt-[95px] pb-16  md:px-8"
           animate={{
             marginLeft: !isMobile
               ? sidebarCollapsed
@@ -95,15 +95,15 @@ const Dashboard: React.FC = () => {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           {/* Header Section */}
-          <div className="w-full py-6 relative header-bg">
-            <div className="absolute inset-0 bg-[#0f172a]/60 z-0"></div>
+          <div className=" pt-4 header-bg">
+            <div className="absolute inset-0 bg-[#0f172a]/50 z-0"></div>
 
             <div
               className={`grid gap-4 w-full max-w-full mx-auto relative z-10 ${
                 isMobile ? "grid-cols-1" : "grid-cols-3"
               }`}
             >
-              <div className="w-full flex justify-center">
+              <div className="w-full flex pb-2 justify-center">
                 <div className="w-full max-w-sm frosted-card-bg p-4">
                   <ProgressCard
                     username="shark491"
@@ -115,7 +115,7 @@ const Dashboard: React.FC = () => {
 
               {!isMobile && (
               <>
-                <div className="w-full flex justify-center">
+                <div className="w-full pb-2 flex justify-center">
                   <div className="w-full max-w-sm">
                     <ImageHead
                       title="Casino"
@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                 </div>
-                <div className="w-full flex justify-center">
+                <div className="w-full pb-2 flex justify-center">
                   <div className="w-full max-w-sm">
                     <ImageHead
                       title="Sports (soon...)"
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="mt-4">
+          <div className="mt-4 px-2">
             <SearchBar
               category={category}
               onCategoryChange={setCategory}
@@ -173,9 +173,9 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Trending Games */}
-          <section className="mt-4 relative mb-8">
+          <section className="mt-4 relative px-2 mb-8">
             <div className="flex items-center mb-2">
-              <h3 className="text-base md:text-lg font-semibold">
+              <h3 className="relative text-xl sm:text-2xl font-bold text-white mt-4  mb-4">
                 Trending Games
               </h3>
               <div className="ml-auto flex gap-2">
