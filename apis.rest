@@ -56,3 +56,6 @@ Content-Type: application/json
 {
   "email": "sahr8074@gmail.com"
 }
+
+### get banners
+GET https://api.omsnepal.com/api/v1/banners HTTP/1.1

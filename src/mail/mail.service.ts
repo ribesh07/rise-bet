@@ -7,11 +7,11 @@ export class MailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: 'mail.playrise.vip', // your Mailcow SMTP host
-      port: 587, // usually 587 for TLS, 465 for SSL
+      host: process.env.MAIL_HOST, // your Mailcow SMTP host
+      port: process.env.MAIL_PORT, // usually 587 for TLS, 465 for SSL
       secure: false, // true for 465, false for 587
       auth: {
-        user: 'info@playrise.vip', // your Mailcow email
+        user: process.env.MAIL_USER, // your Mailcow email
         pass: process.env.MAILCOW_PASSWORD, // email password
       },
       tls: {
