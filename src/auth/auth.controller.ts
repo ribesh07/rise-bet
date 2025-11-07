@@ -10,10 +10,11 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('api/v1/auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService , private readonly mailService: MailService) {}
 
   @Post('signup')
   async signup(@Body() dto: CreateUserDto) {
@@ -27,6 +28,16 @@ export class AuthController {
       return { statusCode: 401, success : false, message: 'Invalid credentials' };
     }
     return this.authService.login(user);
+  }
+
+  @Post('send-otp')
+  async sendOtp(@Body('email') email: string) {
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // send email
+    await this.mailService.sendOtp(email, otp);
+
+    return { message: 'OTP sent', otp }; // you can omit OTP in response for security
   }
 
   @Get('test')
