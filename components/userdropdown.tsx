@@ -60,7 +60,7 @@ const UserDropdown: React.FC = () => {
     { label: "Affiliate", icon: Users, route: "/homesidebarroutes/affiliates" },
     { label: "Statistics", icon: BarChart2, route: "/statistics" },
     { label: "Transactions", icon: Receipt, route: "/transactions" },
-    { label: "My Bets", icon: ClipboardList, route: "/my-bets" },
+    { label: "My Bets", icon: ClipboardList, route: "/mybet" },
     { label: "Settings", icon: Settings, route: "/settings" },
     { label: "Rise Smart", icon: ShieldCheck, route: "/homesidebarroutes/responsiblegambling" },
     { label: "Live Support", icon: Headphones, route: "/support" },
