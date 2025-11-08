@@ -2,7 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowDownToLine, ArrowUpToLine, X, Eye, EyeOff } from "lucide-react";
+import { ArrowDownToLine, ArrowUpToLine, X, Eye, EyeOff,Vault } from "lucide-react";
 
 interface Props {
   onClose: () => void;
@@ -60,7 +60,7 @@ if (isSuccess) {
         <X size={20} />
       </button>
       <div className="text-xl font-semibold flex items-center mb-6">
-        <span className="mr-2">🔒</span> Vault
+        <span className="mr-2"><Vault size={24} /></span> Vault
       </div>
       <div className="flex flex-col items-center text-center">
         
@@ -140,7 +140,7 @@ if (isSuccess) {
       </button>
 
       <div className="text-xl font-semibold flex items-center mb-6">
-        <span className="mr-2">🔒</span> Vault
+        <span className="mr-2"><Vault size={24} /></span> Vault
       </div>
 
       <div className="flex bg-[#13283D] rounded-full p-1 mb-6">

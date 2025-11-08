@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3, ChevronDown, ChevronUp } from "lucide-react";
 
@@ -34,6 +34,32 @@ const BonusHistory: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<Bonus["category"]>("All Bonuses");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // 🖱️ Drag scroll like Stake
+  const onDrag = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!scrollRef.current) return;
+    const startX = "touches" in e ? e.touches[0].pageX : e.pageX;
+    const scrollLeft = scrollRef.current.scrollLeft;
+
+    const move = (moveEvent: any) => {
+      const x = moveEvent.touches ? moveEvent.touches[0].pageX : moveEvent.pageX;
+      const walk = x - startX;
+      scrollRef.current!.scrollLeft = scrollLeft - walk;
+    };
+
+    const stop = () => {
+      document.removeEventListener("mousemove", move);
+      document.removeEventListener("mouseup", stop);
+      document.removeEventListener("touchmove", move);
+      document.removeEventListener("touchend", stop);
+    };
+
+    document.addEventListener("mousemove", move);
+    document.addEventListener("mouseup", stop);
+    document.addEventListener("touchmove", move);
+    document.addEventListener("touchend", stop);
+  };
 
   const bonusData: Bonus[] = [
     { id: "1", date: "2025-10-10", type: "Deposit Bonus", amount: 50, category: "Promotional" },
@@ -53,17 +79,23 @@ const BonusHistory: React.FC = () => {
 
   return (
     <div className="relative bg-[#0F1B2E] text-gray-200 p-4 rounded-xl shadow-lg w-full overflow-hidden transition-all duration-300 flex flex-col h-full">
-      {/* ✅ Scrollable Tabs */}
-      <div className="overflow-x-auto flex gap-2 pb-2 stake-scrollbar">
-        <div className="flex space-x-2 min-w-max">
+
+      {/* ✅ Stake-like Scrollable Tabs */}
+      <div
+        ref={scrollRef}
+        onMouseDown={onDrag}
+        onTouchStart={onDrag}
+        className="overflow-x-auto scrollbar-hide scroll-smooth cursor-grab active:cursor-grabbing mb-5 bg-[#13283D] rounded-2xl"
+      >
+        <div className="flex bg-[#13283D] rounded-2xl text-sm font-medium min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-all duration-300 ${
+              className={`flex-shrink-0 w-[14%] px-3 py-2 transition text-center ${
                 activeTab === tab
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "bg-[#1E2A44] text-gray-300 hover:bg-blue-500/20 hover:text-white"
+                  ? "bg-[#1C2F45] text-white"
+                  : "text-gray-400 hover:bg-[#1C2F45]/50"
               }`}
             >
               {tab}
@@ -73,8 +105,9 @@ const BonusHistory: React.FC = () => {
       </div>
 
       {/* ✅ Card Container */}
-      <Card className="flex-1 mt-4 bg-[#0F1B2E] border border-gray-700 flex flex-col overflow-hidden">
+      <Card className="flex-1 bg-[#0F1B2E] border border-gray-700 flex flex-col overflow-hidden">
         <CardContent className="p-0 flex-1 flex flex-col">
+          
           {/* ✅ Desktop Table Header */}
           <div className="hidden sm:block overflow-x-auto stake-scrollbar w-full">
             <table className="min-w-[720px] w-full table-auto border-separate border-spacing-0">
