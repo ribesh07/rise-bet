@@ -108,7 +108,10 @@ const Dashboard: React.FC = () => {
                   <ProgressCard
                     username="shark491"
                     progressPercentage={45}
-                    levelName="Bronze"
+                    currentLevelName="Silver"
+                    nextLevelName="Gold"
+                    currentLevel="Silver"
+                    nextLevel="Gold"
                   />
                 </div>
               </div>

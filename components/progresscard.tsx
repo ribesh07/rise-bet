@@ -7,13 +7,27 @@ import { Star } from "lucide-react";
 interface ProgressCardProps {
   username: string;
   progressPercentage: number; // 0-100
-  levelName: string;
+  currentLevelName: string;
+  nextLevelName: string;
+  currentLevel: string;
+  nextLevel: string;
 }
+
+const levelColors: Record<string, string> = {
+  Bronze: "#cd7f32",
+  Silver: "#c0c0c0",
+  Gold: "#ffd700",
+  Platinum: "#4cc9f0",
+  Diamond: "#00eaff",
+};
 
 const ProgressCard: React.FC<ProgressCardProps> = ({
   username,
   progressPercentage,
-  levelName,
+  currentLevelName,
+  nextLevelName,
+  currentLevel,
+  nextLevel,
 }) => {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [pulse, setPulse] = useState(false);
@@ -32,9 +46,8 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
       setAnimatedProgress(start);
     }, 10);
 
-    // Trigger star pulse when progress changes
     setPulse(true);
-    const pulseTimeout = setTimeout(() => setPulse(false), 500); // pulse lasts 0.5s
+    const pulseTimeout = setTimeout(() => setPulse(false), 500);
 
     return () => {
       clearInterval(interval);
@@ -50,46 +63,60 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
           pulse ? "animate-pulse-scale" : ""
         }`}
       >
-        <Star className="w-6 h-6 text-yellow-400 stroke-current stroke-2" />
+        <Star
+          className="w-6 h-6 stroke-current stroke-2"
+          style={{ color: levelColors[currentLevelName] || "#ffd700" }}
+        />
       </div>
 
       <CardContent className="p-0 flex flex-col gap-2">
         <h2 className="text-lg font-bold text-white">{username}</h2>
+
         <div className="flex justify-between items-center text-white text-sm mt-1">
-  <span>Your VIP Progress</span>
-  <span className="font-medium">{animatedProgress.toFixed(1)}%</span>
-</div>
-         
-        
+          <span>Your VIP Progress</span>
+          <span className="font-medium">{animatedProgress.toFixed(1)}%</span>
+        </div>
 
         {/* Progress Bar */}
         <div className="w-full bg-gray-700 rounded-full h-3 mt-3 overflow-hidden relative">
           <div
-            className="h-3 rounded-full bg-yellow-400 shadow-lg transition-all duration-300"
-            style={{ width: `${animatedProgress}%` }}
+            className="h-3 rounded-full shadow-lg transition-all duration-300"
+            style={{
+              width: `${animatedProgress}%`,
+              backgroundColor: levelColors[currentLevelName] || "#ffd700",
+            }}
           />
           <div
-            className="absolute h-3 rounded-full bg-yellow-400 blur-xl opacity-40 top-0 left-0"
-            style={{ width: `${animatedProgress}%` }}
+            className="absolute h-3 rounded-full blur-xl opacity-40 top-0 left-0"
+            style={{
+              width: `${animatedProgress}%`,
+              backgroundColor: levelColors[currentLevelName] || "#ffd700",
+            }}
           />
         </div>
 
-       
+        {/* Level Details */}
+        <div className="flex justify-between items-center mt-3 text-sm text-gray-300">
+          {/* Current Level */}
+          <p className="flex items-center gap-1">
+            <Star
+              className="w-4 h-4"
+              style={{ color: levelColors[currentLevelName] || "#ffd700" }}
+            />
+            <span>{currentLevelName}</span>
+          </p>
 
-        <div className="flex justify-between items-center mt-3 text-sm text-gray-400">
-                   <p className="text-gray-300 text-sm mt-1 font-medium">
-          
-        </p>
-                  {/* <span className="flex items-center gap-1 text-yellow-400">
-                    <span>★</span> {levelName}
-                  </span> */}
-                  <p className="font-semibold text-white flex items-center gap-2">
-                                        <Star className="w-4 h-4 text-[#cd7f32]" />{levelName}
-                                      </p>
-                </div>
+          {/* Next Level */}
+          <p className="flex items-center gap-1">
+            <Star
+              className="w-4 h-4"
+              style={{ color: levelColors[nextLevelName] || "#aaa" }}
+            />
+            <span>{nextLevelName}</span>
+          </p>
+        </div>
       </CardContent>
 
-      {/* Custom Tailwind Animation */}
       <style jsx>{`
         @keyframes pulseScale {
           0% {

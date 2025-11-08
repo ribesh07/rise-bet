@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   title: "RISE - BET",
   description: "Total Betting and gaming site for all your needs !!!",
 };
+
 
 export default function RootLayout({
   children,
