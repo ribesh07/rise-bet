@@ -115,7 +115,7 @@ if (isSuccess) {
 </div>
 
         <p className="text-gray-400 text-xs mt-3 text-center px-2 leading-tight">
-        Stake keeps Vault funds secure in cold storage. Withdraw anytime with no fees.
+        rise keeps Vault funds secure in cold storage. Withdraw anytime with no fees.
       </p>
       </div>
     </motion.div>
@@ -232,7 +232,7 @@ if (isSuccess) {
       </button>
 
       <p className="text-gray-400 text-xs mt-3 text-center px-2 leading-tight">
-        Stake keeps Vault funds secure in cold storage. Withdraw anytime with no fees.
+        rise keeps Vault funds secure in cold storage. Withdraw anytime with no fees.
       </p>
 
       

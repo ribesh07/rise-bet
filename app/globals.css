@@ -116,40 +116,40 @@ body {
 
 /* Hide scrollbar on mobile */
 @media (max-width: 768px) {
-  .stake-scrollbar::-webkit-scrollbar {
+  .rise-scrollbar::-webkit-scrollbar {
     display: none;
   }
-  .stake-scrollbar {
+  .rise-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 }
 
-/* Custom Stake-style scrollbar for desktop */
+/* Custom rise-style scrollbar for desktop */
 @media (min-width: 769px) {
-  .stake-scrollbar::-webkit-scrollbar {
+  .rise-scrollbar::-webkit-scrollbar {
     height: 6px; /* thin scrollbar */
   }
 
-  .stake-scrollbar::-webkit-scrollbar-track {
+  .rise-scrollbar::-webkit-scrollbar-track {
     background: #0b1624; /* dark inset track */
     border-radius: 9999px;
     margin-inline: 6px;
   }
 
-  .stake-scrollbar::-webkit-scrollbar-thumb {
+  .rise-scrollbar::-webkit-scrollbar-thumb {
     background: linear-gradient(90deg, #007aff, #00baff);
     border-radius: 9999px;
     box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
     transition: background 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .stake-scrollbar:hover::-webkit-scrollbar-thumb {
+  .rise-scrollbar:hover::-webkit-scrollbar-thumb {
     background: linear-gradient(90deg, #1ec7ff, #00aaff);
     box-shadow: 0 0 6px #00baff;
   }
 
-  .stake-scrollbar {
+  .rise-scrollbar {
     scrollbar-color: #00aaff #0b1624;
     scrollbar-width: thin;
   }

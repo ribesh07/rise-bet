@@ -138,7 +138,7 @@ const CampaignsMobileList: React.FC<{
   );
 };
 
-// Modal Component (Stake-style)
+// Modal Component (rise-style)
 const CreateCampaignModal: React.FC<{ onClose: () => void; onCreate: (name: string) => void }> = ({
   onClose,
   onCreate,
@@ -232,7 +232,7 @@ const CampaignsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
+    <div className="flex-1 bg-[#101b22dd] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
       <h2 className="text-2xl font-bold mb-2">Campaigns</h2>
       <p className="text-gray-400 mb-6 text-sm sm:text-base">
         See the performance of all your campaigns in one simple view below.

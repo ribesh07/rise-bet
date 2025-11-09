@@ -36,7 +36,7 @@ const BonusHistory: React.FC = () => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 🖱️ Drag scroll like Stake
+  // 🖱️ Drag scroll like rise
   const onDrag = (e: React.MouseEvent | React.TouchEvent) => {
     if (!scrollRef.current) return;
     const startX = "touches" in e ? e.touches[0].pageX : e.pageX;
@@ -80,7 +80,7 @@ const BonusHistory: React.FC = () => {
   return (
     <div className="relative bg-[#0F1B2E] text-gray-200 p-4 rounded-xl shadow-lg w-full overflow-hidden transition-all duration-300 flex flex-col h-full">
 
-      {/* ✅ Stake-like Scrollable Tabs */}
+      {/* ✅ rise-like Scrollable Tabs */}
       <div
         ref={scrollRef}
         onMouseDown={onDrag}
@@ -109,7 +109,7 @@ const BonusHistory: React.FC = () => {
         <CardContent className="p-0 flex-1 flex flex-col">
           
           {/* ✅ Desktop Table Header */}
-          <div className="hidden sm:block overflow-x-auto stake-scrollbar w-full">
+          <div className="hidden sm:block overflow-x-auto rise-scrollbar w-full">
             <table className="min-w-[720px] w-full table-auto border-separate border-spacing-0">
               <thead>
                 <tr className="text-sm text-gray-400 font-medium border-b border-gray-700 sticky top-0 bg-[#0F1B2E] z-10">
@@ -122,7 +122,7 @@ const BonusHistory: React.FC = () => {
           </div>
 
           {/* ✅ Scrollable Body */}
-          <div className="overflow-y-auto flex-1 stake-scrollbar">
+          <div className="overflow-y-auto flex-1 rise-scrollbar">
             {/* Desktop Table */}
             <table className="hidden sm:table min-w-[720px] w-full table-auto border-separate border-spacing-0">
               <tbody>

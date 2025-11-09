@@ -52,7 +52,7 @@ const OrderHistory: React.FC = () => {
     setExpanded((prev) => (prev === id ? null : id));
   };
 
-  // 🖱️ Drag-to-scroll (Stake-style)
+  // 🖱️ Drag-to-scroll (rise-style)
   const scrollRef = useRef<HTMLDivElement>(null);
   const onDrag = (e: React.MouseEvent | React.TouchEvent) => {
     if (!scrollRef.current) return;
@@ -81,7 +81,7 @@ const OrderHistory: React.FC = () => {
   return (
     <div className="relative bg-[#0F1B2E] text-gray-200 p-4 rounded-xl shadow-lg w-full overflow-hidden transition-all duration-300 flex flex-col h-full">
       
-      {/* ✅ Stake-style Tabs */}
+      {/* ✅ rise-style Tabs */}
       <div
         ref={scrollRef}
         onMouseDown={onDrag}
@@ -113,9 +113,9 @@ const OrderHistory: React.FC = () => {
           
 
           {/* ✅ Scrollable Body */}
-          <div className="overflow-y-auto flex-1 stake-scrollbar">
+          <div className="overflow-y-auto flex-1 rise-scrollbar">
            {/* ✅ Combined Table for Desktop */}
-<div className="hidden sm:block overflow-y-auto flex-1 stake-scrollbar">
+<div className="hidden sm:block overflow-y-auto flex-1 rise-scrollbar">
   <table className="min-w-[720px] w-full table-auto border-separate border-spacing-0">
     <thead className="sticky top-0 bg-[#0F1B2E] z-10">
       <tr className="text-sm text-gray-400 font-medium border-b border-gray-700">

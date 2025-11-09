@@ -4,7 +4,7 @@ import { ChevronDown, Info, BarChart2, ArrowUpDown } from "lucide-react";
 
 const ReferredUsers: React.FC = () => {
   return (
-    <div className="bg-[#1e293b] text-white p-6 rounded-lg w-full max-w-3xl mx-auto">
+    <div className="bg-[#101b22dd] text-white p-6 rounded-lg w-full max-w-3xl mx-auto">
       {/* Header */}
       <h2 className="text-lg font-semibold mb-2">Referred Users</h2>
       <p className="text-gray-400 text-sm mb-4">

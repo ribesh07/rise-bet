@@ -12,13 +12,7 @@ import {
   Copy,
 } from "lucide-react";
 
-const Overview = ({
-  onLogin,
-  onRegister,
-}: {
-  onLogin: () => void;
-  onRegister: () => void;
-}) => {
+const Overview = () => {
   const [copied, setCopied] = useState(false);
   const affiliateLink = "rise.com/?c=yFnQzATc";
 
@@ -33,7 +27,7 @@ const Overview = ({
   };
 
   return (
-    <main className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
+    <main className="flex-1 bg-[#101b22dd] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
       <section>
         <h1 className="text-2xl font-bold mb-2">Overview</h1>
         <p className="text-gray-300 mb-4">

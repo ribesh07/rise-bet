@@ -19,32 +19,32 @@ type AccordionItemType = {
 
 const generalData: AccordionItemType[] = [
   {
-    title: "What is the Stake Affiliate Program?",
+    title: "What is the rise Affiliate Program?",
     content:
-      "The Stake Affiliate Program allows individuals, businesses, and influencers to earn commissions by referring new players to Stake.com.",
+      "The rise Affiliate Program allows individuals, businesses, and influencers to earn commissions by referring new players to rise.com.",
   },
   {
-    title: "Who can join the Stake Affiliate Program?",
+    title: "Who can join the rise Affiliate Program?",
     content:
-      "The Stake Affiliate Program is open to anyone who has a network or audience to which they can promote Stake.",
+      "The rise Affiliate Program is open to anyone who has a network or audience to which they can promote rise.",
   },
   {
-    title: "How do I join the Stake Affiliate Program?",
+    title: "How do I join the rise Affiliate Program?",
     content:
-      "To begin, you need to sign up for an account on Stake.com. Once you have an account, you’ll be able to start promoting your referral link and earn commission. Once you’ve done this, you can also get in touch with the affiliate team via the contact form to discuss personalised deals based on your audience and network.",
+      "To begin, you need to sign up for an account on rise.com. Once you have an account, you’ll be able to start promoting your referral link and earn commission. Once you’ve done this, you can also get in touch with the affiliate team via the contact form to discuss personalised deals based on your audience and network.",
   },
   {
-    title: "What are the benefits of joining the Stake Affiliate Program?",
+    title: "What are the benefits of joining the rise Affiliate Program?",
     content:
-      "Affiliates can enjoy competitive commission rates, real-time tracking, promotional materials, and dedicated affiliate support. As a world leading casino & sportsbook, Stake offers an exciting product that you can earn from by promoting it.",
+      "Affiliates can enjoy competitive commission rates, real-time tracking, promotional materials, and dedicated affiliate support. As a world leading casino & sportsbook, rise offers an exciting product that you can earn from by promoting it.",
   },
 ];
 
 const affiliateProgramData: AccordionItemType[] = [
   {
-    title: "How can I promote Stake as an affiliate?",
+    title: "How can I promote rise as an affiliate?",
     content:
-      "Affiliates can promote Stake through various channels, including social media networks, live streaming, websites & any other traffic sources they may have. We provide a range of banners, links, and other marketing promotions to help you succeed.",
+      "Affiliates can promote rise through various channels, including social media networks, live streaming, websites & any other traffic sources they may have. We provide a range of banners, links, and other marketing promotions to help you succeed.",
   },
   {
     title: "How can I create new campaigns?",
@@ -64,7 +64,7 @@ const affiliateProgramData: AccordionItemType[] = [
   {
     title: "What countries can I target through my campaigns?",
     content:
-      "You can promote Stake.com in all countries except those listed in our prohibited jurisdictions. For more information, refer to the Stake Terms of Service.",
+      "You can promote rise.com in all countries except those listed in our prohibited jurisdictions. For more information, refer to the rise Terms of Service.",
   },
 ];
 
@@ -82,7 +82,7 @@ const earningsData: AccordionItemType[] = [
   {
     title: "When and how do I get paid?",
     content:
-      "As a wager share affiliate, you can claim your commission instantly from the funds tab. The commission will continue to generate as long as there is wagering activity under your campaigns, and you can transfer any available balance to your Stake wallet at any time.",
+      "As a wager share affiliate, you can claim your commission instantly from the funds tab. The commission will continue to generate as long as there is wagering activity under your campaigns, and you can transfer any available balance to your rise wallet at any time.",
   },
   {
     title: "Can I track my earnings in real-time?",

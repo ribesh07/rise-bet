@@ -8,7 +8,7 @@ const CommissionPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="flex-1 bg-[#1e293b] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
+    <div className="flex-1 bg-[#101b22dd] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
       <h1 className="text-2xl font-semibold mb-3">Commission</h1>
       <p className="text-gray-300 mb-6 text-sm sm:text-base">
         View and track the earnings you've generated through your referrals. This section provides a clear breakdown of your commissions and payouts, keeping you in control of your earnings.
@@ -84,7 +84,7 @@ const CommissionPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Stake-Style Modal */}
+      {/* rise-Style Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <>
