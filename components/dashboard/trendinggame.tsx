@@ -1,6 +1,8 @@
+
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { TrendingUp } from 'lucide-react';
+import ComingSoonModal from '@/components/form/loginmodel'; // <----- IMPORTANT
 
 const trendingGames = [
   { id: 1, name: "Crash", players: 482, provider: "Pragmatic Play", image: "/images/crash.jpg" },
@@ -14,27 +16,43 @@ const trendingGames = [
 ];
 
 export const TrendingGames: React.FC = () => {
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleGameClick = () => {
+    setOpenModal(true);
+  };
+
   return (
     <section>
-                <h2 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-4 flex items-center">
-                  <TrendingUp className="mr-2 mt-4" size={20} /> Trending Games
-                </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
-                  {trendingGames.map((game) => (
-                    <div
-                      key={game.id}
-                      className="bg-slate-800 rounded-xl p-3 sm:p-4 hover:bg-slate-700 transform hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer text-center"
-                    >
-                      <img src={game.image} alt={game.name} className="rounded-md mb-2" />
-                      <div className="text-white font-medium text-xs sm:text-sm mb-1 truncate">{game.name}</div>
-                      <div className="text-slate-400 text-[10px] sm:text-xs mb-1">{game.provider}</div>
-                      <div className="flex items-center justify-center text-xs sm:text-sm text-green-400">
-                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
-                        {game.players} playing
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
+      {/* ✅ Modal */}
+      <ComingSoonModal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+       
+      />
+
+      <h2 className="text-xl sm:text-2xl font-bold text-white mt-4 mb-4 flex items-center">
+        <TrendingUp className="mr-2 mt-4" size={20} />
+        Trending Games
+      </h2>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 sm:gap-4">
+        {trendingGames.map((game) => (
+          <div
+            key={game.id}
+            onClick={handleGameClick} // ✅ Open modal on click
+            className="bg-slate-800 rounded-xl p-3 sm:p-4 hover:bg-slate-700 transform hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer text-center"
+          >
+            <img src={game.image} alt={game.name} className="rounded-md mb-2" />
+            <div className="text-white font-medium text-xs sm:text-sm mb-1 truncate">{game.name}</div>
+            <div className="text-slate-400 text-[10px] sm:text-xs mb-1">{game.provider}</div>
+            <div className="flex items-center justify-center text-xs sm:text-sm text-green-400">
+              <div className="w-1.5 h-1.5 bg-green-400 rounded-full mr-1"></div>
+              {game.players} playing
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
