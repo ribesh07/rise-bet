@@ -19,6 +19,7 @@ import {
   Trophy,
 } from "lucide-react";
 import ComingSoonModal from "@/components/sports/ComingSoonModal";
+import { useRouter, usePathname } from "next/navigation";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -33,9 +34,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   open,
   setOpen,
 }) => {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [activeItem, setActiveItem] = useState<string>("casino");
+  const [activeItem, setActiveItem] = useState<string>("home");
+
+  // ✅ Sync active tab with current route
+  useEffect(() => {
+    if (pathname.startsWith("/home")) setActiveItem("home");
+    if (pathname.includes("/promotions")) setActiveItem("promotions");
+    if (pathname.includes("/affiliates")) setActiveItem("affiliate");
+    if (pathname.includes("/vipsidebar")) setActiveItem("vip");
+    if (pathname.includes("/blog")) setActiveItem("blog");
+    if (pathname.includes("/responsiblegambling")) setActiveItem("gambling");
+  }, [pathname]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -75,29 +89,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {!collapsed ? (
             <div className="flex gap-2">
               <SidebarTopButton
-                active={activeItem === "casino"}
+                active={activeItem === "home"}
                 label="Casino"
-                
-                onClick={() => setActiveItem("casino")}
+                onClick={() => {
+                  setActiveItem("home");
+                  router.push("/home");
+                }}
               />
               <SidebarTopButton
                 active={activeItem === "sports"}
                 label="Sports"
-                
-                onClick={() => setActiveItem("sports")}
+                onClick={() => {
+                  setActiveItem("sports");
+                  setShowComingSoon(true);
+                }}
               />
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               <SidebarTopIcon
-                active={activeItem === "casino"}
+                active={activeItem === "home"}
                 icon={<Gamepad2 size={28} />}
-                onClick={() => setActiveItem("casino")}
+                onClick={() => {
+                  setActiveItem("home");
+                  router.push("/home");
+                }}
               />
               <SidebarTopIcon
                 active={activeItem === "sports"}
                 icon={<Trophy size={28} />}
-                onClick={() => setActiveItem("sports")}
+                onClick={() => {
+                  setActiveItem("sports");
+                  setShowComingSoon(true);
+                }}
               />
             </div>
           )}
@@ -105,7 +129,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* ===== Scrollable Content ===== */}
         <nav className="flex-1 overflow-y-auto px-2 py-3 text-[15px] scrollbar-hide">
-          
           <SidebarItem
             icon={<Gift size={28} />}
             label="Promotions"
@@ -149,8 +172,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           />
 
           <hr className="border-[#2f3745] border-l-8 my-6" />
-
-          
 
           <SidebarItem
             icon={<HeartHandshake size={28} />}
@@ -199,12 +220,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 const SidebarTopButton = ({
   active,
   label,
- 
   onClick,
 }: {
   active: boolean;
   label: string;
-  
   onClick: () => void;
 }) => (
   <button
@@ -216,7 +235,6 @@ const SidebarTopButton = ({
     }`}
   >
     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-in-out" />
-    
     {label}
   </button>
 );

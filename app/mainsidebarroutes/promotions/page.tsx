@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarWrapper } from '@/components/dashboard/sidebarwapper';
-import { TopNavbar } from '@/components/dashboard/topnavbar';
+import  TopNavbar  from '@/components/dashboard/topnavbar';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import HeroBanner from '@/components/promotion/herobanner';
@@ -110,7 +110,7 @@ export default function PromotionsPage() {
             : 0,
         }}
       >
-        <TopNavbar sidebarWidth={!isMobile ? (sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4) : 0} />
+        <TopNavbar  />
       </motion.div>
 
       {/* Main Content */}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarWrapper } from '@/components/dashboard/sidebarwapper';
-import { TopNavbar } from '@/components/dashboard/topnavbar';
+import  TopNavbar  from '@/components/dashboard/topnavbar';
 import Footer from '@/components/footer';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import Image from 'next/image';
@@ -166,13 +166,7 @@ const AffiliateProgram: React.FC = () => {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <TopNavbar
-          sidebarWidth={
-            !isMobile
-              ? sidebarCollapsed
-                ? collapsedWidth * 4
-                : sidebarWidth * 4
-              : 0
-          }
+         
         />
       </motion.div>
 

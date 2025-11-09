@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { SidebarWrapper } from '@/components/dashboard/sidebarwapper';
-import { TopNavbar } from '@/components/dashboard/topnavbar';
+import  TopNavbar  from '@/components/dashboard/topnavbar';
 import { HeroSection } from '@/components/dashboard/herosection';
 import { TrendingGames } from '@/components/dashboard/trendinggame';
 import { TrendingSports } from '@/components/dashboard/trendingsports';
@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const sidebarWidth = 64;
-  const collapsedWidth = 16;
+  const collapsedWidth = 20;
 
   const handleSidebarToggle = () => {
     if (isMobile) {
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
+    <div className="flex min-h-screen bg-[#141f27] text-white overflow-x-hidden">
       {/* Desktop Sidebar */}
       {!isMobile && (
         <motion.div
@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
             width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed top-0 left-0 h-screen bg-[#0f172a] shadow-lg overflow-hidden z-50 flex flex-col"
+          className="fixed top-0 left-0 h-screen bg-[#0f1420] shadow-lg overflow-hidden z-50 flex flex-col"
         >
           <SidebarWrapper
             sidebarOpen={!sidebarCollapsed}
@@ -181,13 +181,6 @@ const Dashboard: React.FC = () => {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <TopNavbar
-          sidebarWidth={
-            !isMobile
-              ? sidebarCollapsed
-                ? collapsedWidth * 4
-                : sidebarWidth * 4
-              : 0
-          }
         />
       </motion.div>
 

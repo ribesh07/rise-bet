@@ -14,7 +14,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import { SidebarWrapper } from '@/components/dashboard/sidebarwapper';
-import { TopNavbar } from '@/components/dashboard/topnavbar';
+import  TopNavbar  from '@/components/dashboard/topnavbar';
 import MobileBottomBar from '@/components/mobilebuttombar';
 import Footer from '@/components/footer';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -170,13 +170,7 @@ const ResponsibleGamblingPage = () => {
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         <TopNavbar
-          sidebarWidth={
-            !isMobile
-              ? sidebarCollapsed
-                ? collapsedWidth * 4
-                : sidebarWidth * 4
-              : 0
-          }
+          
         />
       </motion.div>
 
