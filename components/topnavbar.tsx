@@ -1,10 +1,15 @@
 
 "use client";
-import React from "react";
-import { Search, Wallet, Bell } from "lucide-react"; // ❌ removed Link from here
-import Link from "next/link"; // ✅ correct Link import
+import React, { useState, useEffect } from "react";
+import { Search, ChevronDown, Settings, Bell } from "lucide-react";
+import Link from "next/link";
 import UserDropdown from "./userdropdown";
 import { Button } from "@/components/ui/button";
+
+interface WalletData {
+  symbol: string;
+  balance: number | null | undefined;
+}
 
 interface TopNavbarProps {
   searchValue: string;
@@ -12,55 +17,184 @@ interface TopNavbarProps {
 }
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) => {
+  const [wallets, setWallets] = useState<WalletData[]>([]);
+  const [filteredWallets, setFilteredWallets] = useState<WalletData[]>([]);
+  const [selectedWallet, setSelectedWallet] = useState<WalletData | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ✅ Format balances (INR → 2 decimals, others → 8)
+  const formatBalance = (symbol: string, balance?: number | null) => {
+    if (!balance || isNaN(balance)) return symbol === "INR" ? "0.00" : "0.00000000";
+    return symbol === "INR" ? balance.toFixed(2) : balance.toFixed(8);
+  };
+
+  // ✅ Get icon from /public/coins folder
+  const getIcon = (symbol: string) => `/coins/${symbol.toLowerCase()}.svg`;
+
+  // ✅ Fetch wallet data
+  useEffect(() => {
+    const fetchWallets = async () => {
+      try {
+        const res = await fetch("/api/wallet");
+        const data = await res.json();
+
+        if (data.wallets && Array.isArray(data.wallets)) {
+          const sorted = [...data.wallets]
+            .map((w: WalletData) => ({
+              ...w,
+              balance: w.balance ?? 0,
+            }))
+            .sort((a, b) => (b.balance || 0) - (a.balance || 0));
+
+          setWallets(sorted);
+          setFilteredWallets(sorted);
+          setSelectedWallet(sorted[0]);
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch wallets:", error);
+      }
+    };
+    fetchWallets();
+  }, []);
+
+  // ✅ Filter wallets by search
+  useEffect(() => {
+    const filtered = wallets.filter((w) =>
+      w.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredWallets(filtered);
+  }, [searchTerm, wallets]);
+
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const selectWallet = (wallet: WalletData) => {
+    setSelectedWallet(wallet);
+    setIsDropdownOpen(false);
+  };
+
   return (
-    <header
-      className="
-        relative
-        top-0
-        z-[20]
-        flex justify-between items-center
-        px-3 md:px-4 py-2
-        bg-[#101b22dd]
-        backdrop-blur-md
-      "
-    >
-      {/* Logo (switches based on screen size) */}
-      <div className="w-30 h-15 px-2">
-        <Link href="/" className="block">
-          {/* Desktop logo */}
+    <header className="relative top-0 z-[30] flex items-center justify-between px-3 md:px-6 py-2 bg-[#101b22dd] backdrop-blur-md">
+      {/* 🔹 Left Section - Logo */}
+      <div className="flex items-center">
+        <Link href="/">
           <img
             src="/logo.png"
             alt="Logo"
-            className="hidden md:block w-25 h-13 cursor-pointer"
+            className="hidden md:block w-28 h-auto cursor-pointer"
           />
-          {/* Mobile logo */}
           <img
             src="/logomobile.png"
             alt="Logo Mobile"
-            className="block md:hidden pt-2 w-11 h-11 cursor-pointer"
+            className="block md:hidden w-10 h-10 cursor-pointer"
           />
         </Link>
       </div>
 
-      {/* Wallet */}
-      <div className="flex items-center gap-2 rounded-full bg-[#0d1720] border border-[#2b3340] px-3 py-1.5 shadow-sm hover:border-[#4a9fff] transition-all duration-300 cursor-pointer">
-        <Wallet size={28} className="text-[#4a9fff]" />
-        <span className="text-sm font-semibold text-white tracking-tight font-mono">
-          0.000000
-        </span>
-        <Button
-          variant="ghost"
-          className="hidden md:inline bg-[#1e293b] hover:bg-[#263445] text-xs text-white px-3 py-1 rounded-full shadow-inner border border-[#2b3340] transition-colors duration-200"
+      {/* 🔹 Center Section - Wallet */}
+      <div className="relative flex justify-center items-center">
+        <div
+          onClick={toggleDropdown}
+          className="flex items-center gap-2 rounded-lg bg-[#0d1720] border border-[#2b3340] px-3 py-1.5 shadow-sm hover:border-[#4a9fff] transition-all duration-300 cursor-pointer"
         >
-          Wallet
-        </Button>
+          {/* Balance */}
+          <span className="text-neutral-200 text-sm font-semibold font-sans whitespace-nowrap overflow-hidden text-ellipsis max-w-[16ch]">
+            {selectedWallet
+              ? formatBalance(selectedWallet.symbol, selectedWallet.balance)
+              : "0.00000000"}
+          </span>
+
+          {/* Coin Icon + Symbol */}
+          {selectedWallet && (
+            <div className="flex items-center gap-1 text-white text-sm font-semibold">
+              <img
+                src={getIcon(selectedWallet.symbol)}
+                alt={selectedWallet.symbol}
+                className="w-4 h-4"
+              />
+              <span className="truncate">{selectedWallet.symbol}</span>
+            </div>
+          )}
+
+          <ChevronDown
+            size={16}
+            className={`text-white transition-transform duration-300 ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
+
+          <Button
+            variant="ghost"
+            className="hidden md:inline bg-[#1e293b] hover:bg-[#263445] text-xs text-white px-3 py-1 rounded-full border border-[#2b3340]"
+          >
+            Wallet
+          </Button>
+        </div>
+
+        {/* 🔹 Dropdown Menu */}
+        {isDropdownOpen && (
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-[#0d1720] border border-[#2b3340] rounded-xl shadow-[0_0_15px_rgba(74,159,255,0.15)] w-72 overflow-hidden animate-fade-in z-50">
+            {/* Search Bar */}
+            <div className="flex items-center px-3 py-2 border-b border-[#2b3340] bg-[#0f1a23]">
+              <Search size={16} className="text-gray-400 mr-2" />
+              <input
+                type="text"
+                placeholder="Search Currencies"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Wallet List */}
+            <div className="max-h-72 overflow-y-auto custom-scrollbar">
+              {filteredWallets.length === 0 ? (
+                <p className="text-gray-400 text-center py-3 text-sm">No results</p>
+              ) : (
+                filteredWallets.map((wallet) => (
+                  <div
+                    key={wallet.symbol}
+                    onClick={() => selectWallet(wallet)}
+                    className={`flex justify-between items-center px-4 py-2 hover:bg-[#1a2633] cursor-pointer transition ${
+                      selectedWallet?.symbol === wallet.symbol ? "bg-[#1a2633]" : ""
+                    }`}
+                  >
+                    <span className="text-sm text-white font-mono truncate max-w-[14ch]">
+                      {formatBalance(wallet.symbol, wallet.balance)}
+                    </span>
+                    <div className="flex items-center gap-2 text-white text-sm font-semibold">
+                      <img
+                        src={getIcon(wallet.symbol)}
+                        alt={wallet.symbol}
+                        className="w-4 h-4"
+                      />
+                      <span>{wallet.symbol}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Wallet Settings */}
+            <div className="border-t border-[#2b3340] bg-[#0f1a23] px-4 py-2 flex items-center justify-center hover:bg-[#1a2633] cursor-pointer transition">
+              <Settings size={16} className="text-[#4a9fff] mr-2" />
+              <span className="text-sm text-white font-medium">Wallet Settings</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Right Icons */}
+      {/* 🔹 Right Section - User & Notifications */}
       <div className="flex items-center gap-3">
-        <Search className="cursor-pointer hover:text-blue-400 transition" size={28} />
+        {/* Search icon hidden on mobile, visible on desktop */}
+        <Search
+          className="hidden md:block cursor-pointer hover:text-blue-400 transition"
+          size={28}
+        />
         <UserDropdown />
-        <Bell className="cursor-pointer hover:text-blue-400 transition" size={28} />
+        <Bell
+          className="cursor-pointer hover:text-blue-400 transition"
+          size={28}
+        />
       </div>
     </header>
   );
