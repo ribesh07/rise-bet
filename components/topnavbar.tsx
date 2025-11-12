@@ -1,7 +1,8 @@
 
 "use client";
 import React from "react";
-import { Search, Wallet, Bell } from "lucide-react";
+import { Search, Wallet, Bell } from "lucide-react"; // ❌ removed Link from here
+import Link from "next/link"; // ✅ correct Link import
 import UserDropdown from "./userdropdown";
 import { Button } from "@/components/ui/button";
 
@@ -25,18 +26,20 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) =>
     >
       {/* Logo (switches based on screen size) */}
       <div className="w-30 h-15 px-2">
-        {/* Desktop logo */}
-        <img
-          src="/logo.png"
-          alt="Logo"
-          className="hidden md:block w-25 h-13"
-        />
-        {/* Mobile logo */}
-        <img
-          src="/logomobile.png"
-          alt="Logo Mobile"
-          className="block md:hidden w-12 h-12"
-        />
+        <Link href="/" className="block">
+          {/* Desktop logo */}
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="hidden md:block w-25 h-13 cursor-pointer"
+          />
+          {/* Mobile logo */}
+          <img
+            src="/logomobile.png"
+            alt="Logo Mobile"
+            className="block md:hidden pt-2 w-11 h-11 cursor-pointer"
+          />
+        </Link>
       </div>
 
       {/* Wallet */}

@@ -2,6 +2,7 @@
 'use client';
 import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
+import Link from "next/link";
 
 interface TopNavbarProps {
   
@@ -36,6 +37,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({  }) => {
     >
       {/* Logo */}
       <div className="relative w-30 h-13 px-2">
+        <Link href="/home" className="block">
         <Image
           src="/logo.png"
           alt="Logo"
@@ -43,6 +45,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({  }) => {
           style={{ objectFit: 'contain' }}
           priority
         />
+         </Link>
       </div>
 
       {/* Login / Register */}
