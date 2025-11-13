@@ -31,11 +31,11 @@ export class AuthController {
   }
   @Post('admin-login')
   async adminLogin(@Body() dto: LoginDto) {
-    const user = await this.authService.validateUser( dto.password , dto.email, dto.username);
+    const user = await this.authService.validateAdmin( dto.password , dto.email, dto.username);
     if (!user) {
       return { statusCode: 401, success : false, message: 'Invalid credentials' };
     }
-    return this.authService.login(user);
+    return this.authService.adminLogin(user);
   }
 
 

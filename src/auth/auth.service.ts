@@ -100,7 +100,7 @@ async validateUser(pass: string, email?: string, username?: string) {
 
   async adminLogin(user: any) {
     const payload = { sub: user.id, email: user.email, role :user.role , username : user.username };
-    const details = await this.userService.getUserWithDetails(Number(user.id));
+    const details = await this.adminService.getAdminDetails(Number(user.id));
 
      const { password, ...rest } = details as any;
     return {

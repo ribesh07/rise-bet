@@ -13,7 +13,9 @@ export class ControlController {
   @Post('update')
   async updateControl(@Body() body: UpdateControlDto, @Req() req: Request) {
     const adminUser = req.user as any;
+    console.log('Admin user from token:', adminUser);
     const adminId = adminUser?.id;
+    console.log('Admin ID from token:', adminId);
     return this.controlService.updateControl(body, adminId);
   }
 

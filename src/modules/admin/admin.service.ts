@@ -23,6 +23,14 @@ export class AdminService {
     return this.prisma.admin.findFirst({ where: { username } });
   }
 
+   //shows all details
+  async getAdminDetails(adminId: number) {
+    return this.prisma.admin.findUnique({
+      where: { id: adminId },
+      
+    });
+  }
+
 
   findOne(id: number) {
     return `This action returns a #${id} admin`;

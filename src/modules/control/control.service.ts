@@ -12,7 +12,7 @@ export class ControlService {
       // If you have a single config row, target it by id or use upsert
       // Example: upsert a singleton config with id = 1
       const updateControlPromise = this.prisma.betControl.upsert({
-        where: { id: 1 },
+        where: { id: 2 },
         update: {
           mode: dto.mode,
           forcedResult: dto.forcedResult,
