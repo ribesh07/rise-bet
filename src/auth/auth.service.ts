@@ -35,7 +35,7 @@ async validateUser(pass: string, email?: string, username?: string) {
 
 
   async login(user: any) {
-    const payload = { sub: user.id, email: user.email , username : user.username };
+    const payload = { sub: user.id, email: user.email ,role :user.role, username : user.username };
     const details = await this.userService.getUserWithDetails(Number(user.id));
 
      const { password, ...rest } = details as any;
@@ -98,9 +98,9 @@ async validateUser(pass: string, email?: string, username?: string) {
 
 
 
-  async adminLogin(admin: any) {
-    const payload = { sub: admin.id, email: admin.email , username : admin.username };
-    const details = await this.userService.getUserWithDetails(Number(admin.id));
+  async adminLogin(user: any) {
+    const payload = { sub: user.id, email: user.email, role :user.role , username : user.username };
+    const details = await this.userService.getUserWithDetails(Number(user.id));
 
      const { password, ...rest } = details as any;
     return {

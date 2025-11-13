@@ -29,14 +29,14 @@ Content-Type: application/json
 
 {
   "email": "gandu1@gmail.com",
-  "password": "12345678"
+  "password": "12345678",
+  "role": "USER"
 }
 
 ###get details
 GET http://[::1]:3084/api/v1/users/22/details
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJ1c2VybmFtZSI6ImdhbmR1IiwiaWF0IjoxNzYzMDIzNjAwLCJleHAiOjE3NjMwMjcyMDB9.Lj2g7RFThY2oVSGUbqqD4W-84Pjx5ZFkesHxRn8Cxdo
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUiLCJpYXQiOjE3NjMwMjU1NzAsImV4cCI6MTc2MzAyOTE3MH0.RavCfm76zouMQcN_Dtjndmme-o9frJesPV_AQXK4sWA
 
 ### login
 POST https://api.playrise.vip/api/v1/auth/login
@@ -64,4 +64,24 @@ Content-Type: application/json
 }
 
 ### get banners
-GET https://api.omsnepal.com/api/v1/banners HTTP/1.1
+GET http://[::1]:3084/api/v1/admin/control/logs HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI2LCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NjMwMjU0MDYsImV4cCI6MTc2MzAyOTAwNn0.7HKONOblu7Gsq_xBKwyXwsxH_l6WuA22rFF-KFa1K18
+
+###post login
+POST http://[::1]:3084/api/v1/auth/admin-login
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com",
+  "password": "ChangeMe123!",
+  "role": "admin",
+  "username": "admin"
+}
+
+
+###control 
+GET http://[::1]:3084/api/v1/admin/control/logs HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI2LCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NjMwMjU0MDYsImV4cCI6MTc2MzAyOTAwNn0.7HKONOblu7Gsq_xBKwyXwsxH_l6WuA22rFF-KFa1K18
+

@@ -3,12 +3,13 @@ import type { Request } from 'express';
 import { ControlService } from './control.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateControlDto } from './dto/update-control.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@UseGuards(AdminGuard)
 @Controller('api/v1/admin/control')
 export class ControlController {
   constructor(private readonly controlService: ControlService) {}
-
+  
+  @UseGuards(JwtAuthGuard,AdminGuard)
   @Post('update')
   async updateControl(@Body() body: UpdateControlDto, @Req() req: Request) {
     const adminUser = req.user as any;
@@ -16,6 +17,7 @@ export class ControlController {
     return this.controlService.updateControl(body, adminId);
   }
 
+  @UseGuards(JwtAuthGuard,AdminGuard)
   @Get('logs')
   async getLogs(@Query('limit') limit?: string) {
     const l = limit ? Math.min(parseInt(limit, 10), 500) : 50;

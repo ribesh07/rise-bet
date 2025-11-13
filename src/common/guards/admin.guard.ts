@@ -11,6 +11,7 @@ export class AdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest();
     const user = req.user;
+    // console.log('AdminGuard - User:', user);
 
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
