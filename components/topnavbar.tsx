@@ -19,7 +19,7 @@ interface TopNavbarProps {
 
 // ✅ Centralized list of wallet symbols + icons
 const walletIcons = [
-  { symbol: "INR", icon: "images/inr.png" },
+  { symbol: "INR", icon: "/images/inr.png" },
   { symbol: "BTC", icon: "/images/btc.png" },
   { symbol: "ETH", icon: "/images/eth.png" },
   { symbol: "LTC", icon: "/images/ltc.png" },
