@@ -19,16 +19,16 @@ interface TopNavbarProps {
 
 // ✅ Centralized list of wallet symbols + icons
 const walletIcons = [
-  { symbol: "INR", icon: "/public/coins/inr.png" },
-  { symbol: "BTC", icon: "/public/coins/btc.png" },
-  { symbol: "ETH", icon: "/public/coins/eth.png" },
-  { symbol: "LTC", icon: "/public/coins/ltc.png" },
-  { symbol: "USDT", icon:"/public/coins/usdt.png" },
-  { symbol: "SOL", icon: "/public/coins/sol.png" },
-  { symbol: "XRP", icon: "/public/coins/xrp.png" },
-  { symbol: "TRX", icon: "/public/coins/trx.png" },
-  { symbol: "BNB", icon: "/public/coins/bnb.png" },
-  { symbol: "USDC", icon: "/public/coins/usdc.png" },
+  { symbol: "INR", icon: "/coins/inr.png" },
+  { symbol: "BTC", icon: "/coins/btc.png" },
+  { symbol: "ETH", icon: "/coins/eth.png" },
+  { symbol: "LTC", icon: "/coins/ltc.png" },
+  { symbol: "USDT", icon:"/coins/usdt.png" },
+  { symbol: "SOL", icon: "/coins/sol.png" },
+  { symbol: "XRP", icon: "/coins/xrp.png" },
+  { symbol: "TRX", icon: "/coins/trx.png" },
+  { symbol: "BNB", icon: "/coins/bnb.png" },
+  { symbol: "USDC", icon: "/coins/usdc.png" },
 ];
 
 const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) => {
@@ -63,7 +63,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) =>
   useEffect(() => {
     const withIcons = walletData.map((wallet) => {
       const found = walletIcons.find((w) => w.symbol === wallet.symbol);
-      return { ...wallet, icon: found?.icon || "/public/coins/default.svg" };
+      return { ...wallet, icon: found?.icon || "/coins/default.svg" };
     });
 
     const sorted = withIcons.sort((a, b) => (b.balance || 0) - (a.balance || 0));
