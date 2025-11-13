@@ -34,7 +34,7 @@ const walletIcons = [
 const TopNavbar: React.FC<TopNavbarProps> = ({ searchValue, onSearchChange }) => {
   // ✅ Static wallet data
   const walletData: WalletData[] = [
-    { symbol: "BTC", balance: 0.00012345 },
+    { symbol: "BTC", balance: 0.0001234 },
     { symbol: "ETH", balance: 0.01234567 },
     { symbol: "LTC", balance: 0.00345678 },
     { symbol: "USDT", balance: 50.25 },
