@@ -1,6 +1,6 @@
 import { Controller, Put, Body, UseGuards, Request, Post , Get, Param} from '@nestjs/common';
 import { UserService } from './user.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../..//auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TransactionDto } from './dto/transaction.dto';
 import { BetDto } from './dto/bet.dto';

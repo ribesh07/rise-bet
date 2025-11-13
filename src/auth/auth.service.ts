@@ -1,13 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { UserService } from '../modules/user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { Decimal } from '@prisma/client/runtime/library';
+import { AdminService } from 'src/modules/admin/admin.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
+    private adminService: AdminService,
     private jwtService: JwtService,
   ) {}
 
@@ -72,6 +74,40 @@ async validateUser(pass: string, email?: string, username?: string) {
         phone : user.phone,
         access_token : this.jwtService.sign({ sub: user.id, email: user.email }),
       },
+    };
+  }
+
+  async validateAdmin(pass: string, email?: string, username?: string) {
+  if (!email && !username) return null;
+
+  let admin;
+  if (email) {
+    admin = await this.adminService.findByEmail(email);
+  } else if (username) {
+    admin = await this.adminService.findByUserName(username);
+  }
+
+  if (!admin) return null;
+
+  const matched = await bcrypt.compare(pass, admin.password);
+  if (!matched) return null;
+
+  const { password, ...result } = admin as any;
+  return result;
+}
+
+
+
+  async adminLogin(admin: any) {
+    const payload = { sub: admin.id, email: admin.email , username : admin.username };
+    const details = await this.userService.getUserWithDetails(Number(admin.id));
+
+     const { password, ...rest } = details as any;
+    return {
+      success: true,
+      message: 'Login successful',
+      data: rest,
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

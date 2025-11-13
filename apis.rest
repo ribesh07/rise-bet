@@ -32,6 +32,12 @@ Content-Type: application/json
   "password": "12345678"
 }
 
+###get details
+GET http://[::1]:3084/api/v1/users/22/details
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJ1c2VybmFtZSI6ImdhbmR1IiwiaWF0IjoxNzYzMDIzNjAwLCJleHAiOjE3NjMwMjcyMDB9.Lj2g7RFThY2oVSGUbqqD4W-84Pjx5ZFkesHxRn8Cxdo
+
+
 ### login
 POST https://api.playrise.vip/api/v1/auth/login
 Content-Type: application/json

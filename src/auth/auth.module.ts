@@ -4,13 +4,15 @@ import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { UserModule } from '../user/user.module';
+import { UserModule } from '../modules/user/user.module';
 import { JwtStrategy } from './jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
+import { AdminModule } from 'src/modules/admin/admin.module';
 
 @Module({
   imports: [
     UserModule,
+    AdminModule,
     MailModule,
     PassportModule,
     JwtModule.registerAsync({

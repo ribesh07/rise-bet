@@ -28,6 +28,13 @@ enum TransactionStatus {
   FAILED
 }
 
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+  MODERATOR
+}
+
 model User {
   id              Int            @id @default(autoincrement())  
   email           String         @unique                      
@@ -36,7 +43,8 @@ model User {
   username        String        @unique                      
   phone           String?       @unique 
   dob             String?      
-  referral        String?        @unique                               
+  referral        String?        @unique     
+  role            UserRole      @default(USER)                          
   isEmailVerified Boolean        @default(false)              
   isActive        Boolean        @default(true)               
   createdAt       DateTime       @default(now())
@@ -45,6 +53,41 @@ model User {
   balance         Decimal        @default(0.00) @db.Decimal(12,2)
   transactions    Transaction[]
   bets            Bet[]
+}
+
+model Admin {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  username        String?
+  role        UserRole    @default(ADMIN)
+  isActive    Boolean      @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  logs        ControlLog[]
+}
+
+model ControlLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  admin Admin @relation(fields: [adminId], references: [id])
+}
+
+model BetControl {
+  id           Int       @id @default(autoincrement())
+  mode         String?   // example: "AUTO" | "FORCE"
+  forcedResult String?   // e.g. "WIN" | "LOSE" or null
+  winRatio     Float?    // e.g. 0.8
+  targetUserId Int?      // if applicable
+  targetUserName   String?    
+  active       Boolean   @default(true)
+  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime  @default(now())
 }
 
 model Transaction {
@@ -78,5 +121,6 @@ model Match {
   endTime   DateTime?
   bets      Bet[]
 }
+
 
 
