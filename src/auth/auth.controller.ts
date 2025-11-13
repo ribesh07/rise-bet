@@ -35,6 +35,7 @@ export class AuthController {
     if (!user) {
       return { statusCode: 401, success : false, message: 'Invalid credentials' };
     }
+    // console.log('Admin user validated:', user);
     return this.authService.adminLogin(user);
   }
 

@@ -24,4 +24,17 @@ export class AdminGuard implements CanActivate {
 
     return true;
   }
+//   canActivate(ctx: ExecutionContext): boolean {
+//   const req = ctx.switchToHttp().getRequest();
+//   const user = req.user;
+
+//   if (!user) throw new UnauthorizedException();
+
+//   if (!user.isAdmin) {
+//     throw new ForbiddenException("Admins only");
+//   }
+
+//   return true;
+// }
+
 }

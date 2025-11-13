@@ -38,7 +38,8 @@ async validateUser(pass: string, email?: string, username?: string) {
     const payload = { sub: user.id, email: user.email ,role :user.role, username : user.username };
     const details = await this.userService.getUserWithDetails(Number(user.id));
 
-     const { password, ...rest } = details as any;
+    const { password, ...rest } = details as any;
+    console.log('User details fetched for login:', rest);
     return {
       success: true,
       message: 'Login successful',
@@ -78,14 +79,12 @@ async validateUser(pass: string, email?: string, username?: string) {
   }
 
   async validateAdmin(pass: string, email?: string, username?: string) {
-  if (!email && !username) return null;
+  if (!email ) return null;
 
   let admin;
   if (email) {
     admin = await this.adminService.findByEmail(email);
-  } else if (username) {
-    admin = await this.adminService.findByUserName(username);
-  }
+  } 
 
   if (!admin) return null;
 
@@ -99,9 +98,9 @@ async validateUser(pass: string, email?: string, username?: string) {
 
 
   async adminLogin(user: any) {
-    const payload = { sub: user.id, email: user.email, role :user.role , username : user.username };
+    const payload = { sub: user.id, email: user.email, role :user.role ,username : user.username };
     const details = await this.adminService.getAdminDetails(Number(user.id));
-
+    // console.log('Admin details fetched for login:', details);
      const { password, ...rest } = details as any;
     return {
       success: true,
