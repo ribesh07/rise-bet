@@ -303,18 +303,7 @@ const WalletSettings: React.FC = () => {
   const [displayFiat, setDisplayFiat] = useState(false);
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
 
-  const fiatCurrencies = [
-    { symbol: "INR", icon: "/coins/inr.svg" },
-    { symbol: "BTC", icon: "/coins/btc.svg" },
-    { symbol: "ETH", icon: "/coins/eth.svg" },
-    { symbol: "LTC", icon: "/coins/ltc.svg" },
-    { symbol: "USDT", icon: "/coins/usdt.svg" },
-    { symbol: "SOL", icon: "/coins/sol.svg" },
-    { symbol: "XRP", icon: "/coins/xrp.svg" },
-    { symbol: "TRX", icon: "/coins/trx.svg" },
-    { symbol: "BNB", icon: "/coins/bnb.svg" },
-    { symbol: "USDC", icon: "/coins/usdc.svg" },
-  ];
+  
 
   return (
     <div className="w-full max-w-md mx-auto bg-[#0F1923] rounded-2xl shadow-lg border border-[#1B2A3A] p-5 text-white">
@@ -330,47 +319,10 @@ const WalletSettings: React.FC = () => {
       </div>
 
       {/* Display Crypto in Fiat */}
-      <div className="flex items-start justify-between py-3 border-b border-[#1B2A3A]">
-        <div>
-          <p className="text-sm font-semibold">Display Crypto in Fiat</p>
-          <p className="text-xs text-gray-400 leading-snug">
-            All transactions will be settled in the crypto equivalent
-          </p>
-        </div>
-        <AnimatedSwitch checked={displayFiat} onChange={setDisplayFiat} />
-      </div>
+      
 
       {/* Currency Grid */}
-      <div className="grid grid-cols-4 gap-2 mt-4 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-[#1B2A3A] scrollbar-track-transparent">
-        {fiatCurrencies.map((fiat) => (
-          <button
-            key={fiat.symbol}
-            onClick={() => setSelectedCurrency(fiat.symbol)}
-            className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all border ${
-              selectedCurrency === fiat.symbol
-                ? "bg-[#1C2F45] border-[#4A9FFF]"
-                : "bg-[#131F2C] border-transparent hover:bg-[#1C2F45]/60"
-            }`}
-          >
-            <Image
-              src={fiat.icon}
-              alt={fiat.symbol}
-              width={28}
-              height={28}
-              className="rounded-full"
-            />
-            <span
-              className={`text-xs mt-1 ${
-                selectedCurrency === fiat.symbol
-                  ? "text-white font-semibold"
-                  : "text-gray-400"
-              }`}
-            >
-              {fiat.symbol}
-            </span>
-          </button>
-        ))}
-      </div>
+      
     </div>
   );
 };
