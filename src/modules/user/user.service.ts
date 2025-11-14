@@ -7,6 +7,8 @@ import { TransactionDto } from './dto/transaction.dto';
 import { BetDto } from './dto/bet.dto';
 import { Currency } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 
 @Injectable()
@@ -268,6 +270,25 @@ async updateUserImage(userId: number, filename: string) {
     data: { image: imagePath },
   });
 }
+
+
+//delete image
+ async deleteUserImage(userId: number) {
+    const user = await this.prisma.wallet.findUnique({
+      where: { id: userId },
+      select: { image: true },
+    });
+
+    if (!user?.image) return; // no image, nothing to delete
+
+    const imagePath = path.join(process.cwd(), user.image);
+
+    // check if file exists
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath); // delete file
+      console.log('Deleted old image:', imagePath);
+    }
+  }
 
   //eol
 }

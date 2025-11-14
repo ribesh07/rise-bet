@@ -63,14 +63,23 @@ export class UserController {
       storage: diskStorage({
         destination: './uploads/users',
         filename: (req, file, cb) => {
-          const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(null, unique + extname(file.originalname));
+          const name = file.originalname.replace(/\.[^/.]+$/, ""); 
+          const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+          const timestamp = Date.now();
+          const ext = extname(file.originalname);
+
+          cb(null, `${safeName}-${timestamp}${ext}`);
         },
       }),
     }),
   )
   async uploadImage(@UploadedFile() file, @Req() req ,@Param('id') id: string) {
     const userId = Number(id);
+      // delete old image FIRST
+    await this.userService.deleteUserImage(userId);
+
+    // update with new image path
     return this.userService.updateUserImage(userId, file.filename);
   }
 }
+
