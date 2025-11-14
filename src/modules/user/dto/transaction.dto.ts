@@ -1,5 +1,5 @@
 import { IsEnum, IsNumber, Min } from 'class-validator';
-import { TransactionType } from '@prisma/client';
+import { Currency, TransactionType } from '@prisma/client';
 
 export class TransactionDto {
   @IsEnum(TransactionType)
@@ -8,4 +8,7 @@ export class TransactionDto {
   @IsNumber()
   @Min(1)
   amount: number;
+
+  @IsEnum(Currency)
+  currency: Currency; 
 }

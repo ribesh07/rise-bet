@@ -12,9 +12,6 @@ export class CreateUserDto {
   @IsOptional()
   name?: string;
 
-  @IsOptional()
-  balance?: number;
-
   @IsNotEmpty()
   username: string;
 

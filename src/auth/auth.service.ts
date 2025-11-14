@@ -65,6 +65,7 @@ async validateUser(pass: string, email?: string, username?: string) {
     }
 
     const user = await this.userService.create(email, password , username , dob , phone , referral);
+    
     return {
       success: true,
       data: {

@@ -1,4 +1,5 @@
-import { IsNumber, Min } from 'class-validator';
+import { Currency } from '@prisma/client';
+import { IsEnum, IsNumber, Min } from 'class-validator';
 
 export class BetDto {
   @IsNumber()
@@ -10,4 +11,7 @@ export class BetDto {
 
   @IsNumber()
   odds: number;
+
+    @IsEnum(Currency)
+    currency: Currency; 
 }

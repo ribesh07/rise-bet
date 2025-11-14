@@ -5,7 +5,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { TransactionType, BetStatus } from '@prisma/client';
 import { TransactionDto } from './dto/transaction.dto';
 import { BetDto } from './dto/bet.dto';
-import { Decimal } from '@prisma/client/runtime/library';
+import { Currency } from '@prisma/client';
+
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
     // hash
     console.log({email, password , username , dob , phone , referral});
     const hashed = await bcrypt.hash(password, 10);
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         email,
         password: hashed,
@@ -25,6 +26,29 @@ export class UserService {
         referral : referral,
       },
     });
+    // auto-create wallets
+
+  const currencies: Currency[] = [
+    Currency.INR,
+    Currency.TRX,
+    Currency.XRP,
+    Currency.USDT,
+    Currency.USDC,
+    Currency.SOL,
+    Currency.BNB,
+    Currency.ETH,
+    Currency.LTC,
+    Currency.BTC
+  ];  
+
+  await this.prisma.wallet.createMany({
+    data: currencies.map((currency) => ({
+      userId: user.id,
+      currency,
+    })),
+  });
+  return user;
+
   }
 
   async update(id: number, data: UpdateUserDto) {
@@ -63,6 +87,7 @@ export class UserService {
       where: { id: userId },
       include: {
         transactions: true,
+         wallets: true,  
         bets: {
           include: {
             match: true, // fetch match info too
@@ -72,137 +97,160 @@ export class UserService {
     });
   }
 
+  //helpers function
+  async getWalletOrThrow(userId: number, currency: Currency) {
+  const wallet = await this.prisma.wallet.findUnique({
+    where: {
+      userId_currency: { userId, currency },
+    },
+  });
+
+  if (!wallet) throw new Error(`Wallet for ${currency} not found`);
+
+  return wallet;
+}
+
   //add transaction and update balance
-  async addTransaction(userId: number, dto: TransactionDto) {
+async addTransaction(userId: number, dto: TransactionDto) {
+  return this.prisma.$transaction(async (tx) => {
+    // Get the correct wallet
+    const wallet = await this.getWalletOrThrow(userId, dto.currency);
+
     const balanceUpdate =
       dto.type === TransactionType.DEPOSIT || dto.type === TransactionType.WIN
         ? { increment: dto.amount }
         : { decrement: dto.amount };
 
-    return this.prisma.$transaction([
-      this.prisma.transaction.create({
-        data: {
-          userId,
-          type: dto.type,
-          amount: dto.amount,
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          balance: balanceUpdate,
-        },
-      }),
-    ]);
-  }
+    // Update the wallet balance
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: balanceUpdate },
+    });
 
-  //for withdrawal
-  async createWithdrawal(userId: number, amount: number) {
-  // Get user
-  const user = await this.prisma.user.findUnique({ where: { id: userId } });
-
-  if (!user) throw new Error('User not found');
-  // if (user.balance < amount) throw new Error('Insufficient balance');
-  if (user.balance.lt(amount)) {
-    // throw new Error('Insufficient balance');
-    return { success: false, message: 'Insufficient balance' };
-  }
-
-  // Run inside a transaction
-  return this.prisma.$transaction(async (tx) => {
-    // Create transaction record
-    const transaction = await tx.transaction.create({
+    // Create a transaction record
+    return tx.transaction.create({
       data: {
         userId,
+        currency: dto.currency,
+        type: dto.type,
+        amount: dto.amount,
+      },
+    });
+  });
+}
+
+
+  //for withdrawal
+async createWithdrawal(userId: number, amount: number, currency: Currency) {
+  return this.prisma.$transaction(async (tx) => {
+    const wallet = await this.getWalletOrThrow(userId, currency);
+
+    if (wallet.balance.lt(amount)) {
+      return { success: false, message: 'Insufficient balance' };
+    }
+
+    // Create transaction
+    await tx.transaction.create({
+      data: {
+        userId,
+        currency,
         type: TransactionType.WITHDRAW,
         amount,
         status: 'SUCCESS',
-        description: 'User withdrawal',
       },
     });
 
-    // Update balance safely
-    await tx.user.update({
-      where: { id: userId },
-      data: {
-        balance: { decrement: amount },
-      },
+    // Update wallet balance
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: amount } },
     });
 
-    return transaction;
+    return { success: true };
   });
 }
 
   // place bet, deduct stake, record transaction
-  async placeBet(userId: number, betDto: BetDto) {
-    const potentialWin = betDto.stake * betDto.odds;
+async placeBet(userId: number, dto: BetDto) {
+  return this.prisma.$transaction(async (tx) => {
+    const wallet = await this.getWalletOrThrow(userId, dto.currency);
 
-    return this.prisma.$transaction([
-      // Deduct stake from balance
-      this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          balance: { decrement: betDto.stake },
-        },
-      }),
+    if (wallet.balance.lt(dto.stake)) {
+      throw new Error("Insufficient balance");
+    }
 
-      // Record transaction
-      this.prisma.transaction.create({
-        data: {
-          userId,
-          type: TransactionType.BET,
-          amount: betDto.stake,
-        },
-      }),
+    const potentialWin = dto.stake * dto.odds;
 
-      // Record bet
-      this.prisma.bet.create({
-        data: {
-          userId,
-          matchId: betDto.matchId,
-          stake: betDto.stake,
-          odds: betDto.odds,
-          potentialWin,
-          status: BetStatus.PENDING,
-        },
-      }),
-    ]);
-  }
-
-  async resolveBet(betId: number, status: BetStatus) {
-    const bet = await this.prisma.bet.findUnique({
-      where: { id: betId },
+    // Deduct stake
+    await tx.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: dto.stake } },
     });
 
-    if (!bet) throw new Error('Bet not found');
+    // Log transaction
+    await tx.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.BET,
+        amount: dto.stake,
+        currency: dto.currency,
+      },
+    });
 
-    if (status === BetStatus.WON) {
-      return this.prisma.$transaction([
-        this.prisma.bet.update({
-          where: { id: betId },
-          data: { status: BetStatus.WON },
-        }),
-        this.prisma.transaction.create({
-          data: {
-            userId: bet.userId,
-            type: TransactionType.WIN,
-            amount: bet.potentialWin,
-          },
-        }),
-        this.prisma.user.update({
-          where: { id: bet.userId },
-          data: {
-            balance: { increment: bet.potentialWin },
-          },
-        }),
-      ]);
-    } else {
-      return this.prisma.bet.update({
+    // Create bet
+    return tx.bet.create({
+      data: {
+        userId,
+        matchId: dto.matchId,
+        stake: dto.stake,
+        odds: dto.odds,
+        potentialWin,
+        currency: dto.currency,
+        status: BetStatus.PENDING,
+      },
+    });
+  });
+}
+
+
+async resolveBet(betId: number, status: BetStatus) {
+  const bet = await this.prisma.bet.findUnique({ where: { id: betId } });
+
+  if (!bet) throw new Error('Bet not found');
+
+  if (status === BetStatus.WON) {
+    return this.prisma.$transaction(async (tx) => {
+      const wallet = await this.getWalletOrThrow(bet.userId, bet.currency);
+
+      // Update bet status
+      await tx.bet.update({
         where: { id: betId },
-        data: { status: BetStatus.LOST },
+        data: { status: BetStatus.WON },
       });
-    }
+
+      // Log WIN transaction
+      await tx.transaction.create({
+        data: {
+          userId: bet.userId,
+          type: TransactionType.WIN,
+          amount: bet.potentialWin,
+          currency: bet.currency,
+        },
+      });
+
+      // Add winnings
+      await tx.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: bet.potentialWin } },
+      });
+    });
+  } else {
+    return this.prisma.bet.update({
+      where: { id: betId },
+      data: { status: BetStatus.LOST },
+    });
   }
+}
 
   //eol
 }
