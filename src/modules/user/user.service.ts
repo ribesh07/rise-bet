@@ -179,86 +179,86 @@ async createWithdrawal(userId: number, amount: number, currency: Currency) {
 }
 
   // place bet, deduct stake, record transaction
-async placeBet(userId: number, dto: BetDto) {
-  return this.prisma.$transaction(async (tx) => {
-    const wallet = await this.getWalletOrThrow(userId, dto.currency);
+// async placeBet(userId: number, dto: BetDto) {
+//   return this.prisma.$transaction(async (tx) => {
+//     const wallet = await this.getWalletOrThrow(userId, dto.currency);
 
-    if (wallet.balance.lt(dto.stake)) {
-      throw new Error("Insufficient balance");
-    }
+//     if (wallet.balance.lt(dto.stake)) {
+//       throw new Error("Insufficient balance");
+//     }
 
-    const potentialWin = dto.stake * dto.odds;
+//     const potentialWin = dto.stake * dto.odds;
 
-    // Deduct stake
-    await tx.wallet.update({
-      where: { id: wallet.id },
-      data: { balance: { decrement: dto.stake } },
-    });
+//     // Deduct stake
+//     await tx.wallet.update({
+//       where: { id: wallet.id },
+//       data: { balance: { decrement: dto.stake } },
+//     });
 
-    // Log transaction
-    await tx.transaction.create({
-      data: {
-        userId,
-        type: TransactionType.BET,
-        amount: dto.stake,
-        currency: dto.currency,
-      },
-    });
+//     // Log transaction
+//     await tx.transaction.create({
+//       data: {
+//         userId,
+//         type: TransactionType.BET,
+//         amount: dto.stake,
+//         currency: dto.currency,
+//       },
+//     });
 
-    // Create bet
-    return tx.bet.create({
-      data: {
-        userId,
-        matchId: dto.matchId,
-        stake: dto.stake,
-        odds: dto.odds,
-        potentialWin,
-        currency: dto.currency,
-        status: BetStatus.PENDING,
-      },
-    });
-  });
-}
+//     // Create bet
+//     return tx.bet.create({
+//       data: {
+//         userId,
+//         matchId: dto.matchId,
+//         stake: dto.stake,
+//         odds: dto.odds,
+//         potentialWin,
+//         currency: dto.currency,
+//         status: BetStatus.PENDING,
+//       },
+//     });
+//   });
+// }
 
 
-async resolveBet(betId: number, status: BetStatus) {
-  const bet = await this.prisma.bet.findUnique({ where: { id: betId } });
+// async resolveBet(betId: number, status: BetStatus) {
+//   const bet = await this.prisma.bet.findUnique({ where: { id: betId } });
 
-  if (!bet) throw new Error('Bet not found');
+//   if (!bet) throw new Error('Bet not found');
 
-  if (status === BetStatus.WON) {
-    return this.prisma.$transaction(async (tx) => {
-      const wallet = await this.getWalletOrThrow(bet.userId, bet.currency);
+//   if (status === BetStatus.WON) {
+//     return this.prisma.$transaction(async (tx) => {
+//       const wallet = await this.getWalletOrThrow(bet.userId, bet.currency);
 
-      // Update bet status
-      await tx.bet.update({
-        where: { id: betId },
-        data: { status: BetStatus.WON },
-      });
+//       // Update bet status
+//       await tx.bet.update({
+//         where: { id: betId },
+//         data: { status: BetStatus.WON },
+//       });
 
-      // Log WIN transaction
-      await tx.transaction.create({
-        data: {
-          userId: bet.userId,
-          type: TransactionType.WIN,
-          amount: bet.potentialWin,
-          currency: bet.currency,
-        },
-      });
+//       // Log WIN transaction
+//       await tx.transaction.create({
+//         data: {
+//           userId: bet.userId,
+//           type: TransactionType.WIN,
+//           amount: bet.potentialWin,
+//           currency: bet.currency,
+//         },
+//       });
 
-      // Add winnings
-      await tx.wallet.update({
-        where: { id: wallet.id },
-        data: { balance: { increment: bet.potentialWin } },
-      });
-    });
-  } else {
-    return this.prisma.bet.update({
-      where: { id: betId },
-      data: { status: BetStatus.LOST },
-    });
-  }
-}
+//       // Add winnings
+//       await tx.wallet.update({
+//         where: { id: wallet.id },
+//         data: { balance: { increment: bet.potentialWin } },
+//       });
+//     });
+//   } else {
+//     return this.prisma.bet.update({
+//       where: { id: betId },
+//       data: { status: BetStatus.LOST },
+//     });
+//   }
+// }
 
 
 //upload image

@@ -42,24 +42,24 @@ export class UserController {
     return this.userService.addTransaction(Number(id), dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Post(':id/bet')
-  async placeBet(
-    @Param('id') id: string,
-    @Body() dto: BetDto,
-  ) {
-    return this.userService.placeBet(Number(id), dto);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post(':id/bet')
+  // async placeBet(
+  //   @Param('id') id: string,
+  //   @Body() dto: BetDto,
+  // ) {
+  //   return this.userService.placeBet(Number(id), dto);
+  // }
 
   
-  @UseGuards(JwtAuthGuard)
-  @Post('bets/:betId/resolve')
-  async resolveBet(
-    @Param('betId') betId: string,
-    @Body() dto: ResolveBetDto,
-  ) {
-    return this.userService.resolveBet(Number(betId), dto.status);
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('bets/:betId/resolve')
+  // async resolveBet(
+  //   @Param('betId') betId: string,
+  //   @Body() dto: ResolveBetDto,
+  // ) {
+  //   return this.userService.resolveBet(Number(betId), dto.status);
+  // }
 
   //image upload
    @Post('upload-image/:id')

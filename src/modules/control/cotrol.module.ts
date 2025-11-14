@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { ControlController } from './control.controller';
 import { ControlService } from './control.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RouletteModule } from 'src/roulette/roulette.module';
 
 @Module({
-
+  imports: [RouletteModule],
   controllers: [ControlController],
-  providers: [ControlService , PrismaService],
+  providers: [ControlService , PrismaService ],
 })
 export class ControlModule {}

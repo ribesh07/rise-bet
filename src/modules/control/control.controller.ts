@@ -1,13 +1,25 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query, Param } from '@nestjs/common';
 import type { Request } from 'express';
 import { ControlService } from './control.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateControlDto } from './dto/update-control.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RouletteService } from 'src/roulette/roulette.service';
 
 @Controller('api/v1/admin/control')
 export class ControlController {
-  constructor(private readonly controlService: ControlService) {}
+  constructor(private readonly controlService: ControlService,private readonly rouletteService: RouletteService) {}
+
+  @UseGuards(JwtAuthGuard,AdminGuard)
+  @Post('force-spin/:tableId')
+  async forceSpin(@Param('tableId') tableId: string) {
+    const result = await this.rouletteService.forceSpin(tableId);
+    return {
+      success: true,
+      triggeredBy: "ADMIN",
+      result,
+    };
+  }
   
   @UseGuards(JwtAuthGuard,AdminGuard)
   @Post('update')
@@ -18,6 +30,8 @@ export class ControlController {
     console.log('Admin ID from token:', adminId);
     return this.controlService.updateControl(body, adminId);
   }
+
+
 
   @UseGuards(JwtAuthGuard,AdminGuard)
   @Get('logs')

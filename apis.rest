@@ -43,7 +43,7 @@ Content-Type: application/json
 ###get details
 GET http://[::1]:3084/api/v1/users/28/details
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJpYXQiOjE3NjMxMTM0NDYsImV4cCI6MTc2MzExNzA0Nn0.0qVolLJkfumrCz4NQ-R3uxHiFXDv0l9co4Zxmao1B2A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzMTE2ODQ3LCJleHAiOjE3NjMxMjA0NDd9.L80M7fBk3ntuuRqCYLUW4EsdbS058pA2FNvUoT4RwRc
 
 ### login
 POST https://api.playrise.vip/api/v1/auth/login

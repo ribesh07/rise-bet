@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "public"."Bet" ALTER COLUMN "odds" DROP NOT NULL,
+ALTER COLUMN "potentialWin" DROP NOT NULL,
+ALTER COLUMN "payout" DROP NOT NULL;
