@@ -17,15 +17,46 @@ const WalletSuccess: React.FC<WalletSuccessProps> = ({ type, onBack, balance }) 
       desc: "Your withdrawal has been processed successfully.",
       color: "#3175FF",
     },
+    
+    withdrawUnsuccessful: {
+      title: "Withdrawal Unsuccessful!",
+      desc: "Your withdrawal has not been processed successfully.",
+      color: "#3175FF",
+    },
+    withdrawpending: {
+      title: "Withdrawal Pending!",
+      desc: "Your withdrawal is being processed.",
+      color: "#FFA500",
+    },
     deposit: {
       title: "Deposit Successful!",
       desc: "Your deposit has been added to your wallet.",
       color: "#00C74D",
     },
+    depositUnsuccessful: {  
+      title: "Deposit Unsuccessful!",
+      desc: "Your deposit has not been added to your wallet.",
+      color: "#00C74D",
+    },
+    depositpending: {
+      title: "Deposit Pending!",
+      desc: "Your deposit is being processed.",
+      color: "#FFA500",
+    },
     tip: {
       title: "Tip Sent!",
       desc: "Your tip has been successfully sent.",
       color: "#FFD700",
+    },
+    tipUnsuccessful: {
+      title: "Tip Unsuccessful!",
+      desc: "Your tip has not been sent successfully.",
+      color: "#FFD700",
+    },
+    tippending: {
+      title: "Tip Pending!",
+      desc: "Your tip is being processed.",
+      color: "#FFA500",
     },
   };
 

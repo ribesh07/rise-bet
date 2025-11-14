@@ -2,8 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";
+import { useNotifications } from "@/context/NotificationContext";
 
 interface Props {
   balance: number;
@@ -11,7 +10,7 @@ interface Props {
   selectedCoin: {
     name: string;
     symbol: string;
-    icon: string; // ✅ fixed property name
+    icon: string;
     inrValue?: number;
     minAmount?: number;
   };
@@ -26,37 +25,95 @@ const WalletTip: React.FC<Props> = ({
 }) => {
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
-  const [showPopup, setShowPopup] = useState(false);
   const [error, setError] = useState("");
+
+  const { pushNotification } = useNotifications(); // ✅ fixed
 
   const minAmount = selectedCoin.minAmount || 0.01;
 
   const handleTip = () => {
     const val = parseFloat(amount);
-    if (!recipient.trim()) return setError("Enter recipient address");
-    if (!val || val <= 0) return setError("Enter valid amount");
-    if (val > balance) return setError("Insufficient balance");
 
+    // Validation
+    if (!recipient.trim()) {
+      setError("Enter recipient address");
+      pushNotification({
+        title: "Tip Failed",
+        message: "Recipient address is missing.",
+        type: "error",
+        category: "transactions",
+
+        url: undefined,
+        date: ""
+      });
+      return;
+    }
+
+    if (!val || val <= 0) {
+      setError("Enter valid amount");
+      pushNotification({
+        title: "Tip Failed",
+        message: "Invalid tip amount.",
+        type: "error",
+        category: "transactions",
+
+        url: undefined,
+        date: ""
+      });
+      return;
+    }
+
+    if (val > balance) {
+      setError("Insufficient balance");
+      pushNotification({
+        title: "Tip Failed",
+        message: "You do not have enough balance.",
+        type: "error",
+        category: "transactions",
+
+        url: undefined,
+        date: ""
+      });
+      return;
+    }
+
+    // Reset error
     setError("");
+
+    // Update balance
     setBalance(balance - val);
-    setShowPopup(true);
+
+    // Parent success callback
     onSuccess();
-    setTimeout(() => setShowPopup(false), 2500);
+
+    // Success notification
+    pushNotification({
+      title: "Tip Sent",
+      message: `You tipped ${amount} ${selectedCoin.symbol} to ${recipient}.`,
+      type: "success",
+      category: "transactions",
+      meta: { currency: selectedCoin.symbol, amount, to: recipient },
+
+      url: undefined,
+      date: ""
+    });
+
+    // Clear input
+    setAmount("");
+    setRecipient("");
   };
 
-  const handleSetMin = () => {
-    setAmount(minAmount.toString());
-  };
+  const handleSetMin = () => setAmount(minAmount.toString());
 
   return (
     <div className="bg-[#0B1622] rounded-xl p-5 w-full max-w-md text-white border border-white/10">
-      {/* 💰 Currency Section */}
+      {/* Currency */}
       <div className="mb-4">
         <p className="text-xs text-gray-400 mb-2">Currency</p>
         <div className="bg-[#12263A] rounded-lg p-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src={selectedCoin.icon} // ✅ using correct property
+              src={selectedCoin.icon}
               width={28}
               height={28}
               alt={selectedCoin.symbol}
@@ -78,7 +135,7 @@ const WalletTip: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* 💵 Amount Input */}
+      {/* Amount Input */}
       <div className="mb-4">
         <label className="text-xs text-gray-400 mb-1 block">
           Amount <span className="text-red-400">*</span>
@@ -94,14 +151,14 @@ const WalletTip: React.FC<Props> = ({
           <button
             type="button"
             onClick={handleSetMin}
-            className="relative bg-[#1E3A55] text-xs px-4 py-3 rounded-r-lg hover:bg-[#274a6a] transition-all text-gray-200"
+            className="bg-[#1E3A55] text-xs px-4 py-3 rounded-r-lg hover:bg-[#274a6a] transition-all text-gray-200"
           >
             Min
           </button>
         </div>
       </div>
 
-      {/* 👤 Recipient Input */}
+      {/* Recipient */}
       <div className="mb-5">
         <label className="text-xs text-gray-400 mb-1 block">
           Recipient <span className="text-red-400">*</span>
@@ -110,49 +167,21 @@ const WalletTip: React.FC<Props> = ({
           type="text"
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
-          placeholder="Enter recipient username or address"
+          placeholder="Enter username or address"
           className="w-full bg-[#12263A] p-3 rounded-lg text-white outline-none placeholder:text-gray-500"
         />
       </div>
 
-      {error && (
-        <p className="text-red-400 text-xs mb-3 text-center">{error}</p>
-      )}
+      {/* Error message */}
+      {error && <p className="text-red-400 text-xs mb-3 text-center">{error}</p>}
 
-      {/* 🪙 Tip Button */}
+      {/* Tip Button */}
       <button
         onClick={handleTip}
         className="w-full bg-[#3175FF] hover:bg-[#4D87FF] py-3 rounded-lg font-semibold text-sm transition-all duration-200"
       >
         Tip {selectedCoin.symbol}
       </button>
-
-      {/* ✅ Success Popup */}
-      <AnimatePresence>
-        {showPopup && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 flex items-center justify-center bg-black/40 z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="bg-[#142A3E] px-6 py-5 rounded-2xl shadow-lg flex flex-col items-center text-center max-w-xs"
-            >
-              <CheckCircle2 className="text-green-400 w-12 h-12 mb-2" />
-              <h3 className="text-white font-semibold text-lg">
-                Tip Sent Successfully
-              </h3>
-              <p className="text-gray-400 text-sm mt-1">
-                You tipped {amount} {selectedCoin.symbol}
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

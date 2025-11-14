@@ -1,7 +1,9 @@
+
 "use client";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
+import { useNotifications } from "@/context/NotificationContext"; // ✅ ADDED
 
 interface WalletDepositProps {
   balance: number;
@@ -20,12 +22,30 @@ const WalletDeposit: React.FC<WalletDepositProps> = ({
   const [error, setError] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
+  const { pushNotification } = useNotifications(); // ✅ HOOK
+
   const handleDeposit = () => {
     const val = parseFloat(amount);
     if (!val || val <= 0) return setError("Enter valid amount");
+
     setError("");
     setBalance((prev) => prev + val);
     onSuccess();
+
+    // 🔥 Generate random transaction ID
+    const txId = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    // 🔥 PUSH STAKE-STYLE NOTIFICATION
+    pushNotification({
+      title: "Deposit Successful",
+      message: `You deposited ₹${val}.`,
+      type: "success",
+      category: "transactions",
+      url: `/transactions/${txId}`, // optional click redirect
+      meta: { txId, amount: val },
+      date: ""
+    });
+
     setShowPopup(true);
     setTimeout(() => setShowPopup(false), 2500);
   };
@@ -62,6 +82,7 @@ const WalletDeposit: React.FC<WalletDepositProps> = ({
         Deposit
       </button>
 
+      {/* Success Popup */}
       <AnimatePresence>
         {showPopup && (
           <motion.div
@@ -77,7 +98,9 @@ const WalletDeposit: React.FC<WalletDepositProps> = ({
               className="bg-[#142A3E] px-6 py-5 rounded-2xl shadow-lg text-center"
             >
               <CheckCircle2 className="text-green-400 w-12 h-12 mb-2 mx-auto" />
-              <h3 className="text-white font-semibold text-lg">Deposit Successful</h3>
+              <h3 className="text-white font-semibold text-lg">
+                Deposit Successful
+              </h3>
               <p className="text-gray-400 text-sm mt-1">
                 +{amount} added to your wallet.
               </p>
