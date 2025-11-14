@@ -76,7 +76,7 @@ async validateUser(pass: string, email?: string, username?: string) {
         username : user.username,
         dob : user.dob as unknown as Date,
         phone : user.phone,
-        access_token : this.jwtService.sign({ sub: user.id, email: user.email }),
+        access_token : this.jwtService.sign({ sub: user.id, email: user.email , role :user.role , username : user.username }),
       },
     };
   }

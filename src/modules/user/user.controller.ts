@@ -28,6 +28,11 @@ export class UserController {
     return this.userService.getUserWithDetails(Number(id));
   }
 
+  @Get('wallets')
+  async getUserWallets() {
+    return this.userService.getUserWallets();
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post(':id/transaction')
   async addTransaction(

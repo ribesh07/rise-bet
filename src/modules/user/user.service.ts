@@ -290,5 +290,10 @@ async updateUserImage(userId: number, filename: string) {
     }
   }
 
+  //get wallets
+  async getUserWallets() {
+    return this.prisma.wallet.findMany();
+  }
+
   //eol
 }
