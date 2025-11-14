@@ -76,6 +76,7 @@ model Wallet {
   user      User      @relation(fields: [userId], references: [id])
   userId    Int
   currency  Currency   
+  image   String?   // store image URL for the currency
   balance   Decimal    @default(0.00) @db.Decimal(20, 12)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt

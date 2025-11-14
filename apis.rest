@@ -106,7 +106,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpb
   "type":"WIN","amount":109,"currency":"INR"
 }
 
+###upload image
+POST http://[::1]:3084/api/v1/users/upload-image/2 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpbCI6ImdhbmR1MDFAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJ1c2VybmFtZSI6ImdhbmR1MDEiLCJpYXQiOjE3NjMxMDczNzQsImV4cCI6MTc2MzExMDk3NH0.J2FYCMZMOU3b8Fb9BQ-KKSKQh0eFdyNj6tdTMuzumh8  
 
+{
+  "image": "file"
+}
 
 
 

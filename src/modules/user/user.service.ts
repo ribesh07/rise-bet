@@ -258,5 +258,16 @@ async resolveBet(betId: number, status: BetStatus) {
   }
 }
 
+
+//upload image
+async updateUserImage(userId: number, filename: string) {
+  const imagePath = `/uploads/users/${filename}`;
+
+  return this.prisma.wallet.update({
+    where: { id: userId },
+    data: { image: imagePath },
+  });
+}
+
   //eol
 }
