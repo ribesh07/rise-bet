@@ -2,31 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../..//prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { TransactionType, BetStatus } from '@prisma/client';
+import { TransactionType, BetStatus, UserRole } from '@prisma/client';
 import { TransactionDto } from './dto/transaction.dto';
 import { BetDto } from './dto/bet.dto';
 import { Currency } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
 
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(email: string, password: string , username: string , dob: string , phone?: string , referral?: string) {
+  async create(dto : CreateUserDto) {
     // hash
-    console.log({email, password , username , dob , phone , referral});
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashed,
-        username : username,
-        dob : dob,
-        phone : phone,
-        referral : referral,
-      },
-    });
-    // auto-create wallets
+    console.table(dto);
+   const { password, ...rest } = dto;
+  const hashed = await bcrypt.hash(password, 10);
+
+  const user = await this.prisma.user.create({
+    data: {
+      ...rest,
+      password: hashed,
+      role: dto.role ?? UserRole.USER, // default role
+    },
+  });
+
+  // auto-create wallets
 
   const currencies: Currency[] = [
     Currency.INR,
@@ -83,7 +84,7 @@ export class UserService {
 
   //shows all details
   async getUserWithDetails(userId: number) {
-    return this.prisma.user.findUnique({
+    const details = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
         transactions: true,
@@ -95,6 +96,11 @@ export class UserService {
         },
       },
     });
+    const { password, ...rest } = details as any;
+    return {
+      success: true,
+      data: rest,
+    };
   }
 
   //helpers function

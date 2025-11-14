@@ -4,6 +4,8 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { Decimal } from '@prisma/client/runtime/library';
 import { AdminService } from 'src/modules/admin/admin.service';
+import { UserRole } from '@prisma/client';
+import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,9 +50,9 @@ async validateUser(pass: string, email?: string, username?: string) {
     };
   }
 
-  async signup(email: string, password: string, username: string , dob: string , phone?: string , referral?: string) {
-    const existing = await this.userService.findByEmail(email);
-    const existingByUsername = username ? await this.userService.findByUserName(username) : null;
+  async signup(dto : CreateUserDto) {
+    const existing = await this.userService.findByEmail(dto.email);
+    const existingByUsername = dto.username ? await this.userService.findByUserName(dto.username) : null;
     if(existingByUsername) {
       return {
         success: false,
@@ -64,7 +66,7 @@ async validateUser(pass: string, email?: string, username?: string) {
       };
     }
 
-    const user = await this.userService.create(email, password , username , dob , phone , referral);
+    const user = await this.userService.create(dto);
     
     return {
       success: true,

@@ -16,10 +16,10 @@ POST http://[::1]:3084/api/v1/auth/signup
 Content-Type: application/json
 
 {
-  "email": "gandu@gmail.com",
+  "email": "gandu01@gmail.com",
   "password": "12345678",
-  "username": "gandu1",
-  "phone": "9876543210",
+  "username": "gandu01",
+  "phone": "9876543211",
   "dob": "2000-01-01"
 }
 
@@ -35,15 +35,15 @@ POST http://[::1]:3084/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "gandu1@gmail.com",
+  "email": "gandu01@gmail.com",
   "password": "12345678",
   "role": "USER"
 }
 
 ###get details
-GET http://[::1]:3084/api/v1/users/22/details
+GET http://[::1]:3084/api/v1/users/28/details
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUiLCJpYXQiOjE3NjMwMzI3NTQsImV4cCI6MTc2MzAzNjM1NH0.pRoHUmjkju0EFkL8FEr3b-vj-nlSuMmgv1QsiAvhZ1A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpbCI6ImdhbmR1MDFAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJ1c2VybmFtZSI6ImdhbmR1MDEiLCJpYXQiOjE3NjMxMDczNzQsImV4cCI6MTc2MzExMDk3NH0.J2FYCMZMOU3b8Fb9BQ-KKSKQh0eFdyNj6tdTMuzumh8
 
 ### login
 POST https://api.playrise.vip/api/v1/auth/login
@@ -94,6 +94,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 {
   "mode":"FORCE","forcedResult":"WIN","winRatio":0.8
+}
+
+
+###transactions 
+POST http://[::1]:3084/api/v1/users/28/transaction HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpbCI6ImdhbmR1MDFAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJ1c2VybmFtZSI6ImdhbmR1MDEiLCJpYXQiOjE3NjMxMDczNzQsImV4cCI6MTc2MzExMDk3NH0.J2FYCMZMOU3b8Fb9BQ-KKSKQh0eFdyNj6tdTMuzumh8
+
+{
+  "type":"WIN","amount":109,"currency":"INR"
 }
 
 
