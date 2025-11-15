@@ -3,23 +3,23 @@ import { IsEmail, IsNotEmpty, MinLength, IsOptional, IsEnum } from 'class-valida
 
 export class CreateUserDto {
   @IsEmail()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Password is required' })
   @MinLength(6)
   password: string;
 
   @IsOptional()
   name?: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Username is required' })
   username: string;
 
   @IsOptional()
   phone?: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Date of Birth is required' })
   dob: string;
 
   @IsOptional()
