@@ -101,9 +101,9 @@ async validateUser(pass: string, email?: string, username?: string) {
 
   async adminLogin(user: any) {
     const details = await this.adminService.getAdminDetails(Number(user.id));
-    console.log('Admin details fetched for login:', details);
+    // console.log('Admin details fetched for login:', details);
 
-    
+
      const { password, ...rest } = details as any;
     const payload = { sub: rest?.id, email: rest?.email, role :rest?.role ,username : rest?.username };
     return {
