@@ -37,11 +37,12 @@ async validateUser(pass: string, email?: string, username?: string) {
 
 
   async login(user: any) {
-    const payload = { sub: user.id, email: user.email ,role :user.role, username : user.username };
     const details = await this.userService.getUserWithDetails(Number(user.id));
-
+    
     const { password, ...rest } = details as any;
+    const payload = { sub: rest?.data.id, email: rest?.data.email, role :rest?.data.role ,username : rest?.data.username };
     console.log('User details fetched for login:', rest);
+
     return {
       success: true,
       message: 'Login successful',
@@ -98,13 +99,12 @@ async validateUser(pass: string, email?: string, username?: string) {
   return result;
 }
 
-
-
   async adminLogin(user: any) {
-    const payload = { sub: user.id, email: user.email, role :user.role ,username : user.username };
     const details = await this.adminService.getAdminDetails(Number(user.id));
     // console.log('Admin details fetched for login:', details);
+
      const { password, ...rest } = details as any;
+    const payload = { sub: rest?.id, email: rest?.email, role :rest?.role ,username : rest?.username };
     return {
       success: true,
       message: 'Login successful',
