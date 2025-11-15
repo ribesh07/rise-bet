@@ -56,10 +56,8 @@ model User {
   password     String
   name         String?
   progressPercent Int       @default(0)
-  currentLevelName String?
-  nextLevelName    String?
-  currentLevel      String?
-  nextLevel       String?
+  currentLevelName String?  @default("Bronze")
+  nextLevelName    String?  @default("Silver")
   username     String    @unique
   phone        String?   @unique
   dob          String?
