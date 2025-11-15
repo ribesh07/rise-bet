@@ -14,7 +14,7 @@ const ImageHead: React.FC<ImageCardProps> = ({ title, count, image }) => (
       <img
   src={image}
   alt={title}
-  className="w-full h-full object-cover"
+  className="w-full h-auto object-cover"
 />
 
       <div className="p-3 flex  justify-between">

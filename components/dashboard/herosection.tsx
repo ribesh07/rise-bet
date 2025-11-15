@@ -59,7 +59,7 @@ export const HeroSection: React.FC = () => {
                 <ImageHead
                   title="Casino"
                   count={32339}
-                  image="/images/casino.jpg"
+                  image="/images/casino1.jpg"
                 />
               </div>
             </div>
@@ -68,7 +68,7 @@ export const HeroSection: React.FC = () => {
                 <ImageHead
                   title="Sports (soon...)"
                   count={0}
-                  image="/images/sports.jpg"
+                  image="/images/sports1.jpg"
                 />
               </div>
             </div>
@@ -83,7 +83,7 @@ export const HeroSection: React.FC = () => {
               <ImageHead
                 title="Casino"
                 count={32339}
-                image="/images/casino.jpg"
+                image="/images/casino1.jpg"
               />
             </div>
           </div>
@@ -92,7 +92,7 @@ export const HeroSection: React.FC = () => {
               <ImageHead
                 title="Sports (soon...)"
                 count={0}
-                image="/images/sports.jpg"
+                image="/images/sports1.jpg"
               />
             </div>
           </div>
