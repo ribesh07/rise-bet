@@ -73,7 +73,7 @@ Content-Type: application/json
 ### get logs
 GET http://[::1]:3084/api/v1/admin/control/logs HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzIwMDI3MywiZXhwIjoxNzYzODA1MDczfQ.Tl5_JKe_Ouza_erXTB5_IXbX0H8AdyQ-Homd5EZ_xeI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI4MDg4OCwiZXhwIjoxNzY1ODcyODg4fQ.jV1p_xbbTrFKJ23iinM25IO5dCNnz4UbaoTy-Rn_Akc
 
 ###post login
 POST http://[::1]:3084/api/v1/auth/admin-login
@@ -88,7 +88,7 @@ Content-Type: application/json
 ###control 
 POST http://[::1]:3084/api/v1/admin/control/update HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzYzMDMyNDg0LCJleHAiOjE3NjMwMzYwODR9.6fnlRS_-nwpFRhVXKmlIExIdx01K5dFlJIxC_rW-ltI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI2ODc1NCwiZXhwIjoxNzYzMjcyMzU0fQ.ReafWYy9ztHFhkETiGyLy_Yl6TU4IYUFjmRVYhsJEh4
 
 {
   "mode":"FORCE","forcedResult":"WIN","winRatio":0.8
@@ -114,5 +114,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpb
 }
 
 
+###roulette
+POST http://localhost:3084/api/v1/admin/control/force-spin/roulette_1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI4MDg4OCwiZXhwIjoxNzY1ODcyODg4fQ.jV1p_xbbTrFKJ23iinM25IO5dCNnz4UbaoTy-Rn_Akc
 
 

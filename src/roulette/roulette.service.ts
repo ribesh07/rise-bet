@@ -16,11 +16,13 @@ export class RouletteService {
   private readonly logger = new Logger(RouletteService.name);
   private tables = new Map<string, Table>();
   private io: Server; // set by gateway constructor after creation
+  
 
   constructor(private readonly prisma: PrismaService) {}
 
   setServer(io: Server) {
     this.io = io;
+    this.logger.log('Socket.IO server set on RouletteService');
   }
 
   createTable(room: string, spinInterval = 15000) {
@@ -43,7 +45,11 @@ export class RouletteService {
     if (!table) return;
     table.countdown -= 1;
     // broadcast countdown
-    this.io.to(room).emit('countdown', { seconds: table.countdown });
+    if (this.io) {
+      this.io.to(room).emit('countdown', { seconds: table.countdown });
+      } else {
+        this.logger.warn('Socket server not available; skipping emit');
+      }
 
     if (table.countdown <= 0) {
       table.state = 'spinning';
@@ -60,7 +66,7 @@ export class RouletteService {
         const payload = bet.payload as any;
         const multiplier = evaluateBet(payload, result);
         if (multiplier > 0) {
-          const payout = Number(bet.stake) * Number(multiplier);
+          const payout = Number(bet.amount) * Number(multiplier);
           // update DB atomic: set bet won, create transaction, credit wallet
           await this.prisma.$transaction(async (tx) => {
             // mark bet won
@@ -98,8 +104,8 @@ export class RouletteService {
   async placeBet(userId: number, room: string, betDto: any) {
     // validate betDto: stake positive, payload valid, currency exists, etc.
     
-    const { stake, currency, payload } = betDto;
-    if (!stake || stake <= 0) throw new Error('Invalid stake');
+    const { amount, currency, payload } = betDto;
+    if (!amount || amount <= 0) throw new Error('Invalid amount');
 
     // find wallet
     const wallet = await this.prisma.wallet.findUnique({ where: { userId_currency: { userId, currency } }});
@@ -107,8 +113,8 @@ export class RouletteService {
 
     // perform conditional withdrawal using updateMany for atomic check
     const dec = await this.prisma.wallet.updateMany({
-      where: { id: wallet.id, balance: { gte: stake } },
-      data: { balance: { decrement: stake } },
+      where: { id: wallet.id, balance: { gte: amount } },
+      data: { balance: { decrement: amount } },
     });
 
     if (dec.count === 0) {
@@ -122,7 +128,7 @@ export class RouletteService {
             userId,
             matchId: 0, // no matchId for roulette; or use room hash
             game: 'roulette',
-            stake,
+            amount: amount,
             currency,
             payload,
             status: 'PENDING',
@@ -132,7 +138,7 @@ export class RouletteService {
         data: {
           userId,
           type: 'BET',
-          amount: stake,
+          amount: amount,
           currency,
           description: 'Roulette stake',
         },
@@ -172,7 +178,7 @@ async resolveBetsForTable(
 
     if (multiplier > 0) {
       // WIN
-      const payout = Number(bet.stake) * Number(multiplier);
+      const payout = Number(bet.amount) * Number(multiplier);
 
       await this.prisma.$transaction(async (tx) => {
         // Update bet status
@@ -248,23 +254,103 @@ async resolveBetsForTable(
   }
 
   //admin get table state
-  async forceSpin(tableId: string) {
-  const result = spinWheel(); // generate random result
-  const resolved = await this.resolveBetsForTable(tableId, result);
+async forceSpin(tableId: string) {
+    // create the spin result
+    const result = spinWheel(); // { number, color: 'RED'|'BLACK'|'GREEN' }
 
-  // Notify WebSocket room
-  this.io.to(tableId).emit('spin-result', {
-    result,
-    triggeredBy: 'ADMIN',
-    resolved
+    // resolve bets (DB operations, wallet updates)
+    const resolved = await this.resolveBetsForTable(tableId, result);
+
+    // broadcast if io available, otherwise just log
+    console.log('Emitting spin-result for table', this.io ? 'with' : 'without', 'Socket.IO server');
+    if (this.io) {
+      try {
+        console.log('Emitting spin-result via socket.io for table', tableId);
+        this.io.to(tableId).emit('spin-result', {
+          result,
+          resolved,
+          triggeredBy: 'ADMIN',
+        });
+      } catch (err) {
+        this.logger.error('Failed to emit spin-result via socket.io', err);
+      }
+    } else {
+      this.logger.warn(
+        `Socket.IO server not set — spin-result for ${tableId} not broadcasted.`
+      );
+    }
+
+    return { result, resolved };
+  }
+
+
+async addPlayerToMatch(room: string, player: { userId: number; username: string }) {
+  let match = await this.prisma.match.findFirst({
+    where: { tableId: room, status: "ACTIVE" }
   });
 
-  return {
-    message: "Spin forced",
-    table: tableId,
-    result,
-    resolved
-  };
+  if (!match) {
+    // Create new match/round
+    match = await this.prisma.match.create({
+      data: {
+        tableId: room,
+        players: [player],
+        startTime: new Date(),
+      }
+    });
+  } else {
+    // Add unique players
+    const players = (match.players ?? []) as any[];
+
+    const exists = players.some(p => p.userId === player.userId);
+
+    if (!exists) {
+      players.push(player);
+
+      await this.prisma.match.update({
+        where: { id: match.id },
+        data: { players }
+      });
+    }
+  }
+
+  return match;
 }
+
+
+async createBet(data: { matchId: number; userId: number; room: string; payload: any; amount: number }) {
+  return await this.prisma.bet.create({
+    data: {
+      matchId: data.matchId,
+      userId: data.userId,
+      room: data.room,
+      payload: data.payload,
+      amount: data.amount,
+      currency: 'USDT', 
+    }
+  });
+}
+
+async getActiveMatch(room: string) {
+  let match = await this.prisma.match.findFirst({
+    where: {
+      tableId: room,
+      status: "ACTIVE"
+    }
+  });
+
+  if (!match) {
+    match = await this.prisma.match.create({
+      data: {
+        tableId: room,
+        players: [],
+        startTime: new Date(),
+      }
+    });
+  }
+
+  return match;
+}
+
 
 }

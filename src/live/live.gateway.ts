@@ -1,3 +1,4 @@
+// src/roulette/live.gateway.ts
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -6,6 +7,7 @@ import {
   ConnectedSocket,
   MessageBody,
   SubscribeMessage,
+  OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
@@ -13,13 +15,9 @@ import { RouletteService } from '../roulette/roulette.service';
 import { UserService } from '../modules/user/user.service';
 
 @WebSocketGateway({
-  cors: {
-    origin: '*',
-  },
+  cors: { origin: '*' },
 })
-export class LiveGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -30,114 +28,180 @@ export class LiveGateway
     private readonly usersService: UserService,
   ) {}
 
-  // userId -> socketId 
+  afterInit(server: Server) {
+    // pass server to service
+    this.rouletteService.setServer(server);
+    console.log('LiveGateway initialized');
+  }
 
-  
-
-  handleConnection(client: Socket) {
+  async handleConnection(client: Socket) {
     try {
-      const token = client.handshake.headers.authorization?.replace('Bearer ', '');
+      // prefer auth token (socket.io client sends via `auth`)
+      const tokenFromAuth = client.handshake.auth?.token;
+      // fallback to header (rarely used)
+      const tokenFromHeader = (client.handshake.headers?.authorization as string | undefined)?.replace('Bearer ', '');
+      const token = tokenFromAuth || tokenFromHeader;
 
       if (!token) {
+        console.log('Connection rejected: no token', client.id);
         client.disconnect();
         return;
       }
 
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
-        throw new Error('JWT_SECRET is not defined');
+        console.error('JWT_SECRET not defined');
+        client.disconnect();
+        return;
       }
+
       const decoded = jwt.verify(token, jwtSecret) as any;
-
       const userId = decoded.sub;
-      const username = decoded.username;
+      const username = decoded.username ?? decoded.email ?? `user${userId}`;
 
-      this.onlineUsers.set(userId, {  
-          socketId: client.id,
-          username: username,
-      });
-
+      this.onlineUsers.set(userId, { socketId: client.id, username });
+      console.log(`User connected: ${username} (${userId}) socket=${client.id}`);
       this.broadcastOnlineUsers();
-    } catch (e) {
+    } catch (err) {
+      console.log('Connection error, disconnecting', err?.message ?? err);
       client.disconnect();
     }
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
+    // remove from online map
     for (const [userId, data] of this.onlineUsers) {
       if (data.socketId === client.id) {
         this.onlineUsers.delete(userId);
+        console.log(`User disconnected: ${data.username} (${userId}) socket=${client.id}`);
         break;
       }
     }
-
     this.broadcastOnlineUsers();
   }
 
   broadcastOnlineUsers() {
-     const users = Array.from(this.onlineUsers.entries()).map(
-    ([userId, data]) => ({
+    const users = Array.from(this.onlineUsers.entries()).map(([userId, data]) => ({
       id: userId,
       username: data.username,
-    }),
-  );
-    this.server.emit('online-users', {
-      count: this.onlineUsers.size,
-      users: users,
-    });
+    }));
+    this.server.emit('online-users', { count: users.length, users });
   }
 
   // ROOM CONTROL
   @SubscribeMessage('join-room')
-  handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() payload: { room: string }) {
-    client.join(payload.room);
+  async handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { room: string },
+  ) {
+    try {
+      client.join(payload.room);
+      console.log(`Client ${client.id} requested join-room ${payload.room}`);
+
+      // log how many sockets in the room now
+      const sockets = await this.server.in(payload.room).allSockets();
+      const count = sockets ? sockets.size : 0;
+      console.log(`Room ${payload.room} size after join: ${count}`);
+
+      // try to extract user info (from auth or headers)
+      const tokenHeader = client.handshake.auth?.token || (client.handshake.headers?.authorization as string | undefined);
+      const token = typeof tokenHeader === 'string' ? tokenHeader.replace('Bearer ', '') : null;
+
+      if (!token) {
+        console.log('join-room: no token, skipping addPlayerToMatch');
+        return { ok: false };
+      }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      const userId = decoded.sub;
+      const username = decoded.username ?? decoded.email ?? `user${userId}`;
+
+      // persistence: add player to match table
+      await this.rouletteService.addPlayerToMatch(payload.room, { userId, username });
+
+      // notify room someone joined
+      this.server.to(payload.room).emit('player-joined', { userId, username });
+
+      return { ok: true };
+    } catch (err) {
+      console.error('join-room error', err?.message ?? err);
+      client.emit('error', { message: 'join-room failed' });
+      return { ok: false, error: err?.message ?? String(err) };
+    }
   }
 
   @SubscribeMessage('leave-room')
-  handleLeaveRoom(@ConnectedSocket() client: Socket, @MessageBody() payload: { room: string }) {
+  async handleLeaveRoom(@ConnectedSocket() client: Socket, @MessageBody() payload: { room: string }) {
     client.leave(payload.room);
+    console.log(`Client ${client.id} left room ${payload.room}`);
+    // optionally remove player from match table
+    // await this.rouletteService.removePlayerFromMatch(payload.room, userId);
+    return { ok: true };
   }
 
   // Betting on roulette
   @SubscribeMessage('place-bet')
   async handlePlaceBet(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { room: string; bet: any }, // bet validated in service
+    @MessageBody() payload: { room: string; bet: any },
   ) {
     try {
-      const tokenHeader = client.handshake.auth?.token || client.handshake.headers.authorization;
+      const tokenHeader = client.handshake.auth?.token || (client.handshake.headers?.authorization as string | undefined);
       const token = typeof tokenHeader === 'string' ? tokenHeader.replace('Bearer ', '') : null;
-      const secret = process.env.JWT_SECRET;
-      const decoded = jwt.verify(token!, secret!) as any;
+      if (!token) throw new Error('Unauthenticated');
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       const userId = decoded.sub;
 
-      const betResult = await this.rouletteService.placeBet(userId, payload.room, payload.bet);
-      // emit confirmation to user only
-      client.emit('bet-placed', betResult);
-      // broadcast to room about new bet (optional)
-      this.server.to(payload.room).emit('bet-update', { userId, bet: betResult });
+      const match = await this.rouletteService.getActiveMatch(payload.room);
+      const betEntry = await this.rouletteService.createBet({
+        matchId: match.id,
+        userId,
+        room: payload.room,
+        payload: payload.bet,
+        amount: payload.bet.amount,
+      });
+
+      client.emit('bet-placed', betEntry);
+      this.server.to(payload.room).emit('bet-update', { userId, bet: betEntry });
+
+      return { ok: true };
     } catch (err) {
-      client.emit('error', { message: err.message });
+      console.error('place-bet error', err?.message ?? err);
+      client.emit('error', { message: err?.message ?? String(err) });
+      return { ok: false, error: err?.message ?? String(err) };
     }
   }
 
   // admin trigger to force spin (optional)
   @SubscribeMessage('force-spin')
   async handleForceSpin(@ConnectedSocket() client: Socket, @MessageBody() payload: { room: string }) {
-    // ensure client is admin (validate token and role)
     try {
-      const tokenHeader = client.handshake.auth?.token || client.handshake.headers.authorization;
+      const tokenHeader = client.handshake.auth?.token || (client.handshake.headers?.authorization as string | undefined);
       const token = typeof tokenHeader === 'string' ? tokenHeader.replace('Bearer ', '') : null;
-      const secret = process.env.JWT_SECRET;
-      const decoded = jwt.verify(token!, secret!) as any;
+      if (!token) throw new Error('Unauthenticated');
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       const userId = decoded.sub;
       const user = await this.usersService.findById(userId);
-      if (user?.role !== 'ADMIN') throw new Error('Forbidden');
+      if (!user || user.role !== 'ADMIN') throw new Error('Forbidden');
+
+      // before spin: report how many sockets are in the room
+      const socketsBefore = await this.server.in(payload.room).allSockets();
+      console.log(`Force spin requested by admin ${userId} for ${payload.room}. sockets in room: ${socketsBefore.size}`);
+
       const result = await this.rouletteService.spinNow(payload.room);
+
+      // after resolving, log and broadcast
+      const socketsAfter = await this.server.in(payload.room).allSockets();
+      console.log(`After resolve, sockets in room ${payload.room}: ${socketsAfter.size}`);
+
       this.server.to(payload.room).emit('spin-result', result);
+      return { ok: true, result };
     } catch (err) {
-      client.emit('error', { message: err.message });
+      console.error('force-spin error', err?.message ?? err);
+      client.emit('error', { message: err?.message ?? String(err) });
+      return { ok: false, error: err?.message ?? String(err) };
     }
   }
 }
-
