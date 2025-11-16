@@ -7,7 +7,7 @@ import { TrendingGames } from '@/components/dashboard/trendinggame';
 import { TrendingSports } from '@/components/dashboard/trendingsports';
 import { Promotions } from '@/components/dashboard/pormotion';
 import { RecentBets } from '@/components/dashboard/recentbet';
-import MobileBottomBar from '@/components/mobilebuttombar';
+import MobileBottomBar from '@/components/mainmobilebuttombar';
 import { motion, AnimatePresence } from 'framer-motion';
 import Footer from '@/components/footer';
 import { LoginForm } from '@/components/auths/loginform';

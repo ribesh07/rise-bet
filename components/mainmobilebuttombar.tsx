@@ -2,7 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
-import { Home, Wallet, User, Menu, ClipboardList, X } from "lucide-react";
+import { Home, Wallet, User, MessageSquare, Menu, ClipboardList, X } from "lucide-react";
 import WalletMain from "@/components/wallet/walletmain"; // ✅ Import your WalletMain popup
 
 interface MobileBottomBarProps {
@@ -25,28 +25,28 @@ const MobileBottomBar: React.FC<MobileBottomBarProps> = ({ onBrowseClick }) => {
           <span className="text-xs">Browse</span>
         </button>
 
-        <Link href="/home" className="flex flex-col items-center text-gray-300 hover:text-white">
+        <Link href="/" className="flex flex-col items-center text-gray-300 hover:text-white">
           <Home size={22} />
           <span className="text-xs">Home</span>
         </Link>
 
-        <Link href="/mybet" className="flex flex-col items-center text-gray-300 hover:text-white">
+        <Link href="#" className="flex flex-col items-center text-gray-300 hover:text-white">
           <ClipboardList size={22} />
           <span className="text-xs">Bets</span>
         </Link>
 
         {/* ✅ Wallet opens popup */}
-        <button
+        {/* <button
           onClick={() => setShowWallet(true)}
           className="flex flex-col  items-center text-gray-300 hover:text-white"
         >
           <Wallet size={22} />
           <span className="text-xs">Wallet</span>
-        </button>
+        </button> */}
 
-        <Link href="/setting" className="flex flex-col items-center text-gray-300 hover:text-white">
-          <User size={22} />
-          <span className="text-xs">Profile</span>
+        <Link href="#" className="flex flex-col items-center text-gray-300 hover:text-white">
+          <MessageSquare size={22} />
+          <span className="text-xs">Chat</span>
         </Link>
       </div>
 

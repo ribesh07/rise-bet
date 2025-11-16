@@ -9,8 +9,7 @@ interface ProgressCardProps {
   progressPercentage: number; // 0-100
   currentLevelName: string;
   nextLevelName: string;
-  currentLevel: string;
-  nextLevel: string;
+ 
 }
 
 const levelColors: Record<string, string> = {
@@ -26,8 +25,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({
   progressPercentage,
   currentLevelName,
   nextLevelName,
-  currentLevel,
-  nextLevel,
+ 
 }) => {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [pulse, setPulse] = useState(false);

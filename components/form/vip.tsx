@@ -1,73 +1,89 @@
-
 "use client";
 import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/vipcard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import ProgressCard from "@/components/progresscard";
-import { ChevronDown, Star, Gem, X, Gift, ArrowUpRight, Zap, RefreshCw, Lock, Trophy} from "lucide-react";
-import {  } from "lucide-react";
+import { 
+  ChevronDown,
+  Star,
+  Gem,
+  X,
+  Gift,
+  ArrowUpRight,
+  Zap,
+  RefreshCw,
+  Lock,
+  Trophy } from "lucide-react";
 import { motion } from "framer-motion";
-
+import { apiRequest } from "@/utils/ApiHelper";
 
 interface UserVipCardProps {
   username?: string;
-  avatarUrl?: string;
   vipProgress?: number;
   currentLevelName?: string;
   nextLevelName?: string;
-  currentLevel?: string;
-  nextLevel?: string;
   onClose?: () => void;
 }
 
 const UserVipCard: React.FC<UserVipCardProps> = ({
- username="John Doe",
-  vipProgress=45,
-  currentLevelName="Bronze",
-  nextLevelName="Silver",
-  currentLevel="Bronze",
-  nextLevel="Silver",
+  username,
+  vipProgress,
+  currentLevelName,
+  nextLevelName,
   onClose,
 }) => {
-  const [progress, setProgress] = useState(0);
+  // 👇 local states (API will overwrite them)
+  const [user, setUser] = useState(username || "Loading...");
+  const [progress, setProgress] = useState(vipProgress || 0);
+  const [currentLevel, setCurrentLevel] = useState(currentLevelName || "Bronze");
+  const [nextLevelVal, setNextLevelVal] = useState(nextLevelName || "Silver");
 
+  // 👇 FETCH FROM API
   useEffect(() => {
-    const timeout = setTimeout(() => setProgress(vipProgress), 400);
-    return () => clearTimeout(timeout);
-  }, [vipProgress]);
+    const loadVipData = async () => {
+      try {
+        const id = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+
+        const res = await apiRequest(`/users/${id}/details`, true, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.success) {
+          setUser(res.data.username);
+          setCurrentLevel(res.data.currentLevelName);
+          setNextLevelVal(res.data.nextLevelName);
+
+          // Animate progress
+          setTimeout(() => {
+            setProgress(res.data.progressPercent);
+          }, 250);
+        }
+      } catch (err) {
+        console.error("VIP fetch error:", err);
+      }
+    };
+
+    loadVipData();
+  }, []);
 
   return (
     <motion.div
-       
-             className="bg-[#0C1A2A] w-[450px] rounded-2xl p-6 shadow-xl relative text-white"
-             initial={{ scale: 0.85, opacity: 0 }}
-             animate={{ scale: 1, opacity: 1 }}
-             exit={{ scale: 0.9, opacity: 0 }}
-             transition={{ duration: 0.2 }}
-           >
-   
-      {/* Overlay */}
-      {/* <button
-                onClick={onClose}
-                className="absolute right-5 top-5 text-gray-400 hover:text-white"
-              >
-                <X size={20} />
-              </button> */}
+      className="bg-[#0C1A2A] w-[450px] rounded-2xl p-6 shadow-xl relative text-white"
+      initial={{ scale: 0.85, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.9, opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <div className="relative z-10 bg-[#0d1116]/95 backdrop-blur-xl rounded-2xl p-4 shadow-lg border border-[#1f2733]">
 
-      {/* Glowing animated background */}
-      
-
-      {/* VIP Card */}
-      <div className="relative z-10 w-full max-w-md mx-auto bg-[#0d1116]/95 backdrop-blur-xl rounded-2xl p-4 text-white shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-[#1f2733] md:max-w-lg">
-        {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div className="text-xl font-semibold flex items-center mb-5">
-          <span className="mr-2"><Trophy size={24} /></span> Statistics
-        </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
+            <Trophy size={24} className="mr-2" /> Statistics
+          </div>
+
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -78,18 +94,14 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
             <TabsTrigger value="rewards">Rewards</TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
           <TabsContent value="overview" className="mt-4">
-            <Card className="w-full py-6 relative header-bg border-none rounded-2xl shadow-inner">
+            <Card className="w-full py-6 header-bg rounded-2xl border-none shadow-inner">
               <CardContent className="p-3">
                 <ProgressCard
-                 username={username}
-            progressPercentage={progress}
-            currentLevelName={currentLevelName}
-            nextLevelName={nextLevelName}
-            nextLevel={nextLevel}
-            currentLevel={currentLevel}
-                  
+                  username={user}
+                  progressPercentage={progress}
+                  currentLevelName={currentLevel}
+                  nextLevelName={nextLevelVal}
                 />
               </CardContent>
             </Card>

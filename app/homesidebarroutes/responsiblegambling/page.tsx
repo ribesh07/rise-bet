@@ -21,6 +21,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { LoginForm } from '@/components/auths/loginform';
 import { SignupForm } from '@/components/auths/signupform';
+import { apiRequest } from "@/utils/ApiHelper";
 
 // ✅ Auth Modal Component
 type AuthModalProps = {
@@ -113,7 +114,29 @@ const ResponsibleGamblingPage = () => {
   const mainRef = useRef<HTMLDivElement | null>(null);
   const sidebarWidth = 62;
   const collapsedWidth = 20;
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchDashboardDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const id = localStorage.getItem("userId");
 
+        const res = await apiRequest(`/users/${id}/details`, true, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.success) setDashboardDetails(res.data);
+      } catch (err) {
+        console.error("AFFILIATE PAGE API ERROR:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardDetails();
+  }, []);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -175,7 +198,11 @@ const ResponsibleGamblingPage = () => {
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          <TopNavbar searchValue={search} onSearchChange={setSearch} />
+           <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
         </motion.div>
 
       {/* ===== Main Content Area ===== */}

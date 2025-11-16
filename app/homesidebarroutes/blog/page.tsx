@@ -10,6 +10,7 @@ import MobileBottomBar from '@/components/mobilebuttombar';
 import HeroBanner from '@/components/blog/herobanner';
 import CategoryTabs from '@/components/blog/categorytabs';
 import BlogList from '@/components/blog/bloglisthome';
+import { apiRequest } from "@/utils/ApiHelper";
 
 // ✅ Type for Blog
 export type Blog = {
@@ -148,7 +149,8 @@ export default function BlogsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const mainRef = useRef<HTMLDivElement | null>(null);
-
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   // ✅ Detect screen size
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -179,7 +181,27 @@ export default function BlogsPage() {
 
   const sidebarWidth = 62;
   const collapsedWidth = 20;
+useEffect(() => {
+    const fetchDashboardDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const id = localStorage.getItem("userId");
 
+        const res = await apiRequest(`/users/${id}/details`, true, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.success) setDashboardDetails(res.data);
+      } catch (err) {
+        console.error("AFFILIATE PAGE API ERROR:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardDetails();
+  }, []);
   return (
     <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
       <div className="flex flex-1">
@@ -211,7 +233,11 @@ export default function BlogsPage() {
           }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
-          <TopNavbar searchValue={search} onSearchChange={setSearch} />
+           <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
         </motion.div>
 
         {/* Main Content */}

@@ -308,6 +308,231 @@
 // };
 
 // export default AffiliateProgram;
+// "use client";
+// import React, { useState, useEffect } from "react";
+// import clsx from "clsx";
+// import { motion, AnimatePresence } from "framer-motion";
+
+// import Sidebar from "@/components/sidebar";
+// import TopNavbar from "@/components/topnavbar";
+// import MobileBottomBar from "@/components/mobilebuttombar";
+// import Footer from "@/components/footer";
+// import { apiRequest } from "@/utils/ApiHelper";
+// import Overview from "@/components/affiliates/overviewmain";
+// import Refer from "@/components/affiliates/campaigns";
+// import Commissions from "@/components/affiliates/commission";
+// import ReferredUsers from "@/components/affiliates/refer";
+// import FAQ from "@/components/affiliates/faq";
+
+// const affiliateTabs = [
+//   "Overview",
+//   "Campaigns",
+//   "Commissions",
+//   "Referred Users",
+//   "FAQ",
+// ];
+
+// const AffiliateProgram = () => {
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+//   const [isMobile, setIsMobile] = useState(false);
+//   const [activeTab, setActiveTab] = useState("Overview");
+//   const [search, setSearch] = useState("");
+//   const [sidebarOpen, setSidebarOpen] = useState(false);
+//    const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+//     const [loading, setLoading] = useState(true);
+//   const sidebarWidth = 62;
+//   const collapsedWidth = 20;
+
+//   useEffect(() => {
+//     const handleResize = () => setIsMobile(window.innerWidth < 768);
+//     handleResize();
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
+
+//   const renderTabPage = () => {
+//     switch (activeTab) {
+//       case "Overview":
+//         return <Overview />;
+//       case "Campaigns":
+//         return <Refer />;
+//       case "Commissions":
+//         return <Commissions />;
+//       case "Referred Users":
+//         return <ReferredUsers />;
+//       case "FAQ":
+//         return <FAQ />;
+//       default:
+//         return <Overview />;
+//     }
+//   };
+
+//   useEffect(() => {
+//       const fetchDashboardDetails = async () => {
+//         try {
+//           const token = localStorage.getItem("token");
+//           const id = localStorage.getItem("userId");
+  
+//           const res = await apiRequest(`/users/${id}/details`, true, {
+//             method: "GET",
+//             headers: { Authorization: `Bearer ${token}` },
+//           });
+  
+//           if (res.success) {
+//             setDashboardDetails(res.data);
+//           }
+//         } catch (err) {
+//           console.error("VIP Page API Error:", err);
+//         } finally {
+//           setLoading(false);
+//         }
+//       };
+  
+//       fetchDashboardDetails();
+//     }, []);
+//   return (
+//     <div className="flex bg-[#1a2c38] text-white overflow-x-hidden">
+
+//       {/* ✅ Sidebar Desktop */}
+//       {!isMobile && (
+//         <motion.div
+//           animate={{
+//             width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+//           }}
+//           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+//           className="h-screen bg-[#0f172a] shadow-lg fixed left-0 top-0 z-50"
+//         >
+//           <Sidebar
+//             collapsed={sidebarCollapsed}
+//             setCollapsed={setSidebarCollapsed}
+//             open={true}
+//             setOpen={() => {}}
+//           />
+//         </motion.div>
+//       )}
+
+//       {/* ✅ Top Navbar */}
+//       <motion.div
+//         className="fixed top-0 left-0 right-0 z-40"
+//         animate={{
+//           marginLeft: !isMobile
+//             ? sidebarCollapsed
+//               ? collapsedWidth * 4
+//               : sidebarWidth * 4
+//             : 0,
+//         }}
+//         transition={{ type: "spring", stiffness: 300, damping: 30 }}
+//       >
+//         <TopNavbar searchValue={search} onSearchChange={setSearch} wallets={[]} />
+//       </motion.div>
+
+//       {/* ✅ Main Page */}
+//       <motion.main
+//         className="flex-1 flex flex-col pt-[100px] pb-16 px-4 md:px-10"
+//         animate={{
+//           marginLeft: !isMobile
+//             ? sidebarCollapsed
+//               ? collapsedWidth * 4
+//               : sidebarWidth * 4
+//             : 0,
+//         }}
+//         transition={{ type: "spring", stiffness: 300, damping: 30 }}
+//       >
+//         <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 pb-3">
+
+//           <div className="text-2xl font-bold flex items-center gap-2">
+//             👥 Affiliate Program
+//           </div>
+
+//           {/* ✅ Desktop Sidebar Menu */}
+//           <div className="flex flex-col md:flex-row gap-6">
+//             <aside className="hidden md:flex w-[220px]">
+//               <div className="sticky top-24 bg-[#101b22dd]/95 rounded-md p-2 shadow-md w-full h-min">
+//                 {affiliateTabs.map((tab) => (
+//                   <div
+//                     key={tab}
+//                     onClick={() => setActiveTab(tab)}
+//                     className={clsx(
+//                       "cursor-pointer px-3 py-2 rounded-sm text-sm font-semibold transition-all",
+//                       activeTab === tab
+//                         ? "bg-[#122334] text-white border-l-2 border-[#2b8eff]"
+//                         : "text-gray-300 hover:bg-[#122334] hover:text-white"
+//                     )}
+//                   >
+//                     {tab}
+//                   </div>
+//                 ))}
+//               </div>
+//             </aside>
+
+//             {/* ✅ Mobile Dropdown */}
+//             {isMobile && (
+//               <div className="relative">
+//                 <select
+//                   value={activeTab}
+//                   onChange={(e) => setActiveTab(e.target.value)}
+//                   className="bg-[#101b22dd] border border-[#1f2d3a] rounded-md px-4 py-2 font-semibold"
+//                 >
+//                   {affiliateTabs.map((tab) => (
+//                     <option key={tab} value={tab}>
+//                       {tab}
+//                     </option>
+//                   ))}
+//                 </select>
+//               </div>
+//             )}
+
+//             {/* ✅ Dynamic Page Renderer */}
+//             <div className="flex-1">{renderTabPage()}</div>
+//           </div>
+//         </div>
+
+//         <Footer />
+//       </motion.main>
+
+//       {/* ✅ Mobile Bottom Bar */}
+//       {isMobile && (
+//         <div className="fixed bottom-0 w-full z-50 h-16">
+//           <MobileBottomBar onBrowseClick={() => setSidebarOpen(true)} />
+//         </div>
+//       )}
+
+//       {/* ✅ Mobile Sidebar Slide */}
+//       <AnimatePresence>
+//         {isMobile && sidebarOpen && (
+//           <motion.div
+//             initial={{ x: -256 }}
+//             animate={{ x: 0 }}
+//             exit={{ x: -256 }}
+//             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+//             className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg"
+//           >
+//             <Sidebar
+//               collapsed={false}
+//               setCollapsed={() => {}}
+//               open={sidebarOpen}
+//               setOpen={setSidebarOpen}
+//             />
+//           </motion.div>
+//         )}
+//       </AnimatePresence>
+
+//       {/* ✅ Dark overlay when sidebar open */}
+//       {isMobile && sidebarOpen && (
+//         <motion.div
+//           initial={{ opacity: 0 }}
+//           animate={{ opacity: 0.3 }}
+//           exit={{ opacity: 0 }}
+//           transition={{ duration: 0.2 }}
+//           className="fixed inset-0 bg-black z-40"
+//           onClick={() => setSidebarOpen(false)}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default AffiliateProgram;
 "use client";
 import React, { useState, useEffect } from "react";
 import clsx from "clsx";
@@ -317,6 +542,7 @@ import Sidebar from "@/components/sidebar";
 import TopNavbar from "@/components/topnavbar";
 import MobileBottomBar from "@/components/mobilebuttombar";
 import Footer from "@/components/footer";
+import { apiRequest } from "@/utils/ApiHelper";
 
 import Overview from "@/components/affiliates/overviewmain";
 import Refer from "@/components/affiliates/campaigns";
@@ -335,13 +561,18 @@ const affiliateTabs = [
 const AffiliateProgram = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [activeTab, setActiveTab] = useState("Overview");
   const [search, setSearch] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const sidebarWidth = 62;
   const collapsedWidth = 20;
 
+  // Detect screen size
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -349,6 +580,30 @@ const AffiliateProgram = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Load dashboard details
+  useEffect(() => {
+    const fetchDashboardDetails = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const id = localStorage.getItem("userId");
+
+        const res = await apiRequest(`/users/${id}/details`, true, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.success) setDashboardDetails(res.data);
+      } catch (err) {
+        console.error("AFFILIATE PAGE API ERROR:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardDetails();
+  }, []);
+
+  // Render dynamic tab content
   const renderTabPage = () => {
     switch (activeTab) {
       case "Overview":
@@ -369,7 +624,7 @@ const AffiliateProgram = () => {
   return (
     <div className="flex bg-[#1a2c38] text-white overflow-x-hidden">
 
-      {/* ✅ Sidebar Desktop */}
+      {/* DESKTOP SIDEBAR */}
       {!isMobile && (
         <motion.div
           animate={{
@@ -387,7 +642,7 @@ const AffiliateProgram = () => {
         </motion.div>
       )}
 
-      {/* ✅ Top Navbar */}
+      {/* TOP NAVBAR */}
       <motion.div
         className="fixed top-0 left-0 right-0 z-40"
         animate={{
@@ -399,10 +654,14 @@ const AffiliateProgram = () => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <TopNavbar searchValue={search} onSearchChange={setSearch} />
+        <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
       </motion.div>
 
-      {/* ✅ Main Page */}
+      {/* MAIN PAGE */}
       <motion.main
         className="flex-1 flex flex-col pt-[100px] pb-16 px-4 md:px-10"
         animate={{
@@ -416,12 +675,14 @@ const AffiliateProgram = () => {
       >
         <div className="max-w-6xl mx-auto w-full flex flex-col gap-10 pb-3">
 
+          {/* PAGE TITLE */}
           <div className="text-2xl font-bold flex items-center gap-2">
             👥 Affiliate Program
           </div>
 
-          {/* ✅ Desktop Sidebar Menu */}
           <div className="flex flex-col md:flex-row gap-6">
+
+            {/* DESKTOP MENU */}
             <aside className="hidden md:flex w-[220px]">
               <div className="sticky top-24 bg-[#101b22dd]/95 rounded-md p-2 shadow-md w-full h-min">
                 {affiliateTabs.map((tab) => (
@@ -441,7 +702,7 @@ const AffiliateProgram = () => {
               </div>
             </aside>
 
-            {/* ✅ Mobile Dropdown */}
+            {/* MOBILE DROPDOWN */}
             {isMobile && (
               <div className="relative">
                 <select
@@ -458,7 +719,7 @@ const AffiliateProgram = () => {
               </div>
             )}
 
-            {/* ✅ Dynamic Page Renderer */}
+            {/* CONTENT */}
             <div className="flex-1">{renderTabPage()}</div>
           </div>
         </div>
@@ -466,14 +727,14 @@ const AffiliateProgram = () => {
         <Footer />
       </motion.main>
 
-      {/* ✅ Mobile Bottom Bar */}
+      {/* MOBILE BOTTOM BAR */}
       {isMobile && (
         <div className="fixed bottom-0 w-full z-50 h-16">
           <MobileBottomBar onBrowseClick={() => setSidebarOpen(true)} />
         </div>
       )}
 
-      {/* ✅ Mobile Sidebar Slide */}
+      {/* MOBILE SIDEBAR */}
       <AnimatePresence>
         {isMobile && sidebarOpen && (
           <motion.div
@@ -493,7 +754,7 @@ const AffiliateProgram = () => {
         )}
       </AnimatePresence>
 
-      {/* ✅ Dark overlay when sidebar open */}
+      {/* MOBILE OVERLAY */}
       {isMobile && sidebarOpen && (
         <motion.div
           initial={{ opacity: 0 }}
