@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../..//prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -74,11 +74,13 @@ export class UserService {
 
 
 async updatePassword(id: number, oldPassword: string, newPassword: string) {
+  if (!newPassword) return { success: false, message: 'New password cannot be empty' };
+
   const user = await this.prisma.user.findUnique({ where: { id } });
   if (!user) throw new NotFoundException('User not found');
 
   const match = await bcrypt.compare(oldPassword, user.password);
-  if (!match) throw new UnauthorizedException('Old password is incorrect');
+  if (!match) return { success: false, message: 'Old password is incorrect' };
 
   const hashedNew = await bcrypt.hash(newPassword, 10);
 
@@ -92,6 +94,7 @@ async updatePassword(id: number, oldPassword: string, newPassword: string) {
     message: 'Password updated successfully',
   };
 }
+
 
 
   async findByEmail(email?: string ) {
@@ -125,6 +128,53 @@ async updatePassword(id: number, oldPassword: string, newPassword: string) {
       success: true,
       data: rest,
     };
+  }
+
+  async redeemPromo(userId: number, dto: any) {
+    const code = dto.code.toUpperCase();
+
+    const promo = await this.prisma.promo.findUnique({
+      where: { code },
+    });
+
+    if (!promo) return({ success: false, message: 'Invalid promo code' });
+    if (promo.expiresAt && promo.expiresAt < new Date())
+      return({ success: false, message: 'Promo code has expired' });
+
+    if (promo.claimed >= promo.maxClaims)
+      return({ success: false, message: 'Promo code claim limit reached' });
+
+    // Check if user already used it
+    const existingUsage = await this.prisma.promoUsage.findUnique({
+      where: { promoId_userId: { promoId: promo.id, userId } },
+    });
+    if (existingUsage) return({ success: false, message: 'Promo code already used by this user' });
+
+    // Transaction: add wallet amount + record usage + increment claimed
+    return this.prisma.$transaction(async (tx) => {
+      // Add to INR wallet
+      await tx.wallet.updateMany({
+        where: { userId, currency: 'INR' },
+        data: {
+          balance: {
+            increment: promo.amount,
+          },
+        },
+      });
+
+      // Add usage record
+      await tx.promoUsage.create({
+        data: { userId, promoId: promo.id },
+      });
+
+      // Increase claimed count
+      await tx.promo.update({
+        where: { id: promo.id },
+        data: { claimed: { increment: 1 } },
+      });
+
+      return { success: true, message: 'Promo applied successfully', amount: promo.amount };
+    });
   }
 
   //helpers function

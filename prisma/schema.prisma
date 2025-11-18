@@ -73,6 +73,7 @@ model User {
   lastLogin    DateTime?
 
   wallets      Wallet[]  
+  promoUsages      PromoUsage[]
   transactions Transaction[]
   bets         Bet[]
 }
@@ -204,5 +205,26 @@ model ExternalWallet {
   @@unique([clientAppId, externalUserId, currency])
 }
 
+model Promo {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  amount      Float
+  currency    Currency  @default(INR)
+  maxClaims   Int
+  claimed     Int       @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  usages      PromoUsage[]
+}
 
+model PromoUsage {
+  id        Int      @id @default(autoincrement())
+  promoId   Int
+  userId    Int
+  usedAt    DateTime @default(now())
 
+  promo     Promo    @relation(fields: [promoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([promoId, userId]) // prevents double use
+}

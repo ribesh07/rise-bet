@@ -5,6 +5,7 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateControlDto } from './dto/update-control.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RouletteService } from 'src/roulette/roulette.service';
+import { CreatePromoDto } from '../user/dto/create-promo.dto';
 
 @Controller('api/v1/admin/control')
 export class ControlController {
@@ -20,6 +21,19 @@ export class ControlController {
       result,
     };
   }
+
+  @UseGuards(JwtAuthGuard,AdminGuard)
+  @Get('logs')
+  async getLogs(@Query('limit') limit?: string) {
+    const l = limit ? Math.min(parseInt(limit, 10), 500) : 50;
+    return this.controlService.getLogs(l);
+  }
+
+  @Post('create-promo')
+  async createPromo(@Body() dto: CreatePromoDto) {
+    return this.controlService.createPromo(dto);
+  }
+
   
   @UseGuards(JwtAuthGuard,AdminGuard)
   @Post('update')
@@ -32,11 +46,4 @@ export class ControlController {
   }
 
 
-
-  @UseGuards(JwtAuthGuard,AdminGuard)
-  @Get('logs')
-  async getLogs(@Query('limit') limit?: string) {
-    const l = limit ? Math.min(parseInt(limit, 10), 500) : 50;
-    return this.controlService.getLogs(l);
-  }
 }

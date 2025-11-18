@@ -8,6 +8,8 @@ import { ResolveBetDto } from './dto/resolve-bet.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { extname } from 'path';
 import { diskStorage } from 'multer';
+import { CreatePromoDto } from './dto/create-promo.dto';
+import { RedeemPromoDto } from './dto/redeem-promo.dto';
 
 @Controller('api/v1/users')
 export class UserController {
@@ -22,13 +24,16 @@ export class UserController {
     return this.userService.update(userId, body);
   }
 
-   @UseGuards(JwtAuthGuard) // protect this route
-  @Post('update-password')
-  async updatePassword(@Request() req : any, @Body() body: {oldPassword: string; confirmPassword: string}) {
-    // req.user comes from JwtStrategy.validate()
-    const userId = req.user.id;
-    return this.userService.updatePassword(userId, body.oldPassword, body.confirmPassword);
-  }
+@UseGuards(JwtAuthGuard)
+@Post('update-password')
+async updatePassword(
+  @Request() req: any,
+  @Body() body: { oldPassword: string; newPassword: string }
+) {
+  const userId = req.user.id;
+  return this.userService.updatePassword(userId, body.oldPassword, body.newPassword);
+}
+
 
   @UseGuards(JwtAuthGuard)
   @Get(':id/details')
@@ -36,8 +41,17 @@ export class UserController {
     return this.userService.getUserWithDetails(Number(id));
   }
 
+  // Users redeem promo
+  @UseGuards(JwtAuthGuard)
+  @Post('redeem')
+  async redeem(@Req() req, @Body() dto: RedeemPromoDto) {
+    return this.userService.redeemPromo(req.user.id, dto);
+  }
+
+
   @Get('wallets')
   async getUserWallets() {
+    
     return this.userService.getUserWallets();
   }
 

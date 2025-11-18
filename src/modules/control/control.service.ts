@@ -58,4 +58,16 @@ export class ControlService {
       include: { admin: { select: { id: true, email: true } } },
     });
   }
+
+  // Admin create promo
+    async createPromo(dto: any) {
+    return this.prisma.promo.create({
+      data: {
+        code: dto.code.toUpperCase(),
+        amount: dto.amount,
+        maxClaims: dto.maxClaims,
+        expiresAt: dto.expiresAt ? new Date(dto.expiresAt) : null,
+      },
+    });
+  }
 }
