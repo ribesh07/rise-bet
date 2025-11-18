@@ -15,4 +15,10 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
     @IsNotEmpty()
     phone?: string;
 
+    @IsOptional()
+    oldPassword?: string | undefined;
+
+    @IsOptional()
+    confirmPassword?: string | undefined;
+
 }

@@ -22,6 +22,14 @@ export class UserController {
     return this.userService.update(userId, body);
   }
 
+   @UseGuards(JwtAuthGuard) // protect this route
+  @Post('update-password')
+  async updatePassword(@Request() req : any, @Body() body: {oldPassword: string; confirmPassword: string}) {
+    // req.user comes from JwtStrategy.validate()
+    const userId = req.user.id;
+    return this.userService.updatePassword(userId, body.oldPassword, body.confirmPassword);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id/details')
   async getUserDetails(@Param('id') id: string) {

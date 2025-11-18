@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../..//prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -71,6 +71,28 @@ export class UserService {
       data: rest,
     };
   }
+
+
+async updatePassword(id: number, oldPassword: string, newPassword: string) {
+  const user = await this.prisma.user.findUnique({ where: { id } });
+  if (!user) throw new NotFoundException('User not found');
+
+  const match = await bcrypt.compare(oldPassword, user.password);
+  if (!match) throw new UnauthorizedException('Old password is incorrect');
+
+  const hashedNew = await bcrypt.hash(newPassword, 10);
+
+  await this.prisma.user.update({
+    where: { id },
+    data: { password: hashedNew },
+  });
+
+  return {
+    success: true,
+    message: 'Password updated successfully',
+  };
+}
+
 
   async findByEmail(email?: string ) {
     return this.prisma.user.findUnique({ where: { email } });
