@@ -146,3 +146,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpb
 {
    "code": "FORCE"
 }
+
+### users wallets
+GET http://localhost:3084/api/v1/users/wallets HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzNDYyOTE1LCJleHAiOjE3NjYwNTQ5MTV9.Yfss4h1HuHkiGBCgb_RcHUQ2fhbzW4RWqGlD25rFTlE
+

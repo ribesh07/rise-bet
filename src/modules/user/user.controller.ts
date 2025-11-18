@@ -49,10 +49,11 @@ async updatePassword(
   }
 
 
+  @UseGuards(JwtAuthGuard)
   @Get('wallets')
-  async getUserWallets() {
-    
-    return this.userService.getUserWallets();
+  async getUserWallets(@Request() req: any) {
+    const userId = req.user.id;
+    return this.userService.getUserWallets(Number(userId));
   }
 
   @UseGuards(JwtAuthGuard)

@@ -58,7 +58,7 @@ export class RouletteService {
       const result = spinWheel();
       // fetch pending bets for this room/table (game='roulette' and match room)
       const pendingBets = await this.prisma.bet.findMany({
-        where: { game: 'roulette', status: 'PENDING', /* optionally: matchId or room marker in payload */ },
+        where: { game: 'roulette', status: 'PENDING',room },
       });
       // resolve bets atomically per bet
       const resolutions : any = [];
@@ -78,13 +78,14 @@ export class RouletteService {
                 type: 'WIN',
                 amount: payout,
                 currency: bet.currency,
+                createdAt: new Date(),
                 description: `Roulette win (betId:${bet.id})`,
               },
             });
             // credit wallet
             await tx.wallet.update({
               where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
-              data: { balance: { increment: payout } },
+              data: { balance: { increment: payout }  },
             });
           });
           resolutions.push({ betId: bet.id, status: 'WON', payout });
@@ -244,7 +245,7 @@ async resolveBetsForTable(
 }
 
   // admin/force spin
-  async spinNow(room: string) {
+async spinNow(room: string) {
     const result = spinWheel();
     // very similar resolution as in gameLoop; you may reuse code to avoid duplication
     // for brevity, call gameLoop immediate resolution (but avoid altering countdown here)

@@ -152,6 +152,7 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       const userId = decoded.sub;
+      console.log(`Placing bet for user ${userId} in room ${payload.room}`);
 
       const match = await this.rouletteService.getActiveMatch(payload.room);
       const betEntry = await this.rouletteService.createBet({
