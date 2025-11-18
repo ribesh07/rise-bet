@@ -43,7 +43,7 @@ async updatePassword(
 
   // Users redeem promo
   @UseGuards(JwtAuthGuard)
-  @Post('redeem')
+  @Post('redeem-promo')
   async redeem(@Req() req, @Body() dto: RedeemPromoDto) {
     return this.userService.redeemPromo(req.user.id, dto);
   }

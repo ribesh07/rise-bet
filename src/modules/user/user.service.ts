@@ -148,7 +148,7 @@ async updatePassword(id: number, oldPassword: string, newPassword: string) {
     const existingUsage = await this.prisma.promoUsage.findUnique({
       where: { promoId_userId: { promoId: promo.id, userId } },
     });
-    if (existingUsage) return({ success: false, message: 'Promo code already used by this user' });
+    if (existingUsage) return({ success: false, message: 'Promo code already used by you!' });
 
     // Transaction: add wallet amount + record usage + increment claimed
     return this.prisma.$transaction(async (tx) => {
