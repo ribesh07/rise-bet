@@ -190,7 +190,7 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       const socketsBefore = await this.server.in(payload.room).allSockets();
       console.log(`Force spin requested by admin ${userId} for ${payload.room}. sockets in room: ${socketsBefore.size}`);
 
-      const result = await this.rouletteService.spinNow(payload.room);
+      const result = await this.rouletteService.forceSpin(payload.room);
 
       // after resolving, log and broadcast
       const socketsAfter = await this.server.in(payload.room).allSockets();
