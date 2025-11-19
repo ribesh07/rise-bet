@@ -200,7 +200,7 @@ import RaffleTable from "@/components/transactions/raffle";
 import RaceTable from "@/components/transactions/race";
 import BonusHistory from "@/components/transactions/bonus";
 import OtherHistory from "@/components/transactions/other";
-
+import { apiRequest } from "@/utils/ApiHelper";
 const Transactions: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -208,6 +208,8 @@ const Transactions: React.FC = () => {
   const [active, setActive] = useState("Deposits");
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const sidebarWidth = 252;
   const collapsedWidth = 80;
@@ -220,7 +222,27 @@ const Transactions: React.FC = () => {
     "Races",
     "Others",
   ];
-
+  useEffect(() => {
+        const fetchDashboardDetails = async () => {
+          try {
+            const token = localStorage.getItem("token");
+            const id = localStorage.getItem("userId");
+    
+            const res = await apiRequest(`/users/${id}/details`, true, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            if (res.success) setDashboardDetails(res.data);
+          } catch (err) {
+            console.error("AFFILIATE PAGE API ERROR:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        fetchDashboardDetails();
+      }, []);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -259,7 +281,11 @@ const Transactions: React.FC = () => {
         }}
         transition={{ type: "spring", stiffness: 260, damping: 25 }}
       >
-        <TopNavbar searchValue={search} onSearchChange={setSearch} />
+        <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
       </motion.div>
 
       {/* MAIN CONTENT */}
@@ -274,7 +300,7 @@ const Transactions: React.FC = () => {
         }}
         transition={{ type: "spring", stiffness: 260, damping: 25 }}
       >
-        <div className="max-w-6xl mx-auto w-full">
+        <div className="max-w-6xl pt-6 mx-auto w-full">
 
           {/* Page Title */}
           <h2 className="text-2xl font-bold flex items-center gap-2 mb-6">

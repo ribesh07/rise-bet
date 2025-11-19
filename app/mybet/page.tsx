@@ -13,6 +13,7 @@ import MobileBottomBar from '@/components/mobilebuttombar';
 import Casino from '@/components/mybet/casino';
 import Sports from '@/components/mybet/sport';
 import Archive from '@/components/mybet/archive';
+import { apiRequest } from '@/utils/ApiHelper';
 
 const MyBetsPage = () => {
   const [activeTab, setActiveTab] = useState<'Casino' | 'Sports' | 'Archive'>('Casino');
@@ -20,7 +21,29 @@ const MyBetsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [search, setSearch] = useState('');
-
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+        const fetchDashboardDetails = async () => {
+          try {
+            const token = localStorage.getItem("token");
+            const id = localStorage.getItem("userId");
+    
+            const res = await apiRequest(`/users/${id}/details`, true, {
+              method: "GET",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+    
+            if (res.success) setDashboardDetails(res.data);
+          } catch (err) {
+            console.error("AFFILIATE PAGE API ERROR:", err);
+          } finally {
+            setLoading(false);
+          }
+        };
+    
+        fetchDashboardDetails();
+      }, []);
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
@@ -28,11 +51,11 @@ const MyBetsPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarWidth = 72;
-  const collapsedWidth = 24;
+  const sidebarWidth = 62;
+  const collapsedWidth = 20;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0C1A24] text-white overflow-hidden relative">
+    <div className="flex flex-col pt-6 min-h-screen bg-[#0C1A24] text-white overflow-hidden relative">
 
       {/* Desktop Sidebar */}
       {!isMobile && (
@@ -62,7 +85,11 @@ const MyBetsPage = () => {
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <TopNavbar searchValue={search} onSearchChange={setSearch} />
+        <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
       </motion.div>
 
       {/* Main Content */}

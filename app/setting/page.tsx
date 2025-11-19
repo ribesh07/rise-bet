@@ -15,6 +15,7 @@ import Preferences from "@/components/settings/preference";
 
 import Verification from "@/components/settings/verification";
 import Offers from "@/components/settings/offer";
+import { apiRequest } from "@/utils/ApiHelper";
 
 const settingsTabs = [
   "Account",
@@ -31,6 +32,8 @@ const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("Account");
   const [search, setSearch] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const sidebarWidth = 62;
   const collapsedWidth = 20;
@@ -41,6 +44,28 @@ const SettingsPage = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+  
+  useEffect(() => {
+      const fetchDashboardDetails = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const id = localStorage.getItem("userId");
+  
+          const res = await apiRequest(`/users/${id}/details`, true, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+  
+          if (res.success) setDashboardDetails(res.data);
+        } catch (err) {
+          console.error("AFFILIATE PAGE API ERROR:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchDashboardDetails();
+    }, []);
 
   const renderTabPage = () => {
     switch (activeTab) {
@@ -87,7 +112,11 @@ const SettingsPage = () => {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <TopNavbar searchValue={search} onSearchChange={setSearch} />
+         <TopNavbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          wallets={dashboardDetails?.wallets || []}
+        />
       </motion.div>
 
       {/* ✅ Main Page */}
