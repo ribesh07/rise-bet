@@ -9,6 +9,7 @@ import { Currency } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { join } from 'path';
 
 
 @Injectable()
@@ -250,88 +251,6 @@ async createWithdrawal(userId: number, amount: number, currency: Currency) {
   });
 }
 
-  // place bet, deduct stake, record transaction
-// async placeBet(userId: number, dto: BetDto) {
-//   return this.prisma.$transaction(async (tx) => {
-//     const wallet = await this.getWalletOrThrow(userId, dto.currency);
-
-//     if (wallet.balance.lt(dto.stake)) {
-//       throw new Error("Insufficient balance");
-//     }
-
-//     const potentialWin = dto.stake * dto.odds;
-
-//     // Deduct stake
-//     await tx.wallet.update({
-//       where: { id: wallet.id },
-//       data: { balance: { decrement: dto.stake } },
-//     });
-
-//     // Log transaction
-//     await tx.transaction.create({
-//       data: {
-//         userId,
-//         type: TransactionType.BET,
-//         amount: dto.stake,
-//         currency: dto.currency,
-//       },
-//     });
-
-//     // Create bet
-//     return tx.bet.create({
-//       data: {
-//         userId,
-//         matchId: dto.matchId,
-//         stake: dto.stake,
-//         odds: dto.odds,
-//         potentialWin,
-//         currency: dto.currency,
-//         status: BetStatus.PENDING,
-//       },
-//     });
-//   });
-// }
-
-
-// async resolveBet(betId: number, status: BetStatus) {
-//   const bet = await this.prisma.bet.findUnique({ where: { id: betId } });
-
-//   if (!bet) throw new Error('Bet not found');
-
-//   if (status === BetStatus.WON) {
-//     return this.prisma.$transaction(async (tx) => {
-//       const wallet = await this.getWalletOrThrow(bet.userId, bet.currency);
-
-//       // Update bet status
-//       await tx.bet.update({
-//         where: { id: betId },
-//         data: { status: BetStatus.WON },
-//       });
-
-//       // Log WIN transaction
-//       await tx.transaction.create({
-//         data: {
-//           userId: bet.userId,
-//           type: TransactionType.WIN,
-//           amount: bet.potentialWin,
-//           currency: bet.currency,
-//         },
-//       });
-
-//       // Add winnings
-//       await tx.wallet.update({
-//         where: { id: wallet.id },
-//         data: { balance: { increment: bet.potentialWin } },
-//       });
-//     });
-//   } else {
-//     return this.prisma.bet.update({
-//       where: { id: betId },
-//       data: { status: BetStatus.LOST },
-//     });
-//   }
-// }
-
 
 //upload image
 async updateUserImage(userId: number, filename: string) {
@@ -361,8 +280,125 @@ async updateUserImage(userId: number, filename: string) {
       console.log('Deleted old image:', imagePath);
     }
   }
+//delete image
+ async deleteUserProfileImage(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileImage: true },
+    });
+
+    if (!user?.profileImage) return; // no image, nothing to delete
+
+    const imagePath = path.join(process.cwd(), user.profileImage);
+
+    // check if file exists
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath); // delete file
+      console.log('Deleted old image:', imagePath);
+    }
+  }
+
+
+// async updateUserFiles(
+//   userId: number,
+//   files: {
+//     profileImage?: Express.Multer.File[];
+//     documents?: Express.Multer.File[];
+//   }
+// ) {
+//   let profilePath: string | null = null;
+//   let documentPaths: string[] | null = null;
+
+//   console.log('Updating files for user:', userId);
+//   console.log('Received files:', files);
+
+//   // ----- PROFILE -----
+//   if (files.profileImage?.length) {
+//     const file = files.profileImage[0];
+//     profilePath = `/uploads/users/${userId}/${file.filename}`;
+//   }
+
+//   // ----- DOCUMENTS -----
+//   if (files.documents?.length) {
+//     documentPaths = files.documents.map(
+//       (file) => `/uploads/documents/${userId}/${file.filename}`
+//     );
+//   }
+
+//   const data: any = {};
+
+//   if (profilePath) data.profileImage = profilePath;
+
+//   if (documentPaths) data.documentImages = documentPaths;
+ 
+
+//   const updated = await this.prisma.user.update({
+//     where: { id: userId },
+//     data,
+//   });
+
+//   return {
+//     message: "User files updated",
+//     profileImage: profilePath,
+//     documentImages: documentPaths,
+//   };
+// }
+
 
   //get wallets
+ 
+  async updateUserFiles(
+  userId: number,
+  files: {
+    profileImage?: Express.Multer.File[];
+    documents?: Express.Multer.File[];
+  }
+) {
+  let profilePath: string | null = null;
+  let documentPaths: string[] | null = null;
+
+    console.log('Updating files for user:', userId);
+  console.log('Received files:', files);
+
+  // ----- PROFILE -----
+  if (files.profileImage?.length) {
+    const file = files.profileImage[0];
+    profilePath = `/uploads/users/${userId}/${file.filename}`;
+  }
+
+  // ----- DOCUMENTS -----
+  if (files.documents?.length) {
+    documentPaths = files.documents.map(
+      (file) => `/uploads/documents/${userId}/${file.filename}`
+    );
+  }
+
+  // 🔥 FETCH OLD IMAGES FIRST
+  const previousUser = await this.prisma.user.findUnique({
+    where: { id: userId },
+    select: { profileImage: true, documentImages: true },
+  });
+
+  const data: any = {};
+  if (profilePath) data.profileImage = profilePath;
+  if (documentPaths) data.documentImages = documentPaths;
+
+  // 🔥 UPDATE USER FIRST (no FS work yet)
+  const updatedUser = await this.prisma.user.update({
+    where: { id: userId },
+    data,
+  });
+
+  // Return old + new paths so controller can delete FS
+  return {
+    message: "User files updated",
+    newProfile: profilePath,
+    newDocuments: documentPaths,
+    oldProfile: previousUser?.profileImage,
+  };
+}
+
+
   async getUserWallets(userId: number) {
     return this.prisma.wallet.findMany({
       where: { userId },

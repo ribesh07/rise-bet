@@ -98,6 +98,9 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       client.join(payload.room);
       console.log(`Client ${client.id} requested join-room ${payload.room}`);
 
+        // ⭐ CREATE TABLE LOOP IF NOT EXISTS
+    this.rouletteService.createTable(payload.room);
+
       // log how many sockets in the room now
       const sockets = await this.server.in(payload.room).allSockets();
       const count = sockets ? sockets.size : 0;
