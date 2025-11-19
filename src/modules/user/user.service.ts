@@ -280,69 +280,7 @@ async updateUserImage(userId: number, filename: string) {
       console.log('Deleted old image:', imagePath);
     }
   }
-//delete image
- async deleteUserProfileImage(userId: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { profileImage: true },
-    });
 
-    if (!user?.profileImage) return; // no image, nothing to delete
-
-    const imagePath = path.join(process.cwd(), user.profileImage);
-
-    // check if file exists
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath); // delete file
-      console.log('Deleted old image:', imagePath);
-    }
-  }
-
-
-// async updateUserFiles(
-//   userId: number,
-//   files: {
-//     profileImage?: Express.Multer.File[];
-//     documents?: Express.Multer.File[];
-//   }
-// ) {
-//   let profilePath: string | null = null;
-//   let documentPaths: string[] | null = null;
-
-//   console.log('Updating files for user:', userId);
-//   console.log('Received files:', files);
-
-//   // ----- PROFILE -----
-//   if (files.profileImage?.length) {
-//     const file = files.profileImage[0];
-//     profilePath = `/uploads/users/${userId}/${file.filename}`;
-//   }
-
-//   // ----- DOCUMENTS -----
-//   if (files.documents?.length) {
-//     documentPaths = files.documents.map(
-//       (file) => `/uploads/documents/${userId}/${file.filename}`
-//     );
-//   }
-
-//   const data: any = {};
-
-//   if (profilePath) data.profileImage = profilePath;
-
-//   if (documentPaths) data.documentImages = documentPaths;
- 
-
-//   const updated = await this.prisma.user.update({
-//     where: { id: userId },
-//     data,
-//   });
-
-//   return {
-//     message: "User files updated",
-//     profileImage: profilePath,
-//     documentImages: documentPaths,
-//   };
-// }
 
 
   //get wallets
@@ -354,48 +292,49 @@ async updateUserImage(userId: number, filename: string) {
     documents?: Express.Multer.File[];
   }
 ) {
-  let profilePath: string | null = null;
-  let documentPaths: string[] | null = null;
+    let profilePath: string | null = null;
+    let documentPaths: string[] | null = null;
 
-    console.log('Updating files for user:', userId);
-  console.log('Received files:', files);
+    //   console.log('Updating files for user:', userId);
+    // console.log('Received files:', files);
 
-  // ----- PROFILE -----
-  if (files.profileImage?.length) {
-    const file = files.profileImage[0];
-    profilePath = `/uploads/users/${userId}/${file.filename}`;
-  }
+    // ----- PROFILE -----
+    if (files.profileImage?.length) {
+      const file = files.profileImage[0];
+      profilePath = `/uploads/users/${userId}/${file.filename}`;
+    }
 
-  // ----- DOCUMENTS -----
-  if (files.documents?.length) {
-    documentPaths = files.documents.map(
-      (file) => `/uploads/documents/${userId}/${file.filename}`
-    );
-  }
+    // ----- DOCUMENTS -----
+    if (files.documents?.length) {
+      documentPaths = files.documents.map(
+        (file) => `/uploads/documents/${userId}/${file.filename}`
+      );
+    }
 
-  // 🔥 FETCH OLD IMAGES FIRST
-  const previousUser = await this.prisma.user.findUnique({
-    where: { id: userId },
-    select: { profileImage: true, documentImages: true },
-  });
+    // 🔥 FETCH OLD IMAGES FIRST
+    const previousUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { profileImage: true, documentImages: true },
+    });
 
-  const data: any = {};
-  if (profilePath) data.profileImage = profilePath;
-  if (documentPaths) data.documentImages = documentPaths;
+    const data: any = {};
+    if (profilePath) data.profileImage = profilePath;
+    if (documentPaths) data.documentImages = documentPaths;
 
-  // 🔥 UPDATE USER FIRST (no FS work yet)
-  const updatedUser = await this.prisma.user.update({
-    where: { id: userId },
-    data,
-  });
+    // 🔥 UPDATE USER FIRST (no FS work yet)
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data,
+    });
 
-  // Return old + new paths so controller can delete FS
-  return {
-    message: "User files updated",
-    newProfile: profilePath,
-    newDocuments: documentPaths,
-    oldProfile: previousUser?.profileImage,
-  };
+    // Return old + new paths so controller can delete FS
+    return {
+      success: true,
+      message: "User files updated",
+      newProfile: profilePath,
+      newDocuments: documentPaths,
+      oldProfile: previousUser?.profileImage,
+    };
 }
 
 
