@@ -21,21 +21,21 @@ const SportsBets: React.FC = () => {
   // ✅ Example Bets
   const bets: Bet[] = [
     // Remove these to test empty screen
-    // {
-    //   id: 1,
-    //   match: "Team A vs Team B",
-    //   amount: 50,
-    //   odds: 2.3,
-    //   status: "Active",
-    // },
-    // {
-    //   id: 2,
-    //   match: "Team C vs Team D",
-    //   amount: 75,
-    //   odds: 1.8,
-    //   status: "Settled",
-    //   result: "Won",
-    // },
+    {
+      id: 1,
+      match: "Team A vs Team B",
+      amount: 50,
+      odds: 2.3,
+      status: "Active",
+    },
+    {
+      id: 2,
+      match: "Team C vs Team D",
+      amount: 75,
+      odds: 1.8,
+      status: "Settled",
+      result: "Won",
+    },
   ];
 
   const filteredBets = bets.filter((b) => b.status === activeTab);

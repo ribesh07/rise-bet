@@ -150,4 +150,16 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ2LCJlbWFpb
    "phone": "+1234567890"
 }
 
+###roulette
+POST https://api.playrise.vip/api/v1/admin/control/force-spin/roulette_1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI4MDg4OCwiZXhwIjoxNzY1ODcyODg4fQ.jV1p_xbbTrFKJ23iinM25IO5dCNnz4UbaoTy-Rn_Akc
+
+###verification upload
+POST https://api.playrise.vip/api/v1/users/upload-user-files HTTP/1.1
+Content-Type: multipart/form-data; 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ2LCJlbWFpbCI6ImdnQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnZzQ5MSIsImlhdCI6MTc2MzUzMTY4OSwiZXhwIjoxNzY0MTM2NDg5fQ.gbgxdpR6-c5ggLvA0gJsuLTNPLVFxI9g00NjDk9DcMc
+
+Content-Disposition: form-data; name="documents"; filename="id_card.png"
+Content-Type: image/png
 
