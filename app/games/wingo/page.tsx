@@ -323,8 +323,7 @@ export default function WingoFull() {
                 <div className="w-full p-6 pb-10 relative" style={{backgroundImage:`url('/color/${resultPopup.type==='win'?'win.webp':'lose.webp'}')`,backgroundSize:'cover',backgroundPosition:'center'}}>
                   <img src={`/color/${resultPopup.type==='win'?'win.webp':'lose.webp'}`} className="w-28 mx-auto drop-shadow-xl"/>
                   <h2 className="text-2xl font-bold text-white mt-3 drop-shadow">{resultPopup.type==='win'?'Congratulations!':'Sorry'}</h2>
-                </div>
-                <div className="bg-[#e6f0ff] p-6 pt-8 rounded-b-3xl">
+                   <div className="bg-[#e6f0ff] p-6 pt-8 rounded-b-3xl">
                   <div className="flex items-center justify-center gap-2 text-sm">
                     <span className="px-3 py-1 rounded-full bg-white border text-[#445] shadow">{resultPopup.round.color}</span>
                     <span className="px-3 py-1 rounded-full bg-white border text-[#445] shadow">{resultPopup.round.number}</span>
@@ -333,6 +332,7 @@ export default function WingoFull() {
                   <div className="mt-5 text-xl font-extrabold text-[#3c4c66]">{resultPopup.type==='win'?'WIN':'LOSE'}</div>
                   <div className="mt-2 text-xs text-gray-600">Period: {resultPopup.round.period}</div>
                   <p className="text-gray-500 text-xs mt-4">3 seconds auto close</p>
+                </div>
                 </div>
               </div>
             </motion.div>
