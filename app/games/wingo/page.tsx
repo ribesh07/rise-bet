@@ -40,12 +40,41 @@ export default function WingoFull() {
   // Betting locked in last 5 seconds
   const bettingLocked = timeLeft <= 5;
 
-  function generateRound(): Round {
-    const n = Math.floor(Math.random() * 10);
-    const color = n === 0 ? 'green' : n <= 4 ? 'red' : 'violet';
-    const bs = (n <= 4 ? 'small' : 'big') as 'big' | 'small';
-    return { period: Date.now(), number: n, color, bigSmall: bs };
-  }
+  type Round = {
+  period: number;
+  number: number;
+  color: string;
+  bigSmall: "big" | "small";
+};
+
+function generateRound(): Round {
+  const n = Math.floor(Math.random() * 10);
+
+  // Define colors based on numbers
+  const colorMap: Record<number, string> = {
+    0: "red+violet",
+    1: "green",
+    2: "red",
+    3: "green",
+    4: "red",
+    5: "green+violet",
+    6: "red",
+    7: "green",
+    8: "red",
+    9: "green",
+  };
+
+  const color = colorMap[n];
+  const bigSmall: "big" | "small" = n <= 4 ? "small" : "big";
+
+  return {
+    period: Date.now(),
+    number: n,
+    color,
+    bigSmall,
+  };
+}
+
 
   function playSound(type: 'win'|'lose'|'click'|'draw'){
     const path = `/sounds/${type}.mp3`;
@@ -99,26 +128,72 @@ export default function WingoFull() {
   }
 
   function resolveBets(r: Round, bet = confirmedBet) {
-    let net = 0;
+  let net = 0;
 
-    if(bet.amount <= 0){
-      console.log("NO BET — no confirmed bet stored");
-      return;
-    }
-
-    if(bet.number !== null) net += bet.number === r.number ? bet.amount*9 : -bet.amount;
-    if(bet.color) net += bet.color === r.color ? bet.amount*2 : -bet.amount;
-    if(bet.bigSmall) net += bet.bigSmall === r.bigSmall ? bet.amount*2 : -bet.amount;
-
-    setBalance(b => b + net);
-
-    if(net > 0){ setResultPopup({ type:'win', round:r }); playSound('win'); }
-    else if(net < 0){ setResultPopup({ type:'lose', round:r }); playSound('lose'); }
-    if(net !== 0) setTimeout(()=>setResultPopup(null), 3000);
-
-    // ✅ reset confirmed bet after settlement
-    setConfirmedBet({ number:null, color:null, bigSmall:null, amount:0 });
+  if (bet.amount <= 0) {
+    console.log("NO BET — no confirmed bet stored");
+    return;
   }
+
+  // ---------------- Number Bet ----------------
+  if (bet.number !== null) {
+    if (bet.number === r.number) {
+      net += bet.amount * 9; // 98 * 9 = 882
+    } else {
+      net -= bet.amount;
+    }
+  }
+
+  // ---------------- Color Bet ----------------
+  if (bet.color) {
+    switch (bet.color) {
+      case "green":
+        if ([1, 3, 7, 9].includes(r.number)) net += bet.amount * 2;      // 98 * 2 = 196
+        else if (r.number === 5) net += bet.amount * 1.5;                // 98 * 1.5 = 147
+        else net -= bet.amount;
+        break;
+      case "red":
+        if ([2, 4, 6, 8].includes(r.number)) net += bet.amount * 2;      // 98 * 2 = 196
+        else if (r.number === 0) net += bet.amount * 1.5;                // 98 * 1.5 = 147
+        else net -= bet.amount;
+        break;
+      case "violet":
+        if ([0, 5].includes(r.number)) net += bet.amount * 4.5;          // 98 * 4.5 = 441
+        else net -= bet.amount;
+        break;
+    }
+  }
+
+  // ---------------- Big/Small Bet ----------------
+  if (bet.bigSmall) {
+    if (bet.bigSmall === "big") {
+      if ([5, 6, 7, 8, 9].includes(r.number)) net += bet.amount * 2;   // 98 * 2 = 196
+      else net -= bet.amount;
+    }
+    if (bet.bigSmall === "small") {
+      if ([0, 1, 2, 3, 4].includes(r.number)) net += bet.amount * 2;   // 98 * 2 = 196
+      else net -= bet.amount;
+    }
+  }
+
+  // Update balance
+  setBalance(b => b + net);
+
+  // Show win/lose popup
+  if (net > 0) {
+    setResultPopup({ type: "win", round: r });
+    playSound('win');
+  } else if (net < 0) {
+    setResultPopup({ type: "lose", round: r });
+    playSound('lose');
+  }
+
+  if (net !== 0) setTimeout(() => setResultPopup(null), 3000);
+
+  // Reset confirmed bet after settlement
+  setConfirmedBet({ number: null, color: null, bigSmall: null, amount: 0 });
+}
+
 
   // Selection
   function onSelectColor(c:string){ if(bettingLocked) return; setSelectedColor(c); setSelectedNumber(null); setSelectedBigSmall(null); setShowPopup(true); playSound('click'); }
