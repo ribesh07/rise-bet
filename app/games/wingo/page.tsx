@@ -176,10 +176,10 @@ export default function WingoFull() {
           ))}
         </div>
 
+       
         {/* Main Play Area */}
-        {/* Main Play Area */}
-<div className="w-full max-w-3xl bg-[#1c2a38] rounded-2xl shadow p-4">
-  <div className="flex flex-col md:flex-row gap-4">
+      <div className="w-full max-w-3xl bg-[#1c2a38] rounded-2xl shadow p-4">
+        <div className="flex flex-col md:flex-row gap-4">
 
     {/* LEFT SIDE */}
     <div className="flex-1">
@@ -188,7 +188,37 @@ export default function WingoFull() {
         <div className="text-sm text-gray-400">Time remaining</div>
         <div className="text-xl font-bold" style={{color: bettingLocked ? 'red' : 'white'}}>{timeLeft}s</div>
       </div>
+              {/* Confirmed Bet Display */}
+{(confirmedBet.number !== null || confirmedBet.color || confirmedBet.bigSmall) && (
+  <div className="mb-3 p-3 bg-[#1f2a33] rounded-xl flex gap-3 items-center justify-center flex-wrap">
+    <span className="text-green-400 font-semibold">YOUR TRADE</span>
+    {confirmedBet.number !== null && (
+      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
 
+        <img src={`/color/ball_${confirmedBet.number}.webp`} className="w-10 h-10 rounded-full" />
+        <span className="text-white font-semibold">{confirmedBet.number}</span>
+      </div>
+    )}
+    {confirmedBet.color && (
+      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
+        <span className={`w-5 h-5 rounded-full ${
+          confirmedBet.color === 'red' ? 'bg-red-500' :
+          confirmedBet.color === 'green' ? 'bg-green-500' :
+          'bg-indigo-500'
+        }`} />
+        <span className="text-white capitalize font-semibold">{confirmedBet.color}</span>
+      </div>
+    )}
+    {confirmedBet.bigSmall && (
+      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
+        <span className="text-white capitalize font-semibold">{confirmedBet.bigSmall}</span>
+      </div>
+    )}
+    <div className="text-white font-bold px-3 py-1 border border-white/20 rounded-xl">
+      ₹{confirmedBet.amount}.00
+    </div>
+  </div>
+)}
       {/* Ball Display */}
       <div className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
            style={{ backgroundImage:`url('/color/bg.webp')`, backgroundSize:'cover', backgroundPosition:'center' }}>
@@ -200,7 +230,7 @@ export default function WingoFull() {
         <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-red-500 drop-shadow-lg">
           {bettingLocked ? "TRADE CLOSED" : ''}
         </div>
-
+        
         {/* Previous Draw Info */}
         {currentDraw && (
           <div className="absolute bottom-4 flex flex-col items-center gap-1">
@@ -208,7 +238,10 @@ export default function WingoFull() {
             <div className="text-xs text-gray-200 drop-shadow">{currentDraw.color} • {currentDraw.bigSmall}</div>
           </div>
         )}
+        
       </div>
+  
+
 
       {/* Buttons */}
       <div className="grid grid-cols-3 gap-2 mb-3">
@@ -269,44 +302,39 @@ export default function WingoFull() {
                 </div>
               )}
               {tab === 'How to play' && (
-  <div className="bg-[#101b22dd] rounded p-4 shadow max-h-72 overflow-auto text-sm text-gray-200 space-y-2">
-    <ol className="list-decimal list-inside space-y-2">
-      <li>
-        <span className="text-green-400 font-semibold">Select green:</span> If the result shows 
-        <span className="text-green-400 font-semibold"> 1, 3, 7, 9</span> you will get <span className="font-bold">98 * 2 = 196</span>;  
-        If the result shows <span className="text-green-400 font-semibold">5</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
-      </li>
-      <li>
-        <span className="text-red-500 font-semibold">Select red:</span> If the result shows 
-        <span className="text-red-500 font-semibold">2, 4, 6, 8</span>, you will get <span className="font-bold">98 * 2 = 196</span>;  
-        If the result shows <span className="text-red-500 font-semibold">0</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
-      </li>
-      <li>
-        <span className="text-purple-500 font-semibold">Select violet:</span> If the result shows 
-        <span className="text-purple-500 font-semibold">0 or 5</span>, you will get <span className="font-bold">98 * 4.5 = 441</span>
-      </li>
-      <li>
-        <span className="text-yellow-400 font-semibold">Select number:</span> If the result is the same as the number you selected, you will get <span className="font-bold">98 * 9 = 882</span>
-      </li>
-      <li>
-        <span className="text-blue-400 font-semibold">Select big:</span> If the result shows 
-        <span className="text-blue-400 font-semibold">5, 6, 7, 8, 9</span>, you will get <span className="font-bold">98 * 2 = 196</span>
-      </li>
-      <li>
-        <span className="text-pink-400 font-semibold">Select small:</span> If the result shows 
-        <span className="text-pink-400 font-semibold">0, 1, 2, 3, 4</span>, you will get <span className="font-bold">98 * 2 = 196</span>
-      </li>
-    </ol>
-  </div>
-)}
-
-
+                <div className="bg-[#101b22dd] rounded p-4 shadow max-h-72 overflow-auto text-sm text-gray-200 space-y-2">
+                  <ol className="list-decimal list-inside space-y-2">
+                    <li>
+                      <span className="text-green-400 font-semibold">Select green:</span> If the result shows 
+                      <span className="text-green-400 font-semibold"> 1, 3, 7, 9</span> you will get <span className="font-bold">98 * 2 = 196</span>;  
+                      If the result shows <span className="text-green-400 font-semibold">5</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
+                    </li>
+                    <li>
+                      <span className="text-red-500 font-semibold">Select red:</span> If the result shows 
+                      <span className="text-red-500 font-semibold">2, 4, 6, 8</span>, you will get <span className="font-bold">98 * 2 = 196</span>;  
+                      If the result shows <span className="text-red-500 font-semibold">0</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
+                    </li>
+                    <li>
+                      <span className="text-purple-500 font-semibold">Select violet:</span> If the result shows 
+                      <span className="text-purple-500 font-semibold">0 or 5</span>, you will get <span className="font-bold">98 * 4.5 = 441</span>
+                    </li>
+                    <li>
+                      <span className="text-yellow-400 font-semibold">Select number:</span> If the result is the same as the number you selected, you will get <span className="font-bold">98 * 9 = 882</span>
+                    </li>
+                    <li>
+                      <span className="text-blue-400 font-semibold">Select big:</span> If the result shows 
+                      <span className="text-blue-400 font-semibold">5, 6, 7, 8, 9</span>, you will get <span className="font-bold">98 * 2 = 196</span>
+                    </li>
+                    <li>
+                      <span className="text-pink-400 font-semibold">Select small:</span> If the result shows 
+                      <span className="text-pink-400 font-semibold">0, 1, 2, 3, 4</span>, you will get <span className="font-bold">98 * 2 = 196</span>
+                    </li>
+                  </ol>
+                </div>
+              )}
              </div>
-  </div>
-</div>
-
-
-
+            </div>
+          </div>
         {/* Bet Modal */}
         <AnimatePresence>
           {showPopup && (
