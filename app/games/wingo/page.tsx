@@ -22,7 +22,7 @@ export default function WingoFull() {
   const [selectedBigSmall, setSelectedBigSmall] = useState<'big'|'small'|null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [volume, setVolume] = useState(60);
-  const [tab, setTab] = useState<'play'|'chart'|'history'|'strategy'>('play');
+  const [tab, setTab] = useState<'play'|'chart'|'history'|'How to play'>('play');
   const [lastBall, setLastBall] = useState(0);
   const ballControls = useAnimation();
   const [currentDraw, setCurrentDraw] = useState<Round|null>(null);
@@ -301,7 +301,7 @@ function generateRound(): Round {
             {/* RIGHT SIDE TAB */}
             <div className="w-full md:w-96">
               <div className="flex gap-2 mb-4 bg-[#0d1317] p-2 rounded-xl border border-[#1f2a33]">
-                {['play','chart','history','strategy'].map(t=>(
+                {['play','chart','history','How to play'].map(t=>(
                   <button key={t} onClick={()=>setTab(t as any)} className={`flex-1 py-2 rounded-lg font-semibold capitalize transition ${tab===t?'bg-[#00c46c] text-black shadow-[0_0_10px_#00c46c]':'bg-[#111b21] text-gray-300 border border-[#1f2a33] hover:bg-[#162229]'}`}>
                     {t}
                   </button>
@@ -310,7 +310,7 @@ function generateRound(): Round {
 
               {tab==='chart' && <Sparkline numbers={chartData} />}
               {tab==='history' && (
-                <div className="bg-white rounded p-2 shadow max-h-72 overflow-auto">
+                <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
                   <table className="w-full text-sm">
                     <thead className="text-xs text-gray-500"><tr><th>Period</th><th>Num</th><th>BS</th><th>Color</th></tr></thead>
                     <tbody>
@@ -326,6 +326,39 @@ function generateRound(): Round {
                   </table>
                 </div>
               )}
+              {tab === 'How to play' && (
+  <div className="bg-[#101b22dd] rounded p-4 shadow max-h-72 overflow-auto text-sm text-gray-200 space-y-2">
+    <ol className="list-decimal list-inside space-y-2">
+      <li>
+        <span className="text-green-400 font-semibold">Select green:</span> If the result shows 
+        <span className="text-green-400 font-semibold"> 1, 3, 7, 9</span> you will get <span className="font-bold">98 * 2 = 196</span>;  
+        If the result shows <span className="text-green-400 font-semibold">5</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
+      </li>
+      <li>
+        <span className="text-red-500 font-semibold">Select red:</span> If the result shows 
+        <span className="text-red-500 font-semibold">2, 4, 6, 8</span>, you will get <span className="font-bold">98 * 2 = 196</span>;  
+        If the result shows <span className="text-red-500 font-semibold">0</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
+      </li>
+      <li>
+        <span className="text-purple-500 font-semibold">Select violet:</span> If the result shows 
+        <span className="text-purple-500 font-semibold">0 or 5</span>, you will get <span className="font-bold">98 * 4.5 = 441</span>
+      </li>
+      <li>
+        <span className="text-yellow-400 font-semibold">Select number:</span> If the result is the same as the number you selected, you will get <span className="font-bold">98 * 9 = 882</span>
+      </li>
+      <li>
+        <span className="text-blue-400 font-semibold">Select big:</span> If the result shows 
+        <span className="text-blue-400 font-semibold">5, 6, 7, 8, 9</span>, you will get <span className="font-bold">98 * 2 = 196</span>
+      </li>
+      <li>
+        <span className="text-pink-400 font-semibold">Select small:</span> If the result shows 
+        <span className="text-pink-400 font-semibold">0, 1, 2, 3, 4</span>, you will get <span className="font-bold">98 * 2 = 196</span>
+      </li>
+    </ol>
+  </div>
+)}
+
+
             </div>
           </div>
         </div>
