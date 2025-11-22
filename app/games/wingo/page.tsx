@@ -22,7 +22,9 @@ export default function WingoFull() {
   const [selectedBigSmall, setSelectedBigSmall] = useState<'big'|'small'|null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [volume, setVolume] = useState(60);
-  const [tab, setTab] = useState<'play'|'chart'|'history'|'How to play'>('play');
+  const [betHistory, setBetHistory] = useState<any[]>([]);
+
+  const [tab, setTab] = useState<'Play'|'Player History'|'History'|'How To Play'>('Play');
   const [currentDraw, setCurrentDraw] = useState<Round|null>(null);
   const ballControls = useAnimation();
   const [confirmedBet, setConfirmedBet] = useState<{number:number|null,color:string|null,bigSmall:'big'|'small'|null,amount:number}>({number:null,color:null,bigSmall:null,amount:0});
@@ -44,6 +46,9 @@ export default function WingoFull() {
     };
     return { period: Date.now(), number: n, color: colorMap[n], bigSmall: n <= 4 ? 'small' : 'big' };
   }
+  function generateBetId() {
+  return "BET-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+}
 
   function playSound(type: 'win'|'lose'|'click'|'draw'){
     const path = `/sounds/${type}.mp3`;
@@ -107,35 +112,92 @@ export default function WingoFull() {
     resolveBets(r, bet);
   }
 
-  function resolveBets(r:Round, bet = confirmedBet){
-    let net = 0;
-    if(bet.amount <=0) return console.log("NO BET — no confirmed bet stored");
+  function resolveBets(r: Round, bet = confirmedBet) {
+  let net = 0;
+  if (bet.amount <= 0) return;
 
-    // Number
-    if(bet.number!==null) net += bet.number===r.number ? bet.amount*9 : -bet.amount;
+  let totalMultiplier = 0;
+  let win = false;
 
-    // Color
-    if(bet.color){
-      switch(bet.color){
-        case 'green': net += [1,3,7,9].includes(r.number)? bet.amount*2 : r.number===5? bet.amount*1.5 : -bet.amount; break;
-        case 'red': net += [2,4,6,8].includes(r.number)? bet.amount*2 : r.number===0? bet.amount*1.5 : -bet.amount; break;
-        case 'violet': net += [0,5].includes(r.number)? bet.amount*4.5 : -bet.amount; break;
-      }
+  // ----- Number -----
+  if (bet.number !== null) {
+    if (bet.number === r.number) {
+      net += bet.amount * 9;
+      totalMultiplier = 9;
+      win = true;
+    } else {
+      net -= bet.amount;
+      totalMultiplier = -1;
     }
-
-    // Big/Small
-    if(bet.bigSmall){
-      if(bet.bigSmall==='big') net += [5,6,7,8,9].includes(r.number)? bet.amount*2 : -bet.amount;
-      if(bet.bigSmall==='small') net += [0,1,2,3,4].includes(r.number)? bet.amount*2 : -bet.amount;
-    }
-
-    setBalance(b=>b+net);
-    if(net>0){ setResultPopup({type:'win', round:r}); playSound('win'); }
-    if(net<0){ setResultPopup({type:'lose', round:r}); playSound('lose'); }
-    if(net!==0) setTimeout(()=>setResultPopup(null),3000);
-
-    setConfirmedBet({number:null,color:null,bigSmall:null,amount:0});
   }
+
+  // ----- Color -----
+  if (bet.color) {
+    let multiplier = -1;
+    if (bet.color === "green") {
+      if ([1, 3, 7, 9].includes(r.number)) multiplier = 2;
+      if (r.number === 5) multiplier = 1.5;
+    }
+    if (bet.color === "red") {
+      if ([2, 4, 6, 8].includes(r.number)) multiplier = 2;
+      if (r.number === 0) multiplier = 1.5;
+    }
+    if (bet.color === "violet") {
+      if ([0, 5].includes(r.number)) multiplier = 4.5;
+    }
+
+    net += bet.amount * multiplier;
+    totalMultiplier = multiplier;
+    win = multiplier > 0;
+  }
+
+  // ----- Big/Small -----
+  if (bet.bigSmall) {
+    let multiplier = -1;
+    if (bet.bigSmall === "big" && [5, 6, 7, 8, 9].includes(r.number)) multiplier = 2;
+    if (bet.bigSmall === "small" && [0, 1, 2, 3, 4].includes(r.number)) multiplier = 2;
+
+    net += bet.amount * multiplier;
+    totalMultiplier = multiplier;
+    win = multiplier > 0;
+  }
+
+  // Update balance
+  setBalance(b => b + net);
+
+  // Save Win/Loss history
+  const entry = {
+    betId: generateBetId(),
+    period: r.period,
+    betType: bet.number !== null ? "number" : bet.color ? "color" : "bigSmall",
+    betValue: bet.number ?? bet.color ?? bet.bigSmall,
+    betAmount: bet.amount,
+    multiplier: totalMultiplier,
+    resultNumber: r.number,
+    resultColor: r.color,
+    resultBigSmall: r.bigSmall,
+    winAmount: win ? net : 0,
+    lossAmount: !win ? Math.abs(net) : 0,
+    status: win ? "win" : "lose",
+    timestamp: new Date().toISOString()
+  };
+
+  setBetHistory(h => [entry, ...h]);
+
+  // Popup
+  if (net > 0) {
+    setResultPopup({ type: "win", round: r });
+    playSound("win");
+  }
+  if (net < 0) {
+    setResultPopup({ type: "lose", round: r });
+    playSound("lose");
+  }
+  if (net !== 0) setTimeout(() => setResultPopup(null), 3000);
+
+  setConfirmedBet({ number: null, color: null, bigSmall: null, amount: 0 });
+}
+
 
   // ---------------- Selection ----------------
   function onSelectColor(c:string){ if(bettingLocked) return; setSelectedColor(c); setSelectedNumber(null); setSelectedBigSmall(null); setShowPopup(true); playSound('click'); }
@@ -276,15 +338,50 @@ export default function WingoFull() {
      {/* RIGHT SIDE TAB */}
             <div className="w-full md:w-96">
               <div className="flex gap-2 mb-4 bg-[#0d1317] p-2 rounded-xl border border-[#1f2a33]">
-                {['play','chart','history','How to play'].map(t=>(
+                {['Play','Player History','History','How To Play'].map(t=>(
                   <button key={t} onClick={()=>setTab(t as any)} className={`flex-1 py-2 rounded-lg font-semibold capitalize transition ${tab===t?'bg-[#00c46c] text-black shadow-[0_0_10px_#00c46c]':'bg-[#111b21] text-gray-300 border border-[#1f2a33] hover:bg-[#162229]'}`}>
                     {t}
                   </button>
                 ))}
               </div>
 
-              {tab==='chart' && <Sparkline numbers={chartData} />}
-              {tab==='history' && (
+             {tab === 'Player History' && (
+  <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
+    <table className="w-full text-sm">
+      <thead className="text-xs text-gray-500">
+        <tr>
+          <th>ID</th>
+          <th>Bet</th>
+          <th>Amt</th>
+          <th>Mult</th>
+          <th>Result</th>
+          <th>P/L</th>
+        </tr>
+      </thead>
+      <tbody>
+        {betHistory.map((h, i) => (
+          <tr key={i} className="border-t text-center text-xs">
+            <td>{h.betId}</td>
+            <td>{h.betValue}</td>
+            <td>{h.betAmount}</td>
+            <td>{h.multiplier}</td>
+            <td>{h.resultNumber}</td>
+
+            {/* Win or Loss display */}
+            <td className={h.status === "win" ? "text-green-400" : "text-red-400"}>
+              {h.status === "win"
+                ? `+${h.winAmount}`
+                : `-${h.lossAmount}`}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+
+              {tab==='History' && (
                 <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
                   <table className="w-full text-sm">
                     <thead className="text-xs text-gray-500"><tr><th>Period</th><th>Num</th><th>BS</th><th>Color</th></tr></thead>
@@ -301,7 +398,7 @@ export default function WingoFull() {
                   </table>
                 </div>
               )}
-              {tab === 'How to play' && (
+              {tab === 'How To Play' && (
                 <div className="bg-[#101b22dd] rounded p-4 shadow max-h-72 overflow-auto text-sm text-gray-200 space-y-2">
                   <ol className="list-decimal list-inside space-y-2">
                     <li>
