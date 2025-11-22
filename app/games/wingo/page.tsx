@@ -28,7 +28,9 @@ export default function WingoFull() {
   const [confirmedBet, setConfirmedBet] = useState<{number:number|null,color:string|null,bigSmall:'big'|'small'|null,amount:number}>({number:null,color:null,bigSmall:null,amount:0});
   const [resultPopup, setResultPopup] = useState<null | {type:'win'|'lose', round: Round}>(null);
   const confirmedBetRef = useRef(confirmedBet);
-
+  const [search, setSearch] = useState("");
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
   // Betting locked when 5s or less
   const bettingLocked = timeLeft <= 5;
 
@@ -47,7 +49,31 @@ export default function WingoFull() {
     const path = `/sounds/${type}.mp3`;
     try{ const a = new Audio(path); a.volume = volume/100; a.play().catch(()=>{}); }catch(e){}
   }
-
+   useEffect(() => {
+      const fetchDashboardDetails = async () => {
+        try {
+          const token = localStorage.getItem("token");
+          const id = localStorage.getItem("userId");
+  
+          const res = await apiRequest(`/users/${id}/details`, true, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+         console.log("Dashboard Details Response:", res);
+          if (res.success) {
+            setDashboardDetails(res.data);
+          }
+        } catch (err) {
+          console.error("Dashboard API Error:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchDashboardDetails();
+    }, []);
   // ---------------- Continuous Timer ----------------
   useEffect(() => {
     confirmedBetRef.current = confirmedBet;
@@ -131,10 +157,14 @@ export default function WingoFull() {
 
   // ---------------- JSX ----------------
   return (
-    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
-      <TopNavbar searchValue={''} onSearchChange={()=>{}} wallets={[]}/>
+    <div className="flex min-h-screen bg-[#0d1317] text-white overflow-x-hidden relative flex-col">
+      <TopNavbar
+  searchValue={search}
+  onSearchChange={setSearch}
+  wallets={dashboardDetails?.wallets || []}
+/>
 
-      <div className="min-h-screen bg-[#101b22dd] p-4 flex flex-col items-center gap-4">
+      <div className="min-h-screen bg-[#0d1317] p-4 flex flex-col items-center gap-4">
 
         {/* Durations */}
         <div className="flex gap-3 bg-[#1c2a38] rounded-2xl shadow p-4">

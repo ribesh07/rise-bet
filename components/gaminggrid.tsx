@@ -25,6 +25,7 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const games: Game[] = [
+    { name: "Wingo", image: "/images/wingo.jpg", playing: 340, route: "/games/wingo"  },
     { name: "Crash", image: "/images/crash.jpg", playing: 1738, route: "/games/CrashGame" },
     { name: "Dice", image: "/images/dice.jpg", playing: 384, route: "/games/DiceGame" },
     { name: "Plinko", image: "/images/plinko.jpg", playing: 436, route: "/games/PlinkoGame" },
