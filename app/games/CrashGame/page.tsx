@@ -275,12 +275,12 @@ useEffect(() => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white px-2 sm:px-4">
+    <div className="min-h-screen bg-[#101b22dd]/95 text-white  sm:px-4">
 
       {/* Header */}
-      <div className="bg-gray-800 border-b-2 border-yellow-500 p-4">
+      <div className="bg-gray-800 border-b-2 border-yellow-500 pt-4 pb-4 ">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ml-1.5">
             <h1 className="text-3xl font-bold text-yellow-400">🚀 CRASH</h1>
             <div className="text-lg">Balance: <span className="text-green-400">${balance.toLocaleString()}</span></div>
           </div>
