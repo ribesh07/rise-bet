@@ -244,12 +244,27 @@ useEffect(() => {
 
   // UI helper functions
   const getMultiplierColor = () => {
-    if (gameState === 'crashed') return 'text-red-500';
-    if (currentMultiplier >= 10) return 'text-purple-400';
-    if (currentMultiplier >= 5) return 'text-yellow-400';
-    if (currentMultiplier >= 2) return 'text-green-400';
-    return 'text-white';
-  };
+  if (gameState === "crashed")
+    return "text-red-700 drop-shadow-[0_0_10px_rgba(255,0,0,0.6)]";
+
+  if (currentMultiplier >= 50)
+    return "text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 drop-shadow-[0_0_12px_rgba(255,100,0,0.9)]";
+
+  if (currentMultiplier >= 20)
+    return "text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 drop-shadow-[0_0_10px_rgba(180,0,255,0.8)]";
+
+  if (currentMultiplier >= 10)
+    return "text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-400 drop-shadow-[0_0_12px_rgba(140,0,255,0.7)]";
+
+  if (currentMultiplier >= 5)
+    return "text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-500 drop-shadow-[0_0_10px_rgba(255,180,0,0.8)]";
+
+  if (currentMultiplier >= 2)
+    return "text-green-500 drop-shadow-[0_0_6px_rgba(0,255,100,0.5)]";
+
+  return "text-yellow-300 drop-shadow-[0_0_5px_rgba(255,255,150,0.6)]";
+};
+
 
   const getBetButtonText = () => {
     if (gameState === 'waiting') return countdown > 3 ? `BET $${betAmount.toFixed(2)}` : 'BETTING CLOSED';
@@ -282,7 +297,7 @@ useEffect(() => {
           <div className="lg:col-span-3">
             {/* Game Display */}
             <div className="bg-gray-800 rounded-lg border-1 border-gray-600 p-3 mb-6">
-              <div className="relative h-72 sm:h-80 md:h-96 lg:h-[32rem] xl:h-[32rem] rounded-lg overflow-hidden border-2 border-gray-500">
+              <div className="relative h-68 sm:h-80 md:h-96 lg:h-[32rem] xl:h-[32rem] rounded-lg overflow-hidden border-2 border-gray-500">
 
 
 
@@ -294,10 +309,10 @@ useEffect(() => {
   loop
   autoPlay
   playsInline
-  className={`className="absolute inset-0 w-full h-full object-cover"
- ${
-    showVideo ? "opacity-100" : "opacity-0"
-  }`}
+ className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+  showVideo ? "opacity-100" : "opacity-0"
+}`}
+
 />
 
 
@@ -306,27 +321,41 @@ useEffect(() => {
   <div className="absolute inset-0 bg-black/40"></div>
 
   {/* Multiplier Display */}
-  <div className="absolute inset-0 flex items-center justify-center z-20">
-    <div className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold ${getMultiplierColor()} transition-colors duration-300`}>
-      {gameState === 'waiting' ? (
-        <div className="text-center">
-          <div className="text-3xl text-gray-200 mb-4">Next Round Starting In</div>
-          <div className="text-5xl sm:text-6xl md:text-7xl text-yellow-400 animate-pulse">
-  {countdown}
+<div
+  className={`absolute z-20 
+    ${
+      gameState === "flying"
+        ? "top-4 right-4"  // TOP-RIGHT for flying
+        : "inset-0 flex items-center justify-center"
+    }`}
+>
+  <div
+    className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold 
+      ${getMultiplierColor()} 
+      transition-colors duration-300`}
+  >
+    {gameState === "waiting" ? (
+      <div className="text-center">
+        <div className="text-3xl text-gray-200 mb-4">Next Round Starting In</div>
+        <div className="text-5xl sm:text-6xl md:text-7xl text-yellow-400 animate-pulse">
+          {countdown}
+        </div>
+        <div className="text-lg text-gray-300 mt-4">Place your bets!</div>
+      </div>
+    ) : gameState === "crashed" ? (
+      <div className="text-center animate-pulse">
+        <div className="text-4xl sm:text-5xl md:text-6xl text-red-500 mb-2">
+          CRASHED!
+        </div>
+        <div className="text-4xl text-red-400">at {crashPoint}x</div>
+      </div>
+    ) : (
+      `${currentMultiplier}x`
+    )}
+  </div>
 </div>
 
-          <div className="text-lg text-gray-300 mt-4">Place your bets!</div>
-        </div>
-      ) : gameState === 'crashed' ? (
-        <div className="text-center animate-pulse">
-          <div className="text-4xl sm:text-5xl md:text-6xl text-red-500  mb-2">CRASHED!</div>
-          <div className="text-4xl text-red-400">at {crashPoint}x</div>
-        </div>
-      ) : (
-        `${currentMultiplier}x`
-      )}
-    </div>
-  </div>
+
 
   {/* Crash effect */}
   {gameState === 'crashed' && (
