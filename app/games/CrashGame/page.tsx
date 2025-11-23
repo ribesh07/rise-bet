@@ -34,6 +34,10 @@ const CrashGame: React.FC = () => {
   const [history, setHistory] = useState<number[]>([2.34, 1.23, 5.67, 1.89, 3.45, 7.23, 1.02, 4.56]);
   const [countdown, setCountdown] = useState<number>(7);
   const [activePlayers, setActivePlayers] = useState<ActivePlayer[]>([]);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+const [showVideo, setShowVideo] = useState(true);
+
+
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { user: 'Player123', message: 'Nice win!', time: '12:34' },
     { user: 'CrashMaster', message: 'Going for 10x', time: '12:33' },
@@ -201,6 +205,23 @@ const CrashGame: React.FC = () => {
   const cashOut = useCallback(() => {
     performCashOut(currentMultiplier);
   }, [currentMultiplier, performCashOut]);
+useEffect(() => {
+  if (!videoRef.current) return;
+
+  if (gameState === "crashed") {
+    // Just hide the video visually
+    setShowVideo(false);
+  }
+
+  if (gameState === "waiting") {
+    // Show video again
+    setShowVideo(true);
+
+    // Reset to beginning WITHOUT calling play()
+    videoRef.current.currentTime = 0;
+  }
+}, [gameState]);
+
 
   // Auto cashout effect
   useEffect(() => {
@@ -239,7 +260,8 @@ const CrashGame: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white px-2 sm:px-4">
+
       {/* Header */}
       <div className="bg-gray-800 border-b-2 border-yellow-500 p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
@@ -254,70 +276,71 @@ const CrashGame: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="max-w-6xl mx-auto p-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
           {/* Main Game Area */}
           <div className="lg:col-span-3">
             {/* Game Display */}
-            <div className="bg-gray-800 rounded-lg border-2 border-gray-600 p-6 mb-6">
-              <div className="relative h-96 bg-gradient-to-br from-gray-900 to-gray-700 rounded-lg overflow-hidden border-2 border-gray-500">
-                {/* Background Grid */}
-                <div className="absolute inset-0 opacity-20">
-                  <svg width="100%" height="100%">
-                    <defs>
-                      <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#4ade80" strokeWidth="1"/>
-                      </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                  </svg>
-                </div>
+            <div className="bg-gray-800 rounded-lg border-1 border-gray-600 p-3 mb-6">
+              <div className="relative h-72 sm:h-80 md:h-96 lg:h-[32rem] xl:h-[32rem] rounded-lg overflow-hidden border-2 border-gray-500">
 
-                {/* Multiplier Display */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className={`text-8xl font-bold ${getMultiplierColor()} transition-colors duration-300`}>
-                    {gameState === 'waiting' ? (
-                      <div className="text-center">
-                        <div className="text-3xl text-gray-400 mb-4">Next Round Starting In</div>
-                        <div className="text-7xl text-yellow-400 animate-pulse">{countdown}</div>
-                        <div className="text-lg text-gray-500 mt-4">Place your bets!</div>
-                      </div>
-                    ) : gameState === 'crashed' ? (
-                      <div className="text-center animate-pulse">
-                        <div className="text-6xl text-red-500 mb-2">CRASHED!</div>
-                        <div className="text-4xl text-red-400">at {crashPoint}x</div>
-                        <div className="text-lg text-gray-400 mt-4">Preparing next round...</div>
-                      </div>
-                    ) : (
-                      `${currentMultiplier}x`
-                    )}
-                  </div>
-                </div>
 
-                {/* Rocket Animation */}
-                {gameState === 'flying' && (
-                  <div
-                    className="absolute bottom-10 left-10 text-4xl transition-all duration-300 ease-out"
-                    style={{
-                      transform: `translate(${(currentMultiplier - 1) * 50}px, ${-(currentMultiplier - 1) * 20}px) rotate(${Math.min((currentMultiplier - 1) * 10, 45)}deg)`
-                    }}
-                  >
-                    🚀
-                  </div>
-                )}
 
-                {/* Crash Effect */}
-                {gameState === 'crashed' && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-6xl animate-bounce">💥</div>
-                  </div>
-                )}
+  {/* FULL SCREEN VIDEO BACKGROUND */}
+<video
+  ref={videoRef}
+  src="/animation/animation.mp4"
+  muted
+  loop
+  autoPlay
+  playsInline
+  className={`className="absolute inset-0 w-full h-full object-cover"
+ ${
+    showVideo ? "opacity-100" : "opacity-0"
+  }`}
+/>
 
-                {/* Game Stats */}
-                <div className="absolute top-4 left-4">
-                  <div className="text-sm text-gray-300">Game Hash: #{mounted ? gameHash : 'loading...'}</div>
-                </div>
-              </div>
+
+
+  {/* Dark overlay so multiplier text is readable */}
+  <div className="absolute inset-0 bg-black/40"></div>
+
+  {/* Multiplier Display */}
+  <div className="absolute inset-0 flex items-center justify-center z-20">
+    <div className={`text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold ${getMultiplierColor()} transition-colors duration-300`}>
+      {gameState === 'waiting' ? (
+        <div className="text-center">
+          <div className="text-3xl text-gray-200 mb-4">Next Round Starting In</div>
+          <div className="text-5xl sm:text-6xl md:text-7xl text-yellow-400 animate-pulse">
+  {countdown}
+</div>
+
+          <div className="text-lg text-gray-300 mt-4">Place your bets!</div>
+        </div>
+      ) : gameState === 'crashed' ? (
+        <div className="text-center animate-pulse">
+          <div className="text-4xl sm:text-5xl md:text-6xl text-red-500  mb-2">CRASHED!</div>
+          <div className="text-4xl text-red-400">at {crashPoint}x</div>
+        </div>
+      ) : (
+        `${currentMultiplier}x`
+      )}
+    </div>
+  </div>
+
+  {/* Crash effect */}
+  {gameState === 'crashed' && (
+    <div className="absolute inset-0 flex items-center justify-center z-30">
+      <div className="text-6xl animate-bounce">💥</div>
+    </div>
+  )}
+
+  {/* Game stats */}
+  <div className="absolute top-4 left-4 text-sm text-gray-300 z-30">
+    Game Hash: #{gameHash}
+  </div>
+</div>
+
 
               {/* Player Status */}
               {playerBet && (
@@ -358,7 +381,8 @@ const CrashGame: React.FC = () => {
 
             {/* Controls */}
             <div className="bg-gray-800 rounded-lg border-2 border-gray-600 p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+
                 {/* Bet Amount */}
                 <div>
                   <label className="block text-sm text-gray-300 mb-2">Bet Amount</label>
@@ -440,7 +464,7 @@ const CrashGame: React.FC = () => {
                   (gameState === 'flying' && (!playerBet || cashedOut)) ||
                   gameState === 'crashed'
                 }
-                className={`w-full mt-6 py-4 text-2xl font-bold rounded-lg transition-all duration-300 ${
+                className={`w-full mt-4 py-3 text-xl sm:text-2xl font-bold rounded-lg transition-all duration-300 ${
                   gameState === 'flying' && playerBet && !cashedOut
                     ? 'bg-red-600 hover:bg-red-500 text-white animate-pulse'
                     : gameState === 'waiting' && countdown > 3

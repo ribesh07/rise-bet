@@ -345,40 +345,40 @@ export default function WingoFull() {
                 ))}
               </div>
 
-             {tab === 'Player History' && (
-  <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
-    <table className="w-full text-sm">
-      <thead className="text-xs text-gray-500">
-        <tr>
-          <th>ID</th>
-          <th>Bet</th>
-          <th>Amt</th>
-          <th>Mult</th>
-          <th>Result</th>
-          <th>P/L</th>
-        </tr>
-      </thead>
-      <tbody>
-        {betHistory.map((h, i) => (
-          <tr key={i} className="border-t text-center text-xs">
-            <td>{h.betId}</td>
-            <td>{h.betValue}</td>
-            <td>{h.betAmount}</td>
-            <td>{h.multiplier}</td>
-            <td>{h.resultNumber}</td>
+                        {tab === 'Player History' && (
+              <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-gray-500">
+                    <tr>
+                      <th>ID</th>
+                      <th>Bet</th>
+                      <th>Amt</th>
+                      <th>Mult</th>
+                      <th>Result</th>
+                      <th>P/L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {betHistory.map((h, i) => (
+                      <tr key={i} className="border-t text-center text-xs">
+                        <td>{h.betId}</td>
+                        <td>{h.betValue}</td>
+                        <td>{h.betAmount}</td>
+                        <td>{h.multiplier}</td>
+                        <td>{h.resultNumber}</td>
 
-            {/* Win or Loss display */}
-            <td className={h.status === "win" ? "text-green-400" : "text-red-400"}>
-              {h.status === "win"
-                ? `+${h.winAmount}`
-                : `-${h.lossAmount}`}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
+                        {/* Win or Loss display */}
+                        <td className={h.status === "win" ? "text-green-400" : "text-red-400"}>
+                          {h.status === "win"
+                            ? `+${h.winAmount}`
+                            : `-${h.lossAmount}`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
 
               {tab==='History' && (
@@ -562,14 +562,4 @@ function BetModal({ selectedNumber, selectedColor, selectedBigSmall, betAmount, 
   );
 }
 
-// ------------------- Sparkline -------------------
-function Sparkline({ numbers }: { numbers: number[] }){
-  const max = Math.max(...numbers);
-  return (
-    <div className="w-full h-32 flex items-end gap-1">
-      {numbers.map((n,i)=>(
-        <div key={i} className={`flex-1 rounded-t`} style={{height:`${(n/max)*100}%`, backgroundColor:'#00c46c'}}></div>
-      ))}
-    </div>
-  );
-}
+
