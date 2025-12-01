@@ -6,6 +6,7 @@ import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
 import * as swaggerDocument from './docs/swagger.json';
 import * as swaggerUi from 'swagger-ui-express';
+import { setupSwagger } from './config/swagger.config';
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
@@ -27,8 +28,10 @@ async function bootstrap() {
     prefix: '/uploads',
   });
 
+  //swagger
+          setupSwagger(app);
    // Load existing swagger.json
-   app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  //  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
