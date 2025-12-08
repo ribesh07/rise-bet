@@ -5,7 +5,7 @@ import * as path from 'path';
 
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('Multi-Tenant API')
+    .setTitle('API')
     .setDescription('API documentation for backend services')
     .setVersion('1.0.0')
     .addBearerAuth({
@@ -55,7 +55,7 @@ export function setupSwagger(app: INestApplication) {
       body { background-color: #fbfdfdff !important; }
       .swagger-ui .opblock-summary-method { background-color: #f5f6f8ff !important; }
     `,
-    customSiteTitle: 'J1Soft API Docs',
+    customSiteTitle: 'API Docs',
   });
 
   // OPTIONAL: Export swagger.json (for clients, SDKs, etc.)
