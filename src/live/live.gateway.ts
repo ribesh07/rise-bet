@@ -170,7 +170,7 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         userId,
         room: payload.room,
         payload: payload.bet,
-        amount: payload.bet.amount,
+        amount: Number(payload.bet.amount),
       });
 
       client.emit('bet-placed', betEntry);
