@@ -27,15 +27,23 @@ const ModernRoulette: React.FC<{ tableId: string }> = () => {
   const [countdown, setCountdown] = useState<number>(15);
   const [gameHistory, setGameHistory] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tableId, setTableId] = useState<string>(generateTableId());
+  const [tableId, setTableId] = useState(uuidv4());
   const socketRef = useRef<any>(null);
   const wheelNumbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
     5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26,
   ];
-  const redNumbers = [
-    1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
-  ];
+ const redNumbers = [
+  1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36,
+];
+
+const getColor = (num: number | string) => {
+  if (num === "0" || num === 0) return "green";
+  if (num === "red" || redNumbers.includes(Number(num))) return "red";
+  if (num === "black" || (!redNumbers.includes(Number(num)) && num !== 0)) return "black";
+  return "unknown";
+};
+
   const betAmounts = [1, 5, 10, 25, 50, 100];
 
   const wheelRotationRef = useRef<number>(wheelRotation);
@@ -78,13 +86,18 @@ const ModernRoulette: React.FC<{ tableId: string }> = () => {
   }, [tableId]);
 
   /* ---------- BETTING ---------- */
-  const placeBet = (position: string) => {
-    if (betAmount > balance || isSpinning) return;
+ const placeBet = (position: string) => {
+  if (betAmount > balance || isSpinning) return;
 
-    setBets((prev) => ({ ...prev, [position]: (prev[position] || 0) + betAmount }));
-    setTotalBet((prev) => prev + betAmount);
-    setBalance((prev) => prev - betAmount);
-  };
+  setBets((prev) => ({ ...prev, [position]: (prev[position] || 0) + betAmount }));
+  setTotalBet((prev) => prev + betAmount);
+  setBalance((prev) => prev - betAmount);
+
+  // Comment this out if server handles bets only on spin
+  // sendBetToServer(position, betAmount);
+};
+
+
 
   const clearBets = () => {
     setBalance((prev) => prev + totalBet);
@@ -93,37 +106,42 @@ const ModernRoulette: React.FC<{ tableId: string }> = () => {
   };
 
   /* ---------- SPIN ---------- */
-  const spin = () => {
-    if (totalBet === 0 || isSpinning) return;
-    const socket = socketRef.current;
-    if (!socket || !socket.connected) return alert("No server connection");
+ const spin = () => {
+  if (totalBet === 0 || isSpinning) return;
+  const socket = socketRef.current;
+  if (!socket || !socket.connected) return alert("No server connection");
 
-    setIsSpinning(true);
-    setResult(null);
-    setWinningAmount(0);
-    setShowWinningAlert(false);
+  setIsSpinning(true);
+  setResult(null);
+  setWinningAmount(0);
+  setShowWinningAlert(false);
 
-    const payload = {
-      room: tableId,
-      bets,
-      totalBet,
-    };
-
-    socket.emit("place-bets", payload, (ack: any) => {
-      if (!ack.ok) {
-        alert(ack.error || "Bet rejected");
-        setBalance((prev) => prev + totalBet);
-        setBets({});
-        setTotalBet(0);
-        setIsSpinning(false);
-      }
-    });
-
-    // local wheel animation while waiting
-    const spins = 8 + Math.random() * 4;
-    setWheelRotation((prev) => prev + spins * 360);
-    setBallRotation((prev) => prev - spins * 360);
+  const payload = {
+    room: tableId,
+    userId: localStorage.getItem("userId"),
+    gameId: "roulette",
+    bets: Object.entries(bets).map(([betType, amount]) => ({
+      betId: uuidv4(),
+      betType,
+      amount,
+      color: getColor(betType), // <-- send color here
+    })),
+    totalBet,
   };
+
+  console.log("Sending batch bets payload with color:", payload);
+
+  socket.emit("place-bets", payload, (ack: any) => {
+    if (!ack || !ack.ok) {
+      alert(ack?.error || "Bet rejected");
+      setBalance((prev) => prev + totalBet);
+      setBets({});
+      setTotalBet(0);
+      setIsSpinning(false);
+    }
+  });
+};
+
 
   /* ---------- HANDLE SERVER RESULT ---------- */
   const handleServerResult = (winningNumber: number) => {
@@ -169,6 +187,39 @@ const ModernRoulette: React.FC<{ tableId: string }> = () => {
   };
 
   if (loading) return <div>Joining room...</div>;
+
+
+  const sendBetToServer = (betType: string, amount: number) => {
+  const socket = socketRef.current;
+  if (!socket || !socket.connected) return;
+
+  const payload = {
+    userId: localStorage.getItem("userId"), // assuming user ID is stored
+    gameId: "roulette",
+   room: tableId,
+    betId: uuidv4(), // unique ID per bet
+    betType,
+    amount,
+    color: getColor(betType),
+  };
+  console.log("Sending individual bet payload to server:", payload);
+  socket.emit("place-bet", payload, (ack: any) => {
+    if (!ack.ok) {
+      console.error("Bet rejected:", ack.error);
+      setBalance((prev) => prev + amount);
+      setBets((prev) => {
+        const updated = { ...prev };
+        updated[betType] = (updated[betType] || 0) - amount;
+        if (updated[betType] <= 0) delete updated[betType];
+        return updated;
+      });
+      setTotalBet((prev) => prev - amount);
+    } else {
+      console.log("Bet accepted:", payload);
+    }
+  });
+};
+
 
   /* ---------- JSX ---------- */
   return (
