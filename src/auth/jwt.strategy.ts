@@ -25,7 +25,7 @@ async validate(payload: any) {
 
   // --- CASE 1: ADMIN AUTH ---
   if (payload.role === 'ADMIN' || payload.role === 'SUPER_ADMIN') {
-    const admin = await this.adminService.getAdminDetails(payload.sub);
+    const admin = await this.adminService.getAdminDetails(Number(payload.sub));
 
     // console.log('Admin found:', admin , 'for payload:', payload.sub);
     if (!admin) return null;
