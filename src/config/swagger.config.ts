@@ -50,10 +50,10 @@ export function setupSwagger(app: INestApplication) {
       displayRequestDuration: true,
       docExpansion: 'none',
     },
-    customCss: `
+       customCss: `
       .swagger-ui .topbar { background-color: #4ad179ff; }
       body { background-color: #fbfdfdff !important; }
-      .swagger-ui .opblock-summary-method { background-color: #f5f6f8ff !important; }
+      .swagger-ui .opblock-summary-method { background-color: #4ad179ff !important; }
     `,
     customSiteTitle: 'API Docs',
   });

@@ -154,10 +154,17 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       if (!token) throw new Error('Unauthenticated');
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      const userId = decoded.sub;
+      const userId = Number(decoded.sub);
+      console.log(decoded);
       console.log(`Placing bet for user ${userId} in room ${payload.room}`);
 
+
       const match = await this.rouletteService.getActiveMatch(payload.room);
+      // const user = await this.usersService.findById(userId);
+
+      // if (!user) {
+      //       throw new Error(`User with id ${userId} does NOT exist`);
+      //     }
       const betEntry = await this.rouletteService.createBet({
         matchId: match.id,
         userId,

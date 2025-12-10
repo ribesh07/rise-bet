@@ -40,7 +40,7 @@ async validateUser(pass: string, email?: string, username?: string) {
     const details = await this.userService.getUserWithDetails(Number(user.id));
     
     const { password, ...rest } = details as any;
-    const payload = { sub: rest?.data.id, email: rest?.data.email, role :rest?.data.role ,username : rest?.data.username };
+    const payload = { sub: rest?.data.id, role :rest?.data.role ,username : rest?.data.username };
     console.log('User details fetched for login:', rest);
 
     return {
@@ -79,7 +79,7 @@ async validateUser(pass: string, email?: string, username?: string) {
         username : user.username,
         dob : user.dob as unknown as Date,
         phone : user.phone,
-        access_token : this.jwtService.sign({ sub: user.id, email: user.email , role :user.role , username : user.username }),
+        access_token : this.jwtService.sign({ sub: user.id, role :user.role , username : user.username }),
       },
     };
   }
@@ -107,7 +107,7 @@ async validateUser(pass: string, email?: string, username?: string) {
 
 
      const { password, ...rest } = details as any;
-    const payload = { sub: rest?.id, email: rest?.email, role :rest?.role ,username : rest?.username };
+    const payload = { sub: rest?.id, role :rest?.role ,username : rest?.username };
     return {
       success: true,
       message: 'Login successful',
