@@ -26,13 +26,14 @@ FROM node:20.12.2-alpine
 WORKDIR /src
 
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
-
+RUN npm ci --legacy-peer-deps --include=dev
+RUN npm install
 COPY . .
 
-RUN npm install -D @nestjs/cli
+RUN npm install -g @nestjs/cli
 RUN npx prisma generate
-RUN npx nest build
+RUN npm run build
+
 
 EXPOSE 3084
 
