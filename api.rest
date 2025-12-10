@@ -71,8 +71,8 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ2LCJlbWFpbCI6ImdnQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnZzQ5MSIsImlhdCI6MTc2MzUyNDQ2OCwiZXhwIjoxNzY0MTI5MjY4fQ.mhmWQ6pBhxTZ7DZlluy0BXa9MmmklPZhD72b2n9sAnk
 
 {
-     "oldPassword": "Gggg@123",
-    "newPassword": "Gggg@12344"
+     "oldPassword": "Gggg@12344",
+    "newPassword": "Gggg@12345"
 }
 
 ### send-otp
@@ -116,9 +116,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 
 ###transactions 
-POST https://api.playrise.vip/api/v1/users/48/transaction HTTP/1.1
+POST https://api.playrise.vip/api/v1/users/46/transaction HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUiLCJpYXQiOjE3NjMzODM1ODYsImV4cCI6MTc2Mzk4ODM4Nn0.aBu-9ZWA8UKi6jWNuTy9rFFJsBAT70U5N0z-UQqfKDU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ2LCJlbWFpbCI6ImdnQGdtYWlsLmNvbSIsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnZzQ5MSIsImlhdCI6MTc2NDU5ODcwNiwiZXhwIjoxNzY1MjAzNTA2fQ.2CvODFUJHRY3phvCDw09DEcRs4cG1Xk8tEXHb5LqTGY
+
 {
   "type":"WIN","amount":109,"currency":"INR"
 }

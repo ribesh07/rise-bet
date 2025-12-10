@@ -28,20 +28,20 @@ const sections = [
       "Rise Vendors ↗",
     ],
   },
-  {
-    title: "Sports",
-    items: [
-      "Sportsbook",
-      "Live Sports",
-      "Soccer",
-      "Basketball",
-      "Tennis",
-      "eSports",
-      "Bet Bonuses",
-      "Sports Rules",
-      "Racing Rules",
-    ],
-  },
+  // {
+  //   title: "Sports",
+  //   items: [
+  //     "Sportsbook",
+  //     "Live Sports",
+  //     "Soccer",
+  //     "Basketball",
+  //     "Tennis",
+  //     "eSports",
+  //     "Bet Bonuses",
+  //     "Sports Rules",
+  //     "Racing Rules",
+  //   ],
+  // },
   {
     title: "Support",
     items: [

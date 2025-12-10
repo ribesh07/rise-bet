@@ -8,3 +8,13 @@ export const fetchUserProfile = async () => {
   console.log("User Profile Data:", data);
   return data;
 };
+
+
+export const getToken = () => {
+  if (typeof window === "undefined") return "";
+  const token = localStorage.getItem("token") || "";
+  console.log("Retrieved Token:", token);
+  return token;
+};
+
+// ya aata ham fetch ka dai xi token na saave iinn sessoio storage
