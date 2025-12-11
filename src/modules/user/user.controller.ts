@@ -164,8 +164,8 @@ async updatePassword(
       {
         storage: diskStorage({
           destination: (req, file, cb) => {
+           
             const userId = (req as AuthRequest).user.id;
-
             const folder =
               file.fieldname === 'profileImage'
                 ? `./uploads/users/${userId}/profile`
@@ -191,25 +191,13 @@ async updatePassword(
         }),
         fileFilter: (req, file, cb) => {
           const allowedImageTypes = /jpeg|jpg|png|gif|webp/;
-          const allowedDocTypes = /pdf|doc|docx|txt/;
+          const allowedDocTypes = /jpeg|jpg|png|gif|webp/;
 
           const ext = extname(file.originalname).toLowerCase().slice(1);
 
-          if (file.fieldname === 'profileImage') {
-            if (allowedImageTypes.test(ext)) {
-              cb(null, true);
-            } else {
-              cb(new Error('Only image files are allowed for profile!'), false);
-            }
-          } else if (file.fieldname === 'documents') {
-            if (allowedDocTypes.test(ext) || allowedImageTypes.test(ext)) {
-              cb(null, true);
-            } else {
-              cb(new Error('Invalid document type!'), false);
-            }
-          } else {
+          
             cb(null, true);
-          }
+          
         },
         limits: {
           fileSize: 10 * 1024 * 1024, // 10MB
@@ -225,13 +213,17 @@ async updatePassword(
   },
   @Request() req,
 ) {
+  
   const userId = req.user.id;
+  console.log('User ID:', userId);
 
   if (!files.profileImage && !files.documents) {
     throw new BadRequestException('No files uploaded');
   }
 
+
   try {
+    console.log('Uploaded files:', files);
     const result = await this.userService.updateUserFiles(userId, files);
 
     // 🔥 DELETE OLD PROFILE IMAGE
@@ -269,18 +261,11 @@ async updatePassword(
   }
 }
 
-private deleteFileIfExists(filePath: string) {
-  try {
-    const absolutePath = filePath.startsWith('./')
-      ? path.join(process.cwd(), filePath)
-      : path.join(process.cwd(), filePath.replace(/^\//, ''));
+private deleteFileIfExists(relativePath: string) {
+  const fullPath = path.join(process.cwd(), relativePath);
 
-    if (fs.existsSync(absolutePath)) {
-      fs.unlinkSync(absolutePath);
-      console.log('✅ Deleted file:', absolutePath);
-    }
-  } catch (error) {
-    console.error('❌ Error deleting file:', filePath, error);
+  if (fs.existsSync(fullPath)) {
+    fs.unlinkSync(fullPath);
   }
 }
 

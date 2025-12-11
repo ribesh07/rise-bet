@@ -351,14 +351,17 @@ async updateUserFiles(
     if (files.profileImage?.length) {
       const file = files.profileImage[0];
       // Store relative path consistently
+
       profilePath = `/uploads/users/${userId}/profile/${file.filename}`;
+      console.log('Profile path set to:', profilePath);
     }
 
     // ----- DOCUMENTS -----
     if (files.documents?.length) {
-      documentPaths = files.documents.map(
-        (file) => `/uploads/users/${userId}/documents/${file.filename}`,
-      );
+      documentPaths = documentPaths = files.documents.map(file => {
+        const path = `/uploads/users/${userId}/documents/${file.filename}`;
+        return path;
+      });
     }
 
     // 🔥 FETCH OLD FILES FIRST
