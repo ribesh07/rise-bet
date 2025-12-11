@@ -14,6 +14,7 @@ import { mkdirSync } from 'fs';
 import { AuthRequest } from 'src/types/auth-request';
 import * as fs from 'fs';
 import * as path from 'path';
+// import { Express } from 'express';
 
 @Controller('api/v1/users')
 export class UserController {
@@ -130,8 +131,8 @@ async updatePassword(
 )
 async uploadUserFiles(
   @UploadedFiles() files: {
-    profileImage?: Express.Multer.File[];
-    documents?: Express.Multer.File[];
+    profileImage?: File[];
+    documents?: File[];
   },
   @Request() req
 ) {
