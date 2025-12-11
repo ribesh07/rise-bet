@@ -518,7 +518,7 @@
     }
   },
   "info": {
-    "title": "Multi-Tenant API",
+    "title": "API",
     "description": "API documentation for backend services",
     "version": "1.0.0",
     "contact": {}

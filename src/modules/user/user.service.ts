@@ -4,12 +4,12 @@ import * as bcrypt from 'bcryptjs';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { TransactionType, BetStatus, UserRole } from '@prisma/client';
 import { TransactionDto } from './dto/transaction.dto';
-import { BetDto } from './dto/bet.dto';
+// import { BetDto } from './dto/bet.dto';
 import { Currency } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as fs from 'fs';
 import * as path from 'path';
-import { join } from 'path';
+
 
 
 @Injectable()
@@ -285,57 +285,116 @@ async updateUserImage(userId: number, filename: string) {
 
   //get wallets
  
-  async updateUserFiles(
-  userId: number,
-  files: {
-    profileImage?: Express.Multer.File[];
-    documents?: Express.Multer.File[];
-  }
-) {
+//   async updateUserFiles(
+//   userId: number,
+//   files: {
+//     profileImage?: Express.Multer.File[];
+//     documents?: Express.Multer.File[];
+//   }
+// ) {
+//     let profilePath: string | null = null;
+//     let documentPaths: string[] | null = null;
+
+//     //   console.log('Updating files for user:', userId);
+//     // console.log('Received files:', files);
+
+//     // ----- PROFILE -----
+//     if (files.profileImage?.length) {
+//       const file = files.profileImage[0];
+//       profilePath = `/uploads/users/${userId}/${file.filename}`;
+//     }
+
+//     // ----- DOCUMENTS -----
+//     if (files.documents?.length) {
+//       documentPaths = files.documents.map(
+//         (file) => `/uploads/documents/${userId}/${file.filename}`
+//       );
+//     }
+
+//     // 🔥 FETCH OLD IMAGES FIRST
+//     const previousUser = await this.prisma.user.findUnique({
+//       where: { id: userId },
+//       select: { profileImage: true, documentImages: true },
+//     });
+
+//     const data: any = {};
+//     if (profilePath) data.profileImage = profilePath;
+//     if (documentPaths) data.documentImages = documentPaths;
+
+//     // 🔥 UPDATE USER FIRST (no FS work yet)
+//     const updatedUser = await this.prisma.user.update({
+//       where: { id: userId },
+//       data,
+//     });
+
+//     // Return old + new paths so controller can delete FS
+//     return {
+//       success: true,
+//       message: "User files updated",
+//       newProfile: profilePath,
+//       newDocuments: documentPaths,
+//       oldProfile: previousUser?.profileImage,
+//     };
+// }
+
+async updateUserFiles(
+    userId: number,
+    files: {
+      profileImage?: Express.Multer.File[];
+      documents?: Express.Multer.File[];
+    },
+  ) {
     let profilePath: string | null = null;
     let documentPaths: string[] | null = null;
-
-    //   console.log('Updating files for user:', userId);
-    // console.log('Received files:', files);
 
     // ----- PROFILE -----
     if (files.profileImage?.length) {
       const file = files.profileImage[0];
-      profilePath = `/uploads/users/${userId}/${file.filename}`;
+      // Store relative path consistently
+      profilePath = `/uploads/users/${userId}/profile/${file.filename}`;
     }
 
     // ----- DOCUMENTS -----
     if (files.documents?.length) {
       documentPaths = files.documents.map(
-        (file) => `/uploads/documents/${userId}/${file.filename}`
+        (file) => `/uploads/users/${userId}/documents/${file.filename}`,
       );
     }
 
-    // 🔥 FETCH OLD IMAGES FIRST
+    // 🔥 FETCH OLD FILES FIRST
     const previousUser = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { profileImage: true, documentImages: true },
     });
 
+    if (!previousUser) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
+
+    // Prepare update data
     const data: any = {};
     if (profilePath) data.profileImage = profilePath;
-    if (documentPaths) data.documentImages = documentPaths;
+    if (documentPaths) {
+      // Replace all documents (or append based on your logic)
+      data.documentImages = documentPaths;
+    }
 
-    // 🔥 UPDATE USER FIRST (no FS work yet)
+    // 🔥 UPDATE DB
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data,
     });
 
-    // Return old + new paths so controller can delete FS
+    // Return old + new paths for cleanup
     return {
       success: true,
-      message: "User files updated",
+      message: 'User files updated successfully',
       newProfile: profilePath,
       newDocuments: documentPaths,
-      oldProfile: previousUser?.profileImage,
+      oldProfile: previousUser.profileImage,
+      oldDocuments: previousUser.documentImages, // 🔥 ADDED THIS
     };
-}
+  }
 
 
   async getUserWallets(userId: number) {
