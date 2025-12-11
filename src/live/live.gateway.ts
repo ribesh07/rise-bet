@@ -13,6 +13,7 @@ import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { RouletteService } from '../roulette/roulette.service';
 import { UserService } from '../modules/user/user.service';
+import { AdminService } from 'src/modules/admin/admin.service';
 
 @WebSocketGateway({
   cors: { origin: '*' },
@@ -26,6 +27,7 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   constructor(
     private readonly rouletteService: RouletteService,
     private readonly usersService: UserService,
+    private readonly adminServices: AdminService,
   ) {}
 
   afterInit(server: Server) {
@@ -160,18 +162,21 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
       const match = await this.rouletteService.getActiveMatch(payload.room);
-      // const user = await this.usersService.findById(userId);
+      const user = await this.usersService.findById(userId);
 
-      // if (!user) {
-      //       throw new Error(`User with id ${userId} does NOT exist`);
-      //     }
+
+      if (!user || user.role !== 'USER') {
+            throw new Error(`User with id ${userId} does NOT exist`);
+          }
       const betEntry = await this.rouletteService.createBet({
         matchId: match.id,
         userId,
         room: payload.room,
         payload: payload.bet,
-        amount: Number(payload.bet.amount),
+        amount: Number(payload.bet.amount)
       });
+
+
 
       client.emit('bet-placed', betEntry);
       this.server.to(payload.room).emit('bet-update', { userId, bet: betEntry });
@@ -194,7 +199,7 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       const userId = decoded.sub;
-      const user = await this.usersService.findById(userId);
+      const user = await this.adminServices.getAdminDetails(userId);
       if (!user || user.role !== 'ADMIN') throw new Error('Forbidden');
 
       // before spin: report how many sockets are in the room

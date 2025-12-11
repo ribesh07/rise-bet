@@ -5,10 +5,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RouletteModule } from 'src/roulette/roulette.module';
 import { LiveGateway } from 'src/live/live.gateway';
 import { UserService } from '../user/user.service';
+import { AdminService } from '../admin/admin.service';
 
 @Module({
   imports: [RouletteModule],
   controllers: [ControlController],
-  providers: [ControlService , PrismaService,LiveGateway,UserService ],
+  providers: [ControlService , PrismaService,LiveGateway,UserService , AdminService],
 })
 export class ControlModule {}

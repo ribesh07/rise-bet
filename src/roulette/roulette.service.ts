@@ -58,7 +58,7 @@ export class RouletteService {
       const result = spinWheel();
       // fetch pending bets for this room/table (game='roulette' and match room)
       const pendingBets = await this.prisma.bet.findMany({
-        where: { game: 'roulette', status: 'PENDING',room },
+        where: { game: 'ROULETTE', status: BetStatus.PENDING,room },
       });
       // resolve bets atomically per bet
       const resolutions : any = [];
@@ -88,11 +88,11 @@ export class RouletteService {
               data: { balance: { increment: payout }  },
             });
           });
-          resolutions.push({ betId: bet.id, status: 'WON', payout });
+          resolutions.push({ betId: bet.id, status: 'WON', payout, userId: bet.userId });
         } else {
           // mark lost
           await this.prisma.bet.update({ where: { id: bet.id }, data: { status: 'LOST', updatedAt: new Date() }});
-          resolutions.push({ betId: bet.id, status: 'LOST' });
+          resolutions.push({ betId: bet.id, status: 'LOST' , userId: bet.userId });
         }
       }
 
@@ -327,7 +327,8 @@ async createBet(data: { matchId: number; userId: number; room: string; payload: 
       room: data.room,
       payload: data.payload,
       amount: data.amount,
-      currency: 'USDT', 
+      game:data.payload.game,
+      currency: data.payload.currency, 
     }
   });
 }
