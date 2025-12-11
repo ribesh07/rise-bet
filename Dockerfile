@@ -2,18 +2,18 @@ FROM node:20.12.2-alpine
 
 WORKDIR /src
 
-# Install dependencies first
+# Install dependencies
 COPY package*.json ./
 RUN npm ci --legacy-peer-deps
 
-# Copy source
+# Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate prisma client
 RUN npx prisma generate
 
-# Build NestJS
-RUN npm run build
+# Build using local @nestjs/cli
+RUN npx nest build
 
 EXPOSE 3084
 
