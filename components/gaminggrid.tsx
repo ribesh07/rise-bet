@@ -23,13 +23,14 @@ export interface GameGridHandles {
 const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) => {
   const router = useRouter();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const tableId = "roulette_1"; // Replace with actual table ID logic if needed
 
   const games: Game[] = [
     { name: "Wingo", image: "/images/wingo.jpg", playing: 340, route: "/games/wingo"  },
     { name: "Crash", image: "/images/crash.jpg", playing: 1738, route: "/games/CrashGame" },
     { name: "Dice", image: "/images/dice.jpg", playing: 384, route: "/games/DiceGame" },
     { name: "Plinko", image: "/images/plinko.jpg", playing: 436, route: "/games/PlinkoGame" },
-    { name: "Roulette", image: "/images/roulette.jpg", playing: 202, route: "/games/RouletteGame" },
+    { name: "Roulette", image: "/images/roulette.jpg", playing: 202, route: `/games/RouletteGame/${tableId}` },
     { name: "Mines", image: "/images/mines.jpg", playing: 370, route: "/games/MinesGame" },
     { name: "Hi-Lo", image: "/images/hi_lo.jpg", playing: 232, route: "/games/HiloGame" },
     { name: "Baccarat", image: "/images/baccarat.jpg", playing: 191, route: "/games/BaccaratGame" },
