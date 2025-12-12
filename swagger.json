@@ -208,6 +208,34 @@
         ]
       }
     },
+    "/api/v1/users/transactions": {
+      "get": {
+        "operationId": "UserController_getUserTransactions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
+    "/api/v1/users/bets": {
+      "get": {
+        "operationId": "UserController_getUserBets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "User"
+        ]
+      }
+    },
     "/api/v1/users/{id}/transaction": {
       "post": {
         "operationId": "UserController_addTransaction",

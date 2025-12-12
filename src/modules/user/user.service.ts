@@ -336,68 +336,27 @@ async updateUserImage(userId: number, filename: string) {
     };
 }
 
-// async updateUserFiles(
-//   userId: number,
-//   files: {
-//     profileImage?: Express.Multer.File[];
-//     documents?: Express.Multer.File[];
-//   },
-// ) {
-//   let profilePath: string | null = null;
-//   let documentPaths: string[] | null = null;
-
-//   // PROFILE
-//   if (files.profileImage?.length) {
-//     const file = files.profileImage[0];
-//     profilePath = `/uploads/users/${userId}/profile/${file.filename}`;
-//     console.log("PROFILE PATH:", profilePath);
-//   }
-
-//   // DOCUMENTS
-//   if (files.documents?.length) {
-//     documentPaths = files.documents.map((file) => {
-//       const path = `/uploads/users/${userId}/documents/${file.filename}`;
-//       return path;
-//     });
-
-//     console.log("DOCUMENT PATHS:", documentPaths);
-//   }
-
-//   // FETCH OLD FILES
-//   const previousUser = await this.prisma.user.findUnique({
-//     where: { id: userId },
-//     select: { profileImage: true, documentImages: true },
-//   });
-
-//   if (!previousUser) {
-//     throw new NotFoundException(`User ${userId} not found`);
-//   }
-
-//   // UPDATE
-//   const updateData: any = {};
-//   if (profilePath) updateData.profileImage = profilePath;
-//   if (documentPaths) updateData.documentImages = documentPaths;
-
-//   await this.prisma.user.update({
-//     where: { id: userId },
-//     data: updateData,
-//   });
-
-//   return {
-//     success: true,
-//     message: 'User files updated successfully',
-//     newProfile: profilePath,
-//     newDocuments: documentPaths,
-//     oldProfile: previousUser.profileImage,
-//     oldDocuments:  previousUser.documentImages as string[] | null,
-//   };
-// }
-
-
 
   async getUserWallets(userId: number) {
     return this.prisma.wallet.findMany({
       where: { userId },
+    });
+  }
+
+  async getUserTransactions(userId: number) {
+    return this.prisma.transaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getUserBets(userId: number) {
+    return this.prisma.bet.findMany({
+      where: { userId },
+      include: {
+        match: true,
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

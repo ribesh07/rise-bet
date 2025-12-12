@@ -40,7 +40,7 @@ POST https://api.playrise.vip/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "gandu1@gmail.com",
+  "email": "gandu@gmail.com",
   "password": "12345678"
 
 }
@@ -141,5 +141,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpb
 ### users wallets
 GET http://localhost:3084/api/v1/users/wallets HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzNDYyOTE1LCJleHAiOjE3NjYwNTQ5MTV9.Yfss4h1HuHkiGBCgb_RcHUQ2fhbzW4RWqGlD25rFTlE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg
 
+### users transactions
+GET http://localhost:3084/api/v1/users/transactions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg
+
+### users bets
+GET http://localhost:3084/api/v1/users/bets HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg

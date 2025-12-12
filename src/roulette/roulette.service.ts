@@ -60,11 +60,16 @@ export class RouletteService {
       const pendingBets = await this.prisma.bet.findMany({
         where: { game: 'ROULETTE', status: BetStatus.PENDING,room },
       });
+      console.log(`Spun wheel for table ${room}, result:`, result);
+      console.warn(`Found ${pendingBets.length} pending bets to resolve`);
+      console.dir(pendingBets);
       // resolve bets atomically per bet
       const resolutions : any = [];
       for (const bet of pendingBets) {
+        console.log('Resolving bet:', bet);
         const payload = bet.payload as any;
         const multiplier = evaluateBet(payload, result);
+        console.log(`Bet payload:`, payload, `=> multiplier:`, multiplier);
         if (multiplier > 0) {
           const payout = Number(bet.amount) * Number(multiplier);
           // update DB atomic: set bet won, create transaction, credit wallet
@@ -88,66 +93,91 @@ export class RouletteService {
               data: { balance: { increment: payout }  },
             });
           });
+          console.log(`Bet ${bet.id} won, payout: ${payout}`);
+          // console.log(resolutions);
           resolutions.push({ betId: bet.id, status: 'WON', payout, userId: bet.userId });
         } else {
+
+          // mark bet LOST
+          await this.prisma.$transaction(async (tx) => {
+            await tx.bet.update({ where: { id: bet.id }, data: { status: 'LOST', payout: bet.amount, updatedAt: new Date() }});
+            // create transaction WIN
+            await tx.transaction.create({
+              data: {
+                userId: bet.userId,
+                type: TransactionType.LOST,
+                amount: bet.amount,
+                currency: bet.currency,
+                createdAt: new Date(),
+                description: `Roulette lost (betId:${bet.id})`,
+              },
+            });
+            // credit wallet
+            await tx.wallet.update({
+              where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
+              data: { balance: { decrement : bet.amount }  },
+            });
+          });
+
+          console.log(`Bet ${bet.id} lost.`);
           // mark lost
-          await this.prisma.bet.update({ where: { id: bet.id }, data: { status: 'LOST', updatedAt: new Date() }});
           resolutions.push({ betId: bet.id, status: 'LOST' , userId: bet.userId });
         }
       }
-
+      
+      console.log(resolutions);
       // broadcast spin result + resolutions
       this.io.to(room).emit('spin-result', { result, resolutions });
     } 
   }
 
   // Called by gateway when user places bet
-  async placeBet(userId: number, room: string, betDto: any) {
-    // validate betDto: stake positive, payload valid, currency exists, etc.
+  // async placeBet(userId: number, room: string, betDto: any) {
+  //   // validate betDto: stake positive, payload valid, currency exists, etc.
     
-    const { amount, currency, payload } = betDto;
-    if (!amount || amount <= 0) throw new Error('Invalid amount');
+  //   const { amount, currency, payload } = betDto;
+  //   if (!amount || amount <= 0) throw new Error('Invalid amount');
 
-    // find wallet
-    const wallet = await this.prisma.wallet.findUnique({ where: { userId_currency: { userId, currency } }});
-    if (!wallet) throw new Error('Wallet not found');
+  //   // find wallet
+  //   const wallet = await this.prisma.wallet.findUnique({ where: { userId_currency: { userId, currency } }});
+  //   if (!wallet) throw new Error('Wallet not found');
 
-    // perform conditional withdrawal using updateMany for atomic check
-    const dec = await this.prisma.wallet.updateMany({
-      where: { id: wallet.id, balance: { gte: amount } },
-      data: { balance: { decrement: amount } },
-    });
+  //   // perform conditional withdrawal using updateMany for atomic check
+  //   const dec = await this.prisma.wallet.updateMany({
+  //     where: { id: wallet.id, balance: { gte: amount } },
+  //     data: { balance: { decrement: amount } },
+  //   });
 
-    if (dec.count === 0) {
-      throw new Error('Insufficient balance');
-    }
+  //   if (dec.count === 0) {
+  //     throw new Error('Insufficient balance');
+  //   }
 
-    // create bet record + transaction inside a tx
-    const [createdBet, txRecord] = await this.prisma.$transaction([
-      this.prisma.bet.create({
-        data: {
-            userId,
-            matchId: 0, // no matchId for roulette; or use room hash
-            game: 'roulette',
-            amount: amount,
-            currency,
-            payload,
-            status: 'PENDING',
-        },
-      }),
-      this.prisma.transaction.create({
-        data: {
-          userId,
-          type: 'BET',
-          amount: amount,
-          currency,
-          description: 'Roulette stake',
-        },
-      }),
-    ]);
+  //   // create bet record + transaction inside a tx
+  //   const [createdBet, txRecord] = await this.prisma.$transaction([
+  //     this.prisma.bet.create({
+  //       data: {
+  //           userId,
+  //           matchId: 0, // no matchId for roulette; or use room hash
+  //           game: 'ROULETTE',
+  //           amount: amount,
+  //           currency,
+  //           payload,
+  //           status: 'PENDING',
+  //       },
+  //     }),
+  //     this.prisma.transaction.create({
+  //       data: {
+  //         userId,
+  //         type: 'BET',
+  //         amount: amount,
+  //         currency,
+  //         description: 'Roulette stake',
+  //       },
+  //     }),
+  //   ]);
 
-    return { bet: createdBet };
-  }
+  //   return { bet: createdBet , transaction: txRecord };
+  // }
 
 async resolveBetsForTable(
   tableId: string,
@@ -156,11 +186,12 @@ async resolveBetsForTable(
   // 1️⃣ Fetch pending bets for this table
   const pendingBets = await this.prisma.bet.findMany({
     where: {
-      table: tableId,
-      game: 'roulette',
+      room: tableId,
+      game: 'ROULETTE',
       status: BetStatus.PENDING,
     },
   });
+  console.log(`Resolving ${pendingBets} bets for table ${tableId} with result`, result);
 
   // 2️⃣ typed resolution array to avoid "never[]" error
   const resolutions: {
@@ -260,7 +291,76 @@ async forceSpin(tableId: string) {
     const result = spinWheel(); // { number, color: 'RED'|'BLACK'|'GREEN' }
 
     // resolve bets (DB operations, wallet updates)
-    const resolved = await this.resolveBetsForTable(tableId, result);
+    // const resolved = await this.resolveBetsForTable(tableId, result);
+
+    const pendingBets = await this.prisma.bet.findMany({
+        where: { game: 'ROULETTE', status: BetStatus.PENDING,room:tableId },
+      });
+      console.log(`Spun wheel for table ${tableId}, result:`, result);
+      console.warn(`Found ${pendingBets.length} pending bets to resolve`);
+      console.dir(pendingBets);
+      // resolve bets atomically per bet
+      const resolutions : any = [];
+      for (const bet of pendingBets) {
+        console.log('Resolving bet:', bet);
+        const payload = bet.payload as any;
+        const multiplier = evaluateBet(payload, result);
+        console.log(`Bet payload:`, payload, `=> multiplier:`, multiplier);
+        if (multiplier > 0) {
+          const payout = Number(bet.amount) * Number(multiplier);
+          // update DB atomic: set bet won, create transaction, credit wallet
+          await this.prisma.$transaction(async (tx) => {
+            // mark bet won
+            await tx.bet.update({ where: { id: bet.id }, data: { status: 'WON', payout: payout, updatedAt: new Date() }});
+            // create transaction WIN
+            await tx.transaction.create({
+              data: {
+                userId: bet.userId,
+                type: 'WIN',
+                amount: payout,
+                currency: bet.currency,
+                createdAt: new Date(),
+                description: `Roulette win (betId:${bet.id})`,
+              },
+            });
+            // credit wallet
+            await tx.wallet.update({
+              where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
+              data: { balance: { increment: payout }  },
+            });
+          });
+          console.log(`Bet ${bet.id} won, payout: ${payout}`);
+          console.log(resolutions);
+          resolutions.push({ betId: bet.id, status: 'WON', payout, userId: bet.userId });
+        } else {
+
+          // mark bet LOST
+          await this.prisma.$transaction(async (tx) => {
+            await tx.bet.update({ where: { id: bet.id }, data: { status: 'LOST', payout: bet.amount, updatedAt: new Date() }});
+            // create transaction WIN
+            await tx.transaction.create({
+              data: {
+                userId: bet.userId,
+                type: TransactionType.LOST,
+                amount: bet.amount,
+                currency: bet.currency,
+                createdAt: new Date(),
+                description: `Roulette lost (betId:${bet.id})`,
+              },
+            });
+            // credit wallet
+            await tx.wallet.update({
+              where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
+              data: { balance: { decrement : bet.amount }  },
+            });
+          });
+
+          // mark lost
+          resolutions.push({ betId: bet.id, status: 'LOST' , userId: bet.userId });
+          console.log(`Bet ${bet.id} lost.`);
+          console.log(resolutions);
+        }
+      }
 
     // broadcast if io available, otherwise just log
     console.log('Emitting spin-result for table', this.io ? 'with' : 'without', 'Socket.IO server');
@@ -269,7 +369,7 @@ async forceSpin(tableId: string) {
         console.log('Emitting spin-result via socket.io for table', tableId);
         this.io.to(tableId).emit('spin-result', {
           result,
-          resolved,
+          resolutions,
           triggeredBy: 'ADMIN',
         });
       } catch (err) {
@@ -281,13 +381,13 @@ async forceSpin(tableId: string) {
       );
     }
 
-    return { result, resolved };
+    return { result, resolutions };
   }
 
 
 async addPlayerToMatch(room: string, player: { userId: number; username: string }) {
   let match = await this.prisma.match.findFirst({
-    where: { tableId: room, status: "ACTIVE" }
+    where: { tableId: room, status: "ACTIVE", name : "ROULETTE" }
   });
 
   if (!match) {
@@ -297,6 +397,7 @@ async addPlayerToMatch(room: string, player: { userId: number; username: string 
         tableId: room,
         players: [player],
         startTime: new Date(),
+        name : "ROULETTE"
       }
     });
   } else {
@@ -319,24 +420,75 @@ async addPlayerToMatch(room: string, player: { userId: number; username: string 
 }
 
 
-async createBet(data: { matchId: number; userId: number; room: string; payload: any; amount: number }) {
-  return await this.prisma.bet.create({
-    data: {
-      matchId: data.matchId,
-      userId: data.userId,
-      room: data.room,
-      payload: data.payload,
-      amount: data.amount,
-      game:data.payload.game,
-      currency: data.payload.currency, 
-    }
+async createBet(data: { 
+  matchId: number; 
+  userId: number; 
+  room: string; 
+  payload: any; 
+  amount: number; 
+}) {
+  const { userId, matchId, room, payload, amount } = data;
+  const currency = payload.currency;
+
+  return await this.prisma.$transaction(async (tx) => {
+
+    // 1. Find wallet
+    const wallet = await tx.wallet.findUnique({
+      where: { userId_currency: { userId, currency } },
+    });
+
+   if (!wallet) throw new Error("Wallet not found");
+   
+   
+   // 2. Atomic balance check + decrement
+   const dec = await tx.wallet.updateMany({
+     where: { id: wallet.id, balance: { gte: amount } },
+     data: { balance: { decrement: amount } },
+    });
+    
+    if (dec.count === 0) throw new Error("Insufficient balance");
+   
+
+    // 3. Create bet record
+    const createdBet = await tx.bet.create({
+      data: {
+        matchId,
+        userId,
+        room,
+        payload,
+        amount,
+        game: payload.game,
+        currency,
+      },
+    });
+
+    // 4. Create transaction record
+    const txRecord = await tx.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.BET,
+        amount,
+        currency,
+        description: `Bet placed on ${payload.game}`,
+      },
+    });
+
+    // 5. Return both
+    return {
+      success : true,
+      message : 'Bet placed successfully',
+      bet: createdBet,
+      transaction: txRecord,
+    };
   });
 }
 
-async getActiveMatch(room: string) {
+
+async getActiveMatch(room: string , name : string) {
   let match = await this.prisma.match.findFirst({
     where: {
       tableId: room,
+      name : name,
       status: "ACTIVE"
     }
   });
@@ -347,6 +499,7 @@ async getActiveMatch(room: string) {
         tableId: room,
         players: [],
         startTime: new Date(),
+        name : name
       }
     });
   }

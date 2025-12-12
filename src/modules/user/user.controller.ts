@@ -63,6 +63,19 @@ async updatePassword(
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('transactions')
+  async getUserTransactions(@Request() req: any) {
+    const userId = req.user.id;
+    return this.userService.getUserTransactions(Number(userId));
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('bets')
+  async getUserBets(@Request() req: any) {
+    const userId = req.user.id;
+    return this.userService.getUserBets(Number(userId));
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(':id/transaction')
   async addTransaction(
     @Param('id') id: string,
@@ -154,127 +167,7 @@ async uploadUserFiles(
 }
 
 
-//  @UseGuards(JwtAuthGuard)
-// @Post('upload-user-files')
-// @UseInterceptors(
-//   FileFieldsInterceptor(
-//     [
-//       { name: 'profileImage', maxCount: 1 },
-//       { name: 'documents', maxCount: 10 },
-//     ],
-//     {
-//       storage: diskStorage({
-//         destination: (req, file, cb) => {
-//           console.log("MULTER DEST triggered:", file.fieldname);
 
-//           const userId = (req as AuthRequest).user.id;
-
-//           const folder =
-//             file.fieldname === 'profileImage'
-//               ? `./uploads/users/${userId}/profile`
-//               : `./uploads/users/${userId}/documents`;
-
-//           try {
-//             mkdirSync(folder, { recursive: true });
-//             cb(null, folder);
-//           } catch (error) {
-//             console.error("Folder creation error:", error);
-//             cb(error as Error, folder);
-//           }
-//         },
-//         filename: (req, file, cb) => {
-//           console.log("MULTER FILENAME:", file.originalname);
-
-//           const ext = extname(file.originalname);
-//           const base = file.originalname
-//             .replace(ext, '')
-//             .replace(/[^a-zA-Z0-9_-]/g, '_');
-
-//           const timestamp = Date.now();
-//           const random = Math.round(Math.random() * 1e9);
-
-//           cb(null, `${base}-${timestamp}-${random}${ext}`);
-//         },
-//       }),
-
-//       fileFilter: (req, file, cb) => {
-//         console.log("FILE FILTER:", file.originalname);
-
-//         cb(null, true); // Accept everything for now
-//       },
-
-//       limits: {
-//         fileSize: 10 * 1024 * 1024, // 10MB
-//       },
-//     }
-//   )
-// )
-// async uploadUserFiles(
-//   @UploadedFiles()
-//   files: {
-//     profileImage?: Express.Multer.File[];
-//     documents?: Express.Multer.File[];
-//   },
-//   @Request() req,
-// ) {
-//   const userId = req.user.id;
-//   console.log("User ID:", userId);
-
-//   if (!files.profileImage && !files.documents) {
-//     throw new BadRequestException('No files uploaded');
-//   }
-
-//   try {
-//     console.log("Uploaded files:", files);
-
-//     const result = await this.userService.updateUserFiles(userId, files);
-
-//     // DELETE OLD PROFILE
-//     if (result.oldProfile) {
-//       this.deleteFileIfExists(result.oldProfile);
-//     }
-    
-
-//     // DELETE OLD DOCUMENTS
-//     if (result.oldDocuments && Array.isArray(result.oldDocuments)) {
-//       result.oldDocuments.forEach((doc) => this.deleteFileIfExists(doc));
-//     }
-
-//     return {
-//       success: true,
-//       message: result.message,
-//       data: {
-//         profileImage: result.newProfile,
-//         documents: result.newDocuments,
-//       },
-//     };
-
-//   } catch (error) {
-//     console.error("UPLOAD ERROR:", error);
-
-//     // ROLLBACK NEW FILES
-//     if (files.profileImage?.[0]) {
-//       this.deleteFileIfExists(files.profileImage[0].path);
-//     }
-
-//     if (files.documents?.length) {
-//       files.documents.forEach((file) => this.deleteFileIfExists(file.path));
-//     }
-
-//     throw error;
-//   }
-// }
-
-
-// private deleteFileIfExists(relativePath: string) {
-//   const fullPath = path.join(process.cwd(), relativePath);
-
-//   if (fs.existsSync(fullPath)) {
-//     fs.unlinkSync(fullPath);
-//     console.log("Deleted:", fullPath);
-//   }
-// }
-
-
+//eol
 }
 

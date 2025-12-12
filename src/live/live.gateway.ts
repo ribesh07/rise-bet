@@ -28,7 +28,9 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private readonly rouletteService: RouletteService,
     private readonly usersService: UserService,
     private readonly adminServices: AdminService,
-  ) {}
+  ) {
+    console.log('LiveGateway constructor called');
+  }
 
   afterInit(server: Server) {
     // pass server to service
@@ -157,11 +159,15 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
       const userId = Number(decoded.sub);
+      const username = decoded.username ;
       console.log(decoded);
-      console.log(`Placing bet for user ${userId} in room ${payload.room}`);
+      console.log(`Placing bet for user ${username} in room ${payload.room} with client ${client.id}`);
 
 
-      const match = await this.rouletteService.getActiveMatch(payload.room);
+      const match = await this.rouletteService.getActiveMatch(payload.room, payload.bet.game);
+      if (!match) {
+        throw new Error(`No active match found for room ${payload.room}`);
+      }
       const user = await this.usersService.findById(userId);
 
 
@@ -176,11 +182,8 @@ export class LiveGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         amount: Number(payload.bet.amount)
       });
 
-
-
       client.emit('bet-placed', betEntry);
       this.server.to(payload.room).emit('bet-update', { userId, bet: betEntry });
-
       return { ok: true };
     } catch (err) {
       console.error('place-bet error', err?.message ?? err);

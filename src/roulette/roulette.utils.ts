@@ -15,37 +15,38 @@ export function spinWheel(): RouletteResult {
 
 export function evaluateBet(payload: any, result: RouletteResult) {
   // payload example: { type: 'straight', number: 7 }
+  console.log('Evaluating bet:', payload, 'against result:', result);
   switch (payload.type) {
-    case 'straight':
-      return payload.number === result.number ? 35 : -1;
-    case 'color':
-      return payload.color === result.color ? 1 : -1;
-    case 'odd':
+    case 'STRAIGHT':
+      return payload.value === result.number ? 35 : -1;
+    case 'COLOR':
+      return payload.value === result.color ? 1 : -1;
+    case 'ODD':
       return result.number !== 0 && (result.number % 2 === 1) ? 1 : -1;
-    case 'even':
+    case 'EVEN':
       return result.number !== 0 && (result.number % 2 === 0) ? 1 : -1;
-    case 'dozen':
+    case 'DOZEN':
       {
         const n = result.number;
         if (n === 0) return -1;
-        const d = payload.dozen; // 1,2,3
+        const d = payload.value; // 1,2,3
         if (d === 1 && n >=1 && n <=12) return 2;
         if (d === 2 && n >=13 && n <=24) return 2;
         if (d === 3 && n >=25 && n <=36) return 2;
         return -1;
       }
-    case 'column':
+    case 'COLUMN':
       {
         const n = result.number;
         if (n === 0) return -1;
         // columns: col1 = 1,4,7..34 ; col2 = 2,5,8..35 ; col3 = 3,6,9..36
-        const col = payload.column; // 1,2,3
+        const col = payload.value; // 1,2,3
         if (((n - col) % 3) === 0) return 2;
         return -1;
       }
-    case 'high':
+    case 'HIGH':
       return result.number >= 19 && result.number <= 36 ? 1 : -1;
-    case 'low':
+    case 'LOW':
       return result.number >= 1 && result.number <= 18 ? 1 : -1;
     default:
       return -1;

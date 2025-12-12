@@ -8,7 +8,7 @@ import { AdminService } from 'src/modules/admin/admin.service';
 
 @Module({
   controllers: [RouletteController],
-  providers: [RouletteService , PrismaService,LiveGateway , UserService,AdminService],
+  providers: [RouletteService , PrismaService ,LiveGateway, UserService,AdminService],
   exports: [RouletteService],
 })
 export class RouletteModule {}

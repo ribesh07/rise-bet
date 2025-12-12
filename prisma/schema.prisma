@@ -12,6 +12,7 @@ enum TransactionType {
   WITHDRAW
   BET
   WIN
+  LOST
   BONUS
   REFUND
 }
