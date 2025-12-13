@@ -9,6 +9,7 @@ import TopNavbar from "@/components/topnavbar";
 import { useCurrency } from "@/context/CurrencyContext";
 import toast from "react-hot-toast";
 
+
 type BetsMap = { [key: string]: number };
 
 // Generates a unique table ID using uuid
@@ -36,8 +37,12 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   const socketRef = useRef<any>(null);
   const [search, setSearch] = useState("");
   const [dashboardDetails, setDashboardDetails] = useState<any>(null);
-
+  
   const { currency, setCurrency } = useCurrency();
+type GamePhase = "COUNTDOWN" | "SPINNING" | "RESULT";
+
+const [phase, setPhase] = useState<GamePhase>("COUNTDOWN");
+const showCountdown = phase === "COUNTDOWN";
 
   const wheelNumbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
@@ -55,12 +60,15 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   };
 
   const betAmounts = [1, 5, 10, 25, 50, 100];
-  type RecentBet = {
+ type RecentBet = {
+  betId: string;
   value: string;
   amount: number;
   currency: string;
   time: number;
+  status: "PENDING" | "WIN" | "LOSE";
 };
+
 
 const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
 
@@ -195,8 +203,17 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
     });
 
     socket.on("countdown", (data: any) => {
-      if (data?.seconds !== undefined) setCountdown(data.seconds);
-    });
+  if (typeof data?.seconds === "number") {
+    setCountdown(data.seconds);
+    setPhase("COUNTDOWN");
+
+    // when countdown hits zero → spinning
+    if (data.seconds === 0) {
+      setPhase("SPINNING");
+    }
+  }
+});
+
 
     socket.on("spin-result", (data: any) => {
       // server expected data.result.number
@@ -268,56 +285,26 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   };
 
 /* ---------- PLACE INDIVIDUAL BET ---------- */
-const placeBet = (value: string, amount: number = betAmount) => {
-  const socket = socketRef.current;
-  if (!socket || !socket.connected) return alert("No server connection");
+const addBetLocally = (value: string, amount: number = betAmount) => {
   if (isSpinning) return;
 
-  // CHECK BALANCE BEFORE PLACING BET
-  if (amount > balance) {
-    return alert("Insufficient balance!");
+  // calculate new total
+  const newTotal =
+    Object.values(bets).reduce((a, b) => a + b, 0) + amount;
+
+  if (newTotal > balance) {
+    toast.error("Insufficient balance");
+    return;
   }
 
-  const payload = {
-    room: tableId,
-    bet: {
-      type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
-      value: value.toUpperCase(),
-      amount,
-      currency,
-      game: "ROULETTE",
-    },
-  };
-
-  console.log("Sending bet payload:", payload);
-
-  socket.emit("place-bet", payload, (res: any) => {
-  
-
-  toast.success("Bet placed");
-
-  // Update current bets
   setBets((prev) => ({
     ...prev,
     [value]: (prev[value] || 0) + amount,
   }));
 
-  // Deduct balance
-  setBalance((prev) => prev - amount);
-
-  // ✅ ADD TO RECENT BETS (keep last 10)
-  setRecentBets((prev) => [
-    {
-      value,
-      amount,
-      currency,
-      time: Date.now(),
-    },
-    ...prev,
-  ].slice(0, 10));
-});
-
+  setTotalBet(newTotal);
 };
+
 
 
 /* ---------- CLEAR BETS ---------- */
@@ -330,12 +317,6 @@ const clearBets = () => {
 const spin = () => {
   if (Object.keys(bets).length === 0 || isSpinning) return;
 
-  // CALCULATE TOTAL BET AMOUNT
-  const totalBetAmount = Object.values(bets).reduce((acc, val) => acc + val, 0);
-  if (totalBetAmount > balance) {
-    return alert("Insufficient balance to spin!");
-  }
-
   const socket = socketRef.current;
   if (!socket || !socket.connected) return alert("No server connection");
 
@@ -344,58 +325,102 @@ const spin = () => {
   setWinningAmount(0);
   setShowWinningAlert(false);
 
-  const payload = {
-    room: tableId,
-    userId: localStorage.getItem("userId"),
-    gameId: "roulette",
-    currency,
-    bets: Object.entries(bets).map(([value, amount]) => ({
-      type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
-      value: value.toUpperCase(),
-      amount,
-      currency,
-      game: "ROULETTE",
-    })),
-    totalBet: totalBetAmount,
-  };
+  const spinRecentBets = Object.entries(bets).map(([value, amount]) => ({
+    value,
+    amount,
+    type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
+  }));
 
-  console.log("Sending batch bets payload:", payload);
+  Object.entries(bets).forEach(([value, amount]) => {
+    const payload = {
+      room: tableId,
+      bet: {
+        type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
+        value: value.toUpperCase(),
+        amount,
+        currency,
+        game: "ROULETTE",
+      },
+    };
 
-  socket.emit("place-bets", payload, (ack: any) => {
-    if (!ack?.success) {
-      alert(ack?.message || "Bet rejected");
+    socket.emit("place-bet", payload, (res: any) => {
+      if (!res?.success && res?.success !== undefined) {
+        toast.error(res?.message || "Bet rejected");
 
-      // ROLLBACK: clear all bets visually
-      setBets({});
-      setTotalBet(0);
-      setIsSpinning(false);
-    } else {
-      // Deduct balance locally
-      setBalance((prev) => prev - totalBetAmount);
-    }
+        setBets((prev) => {
+          const newBets = { ...prev };
+          delete newBets[value];
+          return newBets;
+        });
+
+        setBalance((prev) => prev + amount);
+      } else {
+        toast.success(`Bet on ${value} placed`);
+      }
+    });
   });
+
+  // ✅ Save recent bets (max 10)
+  const completedRecentBets = spinRecentBets.map((bet) => ({
+    betId: uuidv4(),
+    value: bet.value,
+    amount: bet.amount,
+    currency,
+    time: Date.now(),
+    status: "PENDING" as const,
+  }));
+
+  setRecentBets((prev) =>
+    [...completedRecentBets, ...prev].slice(0, 10)
+  );
+
+  // Clear bets after spin
+  setBets({});
 };
 
 
+
+
   /* ---------- HANDLE SERVER RESULT ---------- */
-  const handleServerResult = (winningNumber: number) => {
-    const winningIndex = wheelNumbers.indexOf(winningNumber);
-    const segmentAngle = 360 / wheelNumbers.length;
-    const extraSpins = 3 + Math.random() * 3;
-    const finalRotation = wheelRotationRef.current + extraSpins * 360 - winningIndex * segmentAngle;
+const handleServerResult = (winningNumber: number) => {
+  setPhase("SPINNING");
 
-    setWheelRotation(finalRotation);
-    setBallRotation(finalRotation * -1);
-    setBallVisible(true);
+  const winningIndex = wheelNumbers.indexOf(winningNumber);
+  const segmentAngle = 360 / wheelNumbers.length;
+  const extraSpins = 3 + Math.random() * 3;
+  const finalRotation =
+    wheelRotationRef.current +
+    extraSpins * 360 -
+    winningIndex * segmentAngle;
 
-    setTimeout(() => setBallVisible(false), 4200);
-    setTimeout(() => {
-      setResult(winningNumber);
-      setShowWinningAlert(true);
-     
-    }, 4500);
-    setTimeout(() => setShowWinningAlert(false), 7500);
-  };
+  setWheelRotation(finalRotation);
+  setBallRotation(finalRotation * -1);
+  setBallVisible(true);
+
+  // hide ball after spin
+  setTimeout(() => setBallVisible(false), 4200);
+
+  // show winner
+  setTimeout(() => {
+    setResult(winningNumber);
+    setShowWinningAlert(true);
+    setPhase("RESULT");
+  }, 4500);
+
+  // hide winner and RESET
+  setTimeout(() => {
+    setShowWinningAlert(false);
+    setResult(null);
+
+    // 🔄 READY FOR NEXT ROUND
+    setCountdown(15);
+    setPhase("COUNTDOWN");
+    setIsSpinning(false);
+    setBets({});
+    setTotalBet(0);
+  }, 7500);
+};
+
 
 
  
@@ -642,10 +667,23 @@ const spin = () => {
                 </div>
 
                 {/* Winning alert */}
+                 {showCountdown && (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div className="w-32 h-32 rounded-full bg-black/80 border-4 border-blue-400 flex flex-col items-center justify-center animate-pulse">
+        <div className="text-4xl font-bold text-blue-400">
+          {countdown}
+        </div>
+        <div className="text-sm text-gray-300 font-bold">
+          NEXT SPIN
+        </div>
+      </div>
+    </div>
+  )}
                 {showWinningAlert && result !== null && (
                   <div className="absolute inset-0 flex items-center justify-center z-30">
                     <div className="relative">
                       <div className="w-32 h-32 bg-black/80 rounded-full flex items-center justify-center border-4 border-yellow-400 shadow-2xl animate-pulse">
+                       
                         <div className="text-center">
                           <div className={`text-4xl font-bold mb-1 ${result === 0 ? "text-green-400" : redNumbers.includes(result) ? "text-red-400" : "text-white"}`}>
                             {result}
@@ -657,11 +695,12 @@ const spin = () => {
                       <div className="absolute -top-1 -right-3 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: "0.2s" }}></div>
                     </div>
                   </div>
-                )}
+                
+  )}
               </div>
 
               {/* Result display */}
-              {result !== null && (
+              {/* {result !== null && (
                 <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
                   <div
                     className={`px-4 py-2 rounded-lg font-bold text-lg border-2 ${
@@ -671,7 +710,7 @@ const spin = () => {
                     🎯 {result}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
 
@@ -706,7 +745,7 @@ const spin = () => {
                   {[0, ...Array.from({ length: 36 }, (_, i) => i + 1)].map((num) => (
                     <button
                       key={num}
-                      onClick={() => placeBet(num.toString())}
+                      onClick={() => addBetLocally(num.toString())}
                       disabled={isSpinning}
                       className={`h-8 text-xs font-bold rounded transition-all relative ${num === 0 ? "bg-green-600 hover:bg-green-500" : redNumbers.includes(num) ? "bg-red-600 hover:bg-red-500" : "bg-gray-700 hover:bg-gray-600"} text-white disabled:opacity-50`}
                     >
@@ -724,48 +763,48 @@ const spin = () => {
                 <div className="text-sm font-medium text-gray-400 mb-2">Outside Bets</div>
 
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => placeBet("red")} disabled={isSpinning} className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
+                  <button onClick={() => addBetLocally("red")} disabled={isSpinning} className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
                     Red (1:1)
                     {bets["red"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
-                  <button onClick={() => placeBet("black")} disabled={isSpinning} className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded border border-gray-600 transition-all relative">
+                  <button onClick={() => addBetLocally("black")} disabled={isSpinning} className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded border border-gray-600 transition-all relative">
                     Black (1:1)
                     {bets["black"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => placeBet("even")} disabled={isSpinning} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
+                  <button onClick={() => addBetLocally("even")} disabled={isSpinning} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
                     Even (1:1)
                     {bets["even"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
-                  <button onClick={() => placeBet("odd")} disabled={isSpinning} className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
+                  <button onClick={() => addBetLocally("odd")} disabled={isSpinning} className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
                     Odd (1:1)
                     {bets["odd"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => placeBet("1-18")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
+                  <button onClick={() => addBetLocally("1-18")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
                     1-18 (1:1)
                     {bets["1-18"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
-                  <button onClick={() => placeBet("19-36")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
+                  <button onClick={() => addBetLocally("19-36")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
                     19-36 (1:1)
                     {bets["19-36"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
                 </div>
 
                 <div className="grid grid-cols-3 gap-1">
-                  <button onClick={() => placeBet("1-12")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
+                  <button onClick={() => addBetLocally("1-12")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
                     1-12 (2:1)
                     {bets["1-12"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
-                  <button onClick={() => placeBet("13-24")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
+                  <button onClick={() => addBetLocally("13-24")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
                     13-24 (2:1)
                     {bets["13-24"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
-                  <button onClick={() => placeBet("25-36")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
+                  <button onClick={() => addBetLocally("25-36")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
                     25-36 (2:1)
                     {bets["25-36"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
                   </button>
@@ -794,16 +833,23 @@ const spin = () => {
 
             
 
-            <button onClick={spin} disabled={totalBet === 0 || isSpinning} className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg">
-              {isSpinning ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  SPINNING...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 p-2">🎲 SPIN ({formatCurrency(totalBet)})</div>
-              )}
-            </button>
+           <button
+  onClick={() => spin()} // ✅ call spin with no arguments
+  disabled={totalBet === 0 || isSpinning}
+  className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+>
+  {isSpinning ? (
+    <div className="flex items-center gap-2">
+      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+      SPINNING...
+    </div>
+  ) : (
+    <div className="flex items-center gap-2 p-2">
+      🎲 SPIN ({formatCurrency(totalBet)})
+    </div>
+  )}
+</button>
+
           </div>
         </div>
       </div>
