@@ -112,11 +112,11 @@ export class RouletteService {
                 description: `Roulette lost (betId:${bet.id})`,
               },
             });
-            // credit wallet
-            await tx.wallet.update({
-              where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
-              data: { balance: { decrement : bet.amount }  },
-            });
+            // // credit wallet
+            // await tx.wallet.update({
+            //   where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
+            //   data: { balance: { decrement : bet.amount }  },
+            // });
           });
 
           console.log(`Bet ${bet.id} lost.`);
