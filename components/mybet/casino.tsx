@@ -2,46 +2,86 @@
 "use client";
 import { BarChart3, Link, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { apiRequest } from "@/utils/ApiHelper";
 
 type CasinoBet = {
-  id: string;
+  id: number;
   game: string;
   date: string;
   amount: number;
-  multiplier: number;
   payout: number;
+  status: string;
+  value?: string;
 };
+
+const ITEMS_PER_PAGE = 10;
 
 const Casino = () => {
   const [bets, setBets] = useState<CasinoBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBet, setSelectedBet] = useState<CasinoBet | null>(null);
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
-    // Simulate fetching data
-    setTimeout(() => {
-      // setBets([]); // Uncomment to show empty state
-      setBets([
-        {
-          id: "C1001",
-          game: "Roulette",
-          date: "2025-11-07",
-          amount: 50,
-          multiplier: 2.5,
-          payout: 125,
-        },
-        {
-          id: "C1002",
-          game: "Crash",
-          date: "2025-11-06",
-          amount: 100,
-          multiplier: 1.8,
-          payout: 180,
-        },
-      ]);
-      setLoading(false);
-    }, 800);
+    const fetchBets = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await apiRequest("/users/bets", true, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.success) {
+          const formattedBets: CasinoBet[] = res.data.map((bet: any) => ({
+            id: bet.id,
+            game: bet.game,
+            date: bet.createdAt
+              ? new Date(bet.createdAt).toLocaleDateString()
+              : new Date().toLocaleDateString(),
+            amount: bet.payload.amount,
+           
+            status: bet.status || "PENDING",
+            payout:
+              bet.payout ,
+              
+          }));
+
+          // Sort bets by most recent first
+          formattedBets.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+
+          setBets(formattedBets);
+        } else {
+          setBets([]);
+        }
+      } catch (err) {
+        console.error("Bets API Error:", err);
+        setBets([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBets();
   }, []);
+
+  // Pagination logic
+  const startIndex = page * ITEMS_PER_PAGE;
+  const paginatedBets = bets.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const handleNext = () => {
+    if (startIndex + ITEMS_PER_PAGE < bets.length) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (page > 0) setPage((prev) => prev - 1);
+  };
 
   if (loading) {
     return <p className="text-gray-400 text-center py-10">Loading bets...</p>;
@@ -51,17 +91,17 @@ const Casino = () => {
     <div className="relative bg-[#0f1d2b] text-gray-300 rounded-lg p-6 shadow-md border border-slate-700">
       <div className="overflow-x-auto">
         <div className="min-w-[750px]">
-          {/* ✅ Table Header */}
+          {/* Table Header */}
           <div className="grid grid-cols-[1.3fr_1.2fr_1.2fr_1fr_1fr_1fr] text-sm font-semibold text-gray-400 border-b border-slate-700 pb-3 mb-4">
             <div>Game</div>
             <div>Bet ID</div>
             <div>Date</div>
             <div className="text-center">Amount</div>
-            <div className="text-center">Multiplier</div>
-            <div className="text-right">Payout</div>
+            <div className="text-center">Payout</div>
+            <div className="text-right">Status</div>
           </div>
 
-          {/* ✅ Empty State */}
+          {/* Empty State */}
           {bets.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-12">
               <div className="relative">
@@ -70,16 +110,15 @@ const Casino = () => {
               </div>
               <p className="text-gray-400 mt-4 font-medium">No Casino Bets</p>
               <Link
-  href="/home"
-  className="text-[#3BA55D] font-semibold mt-2 hover:underline"
->
-  Start Playing Now!
-</Link>
-
+                href="/home"
+                className="text-[#3BA55D] font-semibold mt-2 hover:underline"
+              >
+                Start Playing Now!
+              </Link>
             </div>
           ) : (
             <div className="divide-y divide-slate-700">
-              {bets.map((bet) => (
+              {paginatedBets.map((bet) => (
                 <div
                   key={bet.id}
                   className="grid grid-cols-[1.3fr_1.2fr_1.2fr_1fr_1fr_1fr] items-center py-3 text-sm hover:bg-[#1e293b] transition-colors rounded-lg px-2"
@@ -88,28 +127,65 @@ const Casino = () => {
                   <div>{bet.id}</div>
                   <div>{bet.date}</div>
                   <div className="text-center">${bet.amount}</div>
-                  <div className="text-center">{bet.multiplier}x</div>
-                  <div className="text-right font-semibold text-green-400">
-                    ${bet.payout}
-                  </div>
+                  <div className="text-center">
+  <span
+    className={`font-semibold ${
+      bet.status === "LOST"
+        ? "text-red-500"
+        : bet.status === "PENDING"
+        ? "text-yellow-400"
+        : "text-green-400"
+    }`}
+  >
+    {bet.status === "LOST" ? "-" : `$${bet.payout}`}
+  </span>
+</div>
 
-                  {/* View Button (Optional): could be inside last column */}
-                  <div className="hidden">
-                    <button
-                      onClick={() => setSelectedBet(bet)}
-                      className="px-3 py-1 text-sm font-semibold text-blue-400 border border-blue-500/30 rounded-full bg-blue-500/10 hover:bg-blue-500/20 transition"
+                  <div className="text-right">
+                    <span className="text-gray-400"></span>{" "}
+                    <span
+                      className={`font-semibold ${
+                        bet.status === "LOST"
+                          ? "text-red-500"
+                          : bet.status === "PENDING"
+                          ? "text-yellow-400"
+                          : "text-green-400"
+                      }`}
                     >
-                      View
-                    </button>
+                      {bet.status}
+                    </span>
                   </div>
-                </div>
+       
+
+                  </div>
+                
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* ✅ Modal for Bet Details */}
+      {/* Pagination Buttons */}
+      {bets.length > ITEMS_PER_PAGE && (
+        <div className="flex justify-between mt-4">
+          <button
+            onClick={handlePrev}
+            disabled={page === 0}
+            className={`px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={startIndex + ITEMS_PER_PAGE >= bets.length}
+            className={`px-4 py-2 rounded bg-gray-700 hover:bg-gray-600 transition disabled:opacity-50`}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Modal for Bet Details */}
       {selectedBet && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn">
           <div className="bg-[#1e293b] p-6 rounded-xl w-[90%] max-w-md shadow-lg border border-slate-700 relative">
@@ -139,15 +215,43 @@ const Casino = () => {
                 {selectedBet.amount}
               </p>
               <p>
-                <span className="text-gray-400">Multiplier:</span>{" "}
-                {selectedBet.multiplier}x
-              </p>
+  <span className="text-gray-400">Payout:</span>{" "}
+  <span
+    className={`font-semibold ${
+      selectedBet.status === "LOST"
+        ? "text-red-500"
+        : selectedBet.status === "PENDING"
+        ? "text-yellow-400"
+        : "text-green-400"
+    }`}
+  >
+    {selectedBet.status === "LOST" ? "-" : `$${selectedBet.payout}`}
+  </span>
+</p>
+
               <p>
-                <span className="text-gray-400">Payout:</span>{" "}
-                <span className="font-semibold text-green-400">
-                  ${selectedBet.payout}
-                </span>
-              </p>
+                <span className="text-gray-400">Status:</span>{" "}
+    
+  <span
+    className={`font-semibold ${
+      selectedBet.status === "LOST"
+        ? "text-red-500"
+        : selectedBet.status === "PENDING"
+        ? "text-yellow-400"
+        : "text-green-400"
+    }`}
+  >
+    {selectedBet.status}
+  </span>
+</p>
+
+              
+              {selectedBet.value && (
+                <p>
+                  <span className="text-gray-400">Bet Value:</span>{" "}
+                  {selectedBet.value}
+                </p>
+              )}
             </div>
           </div>
         </div>

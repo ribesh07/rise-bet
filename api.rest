@@ -49,7 +49,7 @@ POST https://api.playrise.vip/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "gandu1@gmail.com",
+  "email": "gandu@gmail.com",
   "password": "12345678"
 
 }
@@ -164,3 +164,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjQ2LCJlbWFpb
 Content-Disposition: form-data; name="documents"; filename="id_card.png"
 Content-Type: image/png
 
+####bet
+
+GET https://api.playrise.vip/api/v1/users/bets HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTcxMzE0OSwiZXhwIjoxNzY4MzA1MTQ5fQ.5GIGHnj9xAXG1p6FygkTLYiwJ--IP9q1cUz6RFzl8fQ

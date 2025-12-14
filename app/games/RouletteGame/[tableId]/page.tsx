@@ -9,17 +9,15 @@ import TopNavbar from "@/components/topnavbar";
 import { useCurrency } from "@/context/CurrencyContext";
 import toast from "react-hot-toast";
 
-
 type BetsMap = { [key: string]: number };
-
-// Generates a unique table ID using uuid
 function generateTableId(): string {
   return uuidv4();
 }
 
 const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }) => {
   const [balance, setBalance] = useState<number>(0);
-
+  const [resolutions, setResolutions] = useState<Resolution[]>([]);
+  const pendingRecentBets: RecentBet[] = [];
   const [totalBet, setTotalBet] = useState<number>(0);
   const [winningAmount, setWinningAmount] = useState<number>(0);
   const [bets, setBets] = useState<BetsMap>({});
@@ -37,12 +35,10 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   const socketRef = useRef<any>(null);
   const [search, setSearch] = useState("");
   const [dashboardDetails, setDashboardDetails] = useState<any>(null);
-  
   const { currency, setCurrency } = useCurrency();
-type GamePhase = "COUNTDOWN" | "SPINNING" | "RESULT";
-
-const [phase, setPhase] = useState<GamePhase>("COUNTDOWN");
-const showCountdown = phase === "COUNTDOWN";
+  type GamePhase = "COUNTDOWN" | "SPINNING" | "RESULT";
+  const [phase, setPhase] = useState<GamePhase>("COUNTDOWN");
+  const showCountdown = phase === "COUNTDOWN";
 
   const wheelNumbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
@@ -59,35 +55,34 @@ const showCountdown = phase === "COUNTDOWN";
     return "unknown";
   };
 
-  const betAmounts = [1, 5, 10, 25, 50, 100];
- type RecentBet = {
+const betAmounts = [0.5,1,5, 10, 25, 50, 100];
+type RecentBet = {
   betId: string;
   value: string;
   amount: number;
   currency: string;
-  time: number;
-  status: "PENDING" | "WIN" | "LOSE";
+    time: number;
+  status: "PENDING" | "WIN" | "LOSE" | "LOST";
+};
+type Resolution = {
+  betId: string;
+  status: "WIN" | "LOSE" | "LOST";
+  userId?: string;
 };
 
-
 const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
-
   const wheelRotationRef = useRef<number>(wheelRotation);
   useEffect(() => {
     wheelRotationRef.current = wheelRotation;
   }, [wheelRotation]);
 
-  /* -------------------------
-     Currency / conversion helpers
-     ------------------------- */
-
   // Placeholder conversion rates (BASE ~ USD). Replace with live rates if available.
   const conversionRates: Record<string, number> = {
-    INR: 83.0, // 1 USD = 83 INR
+    INR: 83.0, 
     USD: 1,
     USDT: 1,
-    BTC: 1 / 60000, // 1 USD = 0.000016666.. BTC
-    ETH: 1 / 1800, // example
+    BTC: 1 / 60000, 
+    ETH: 1 / 1800, 
     LTC: 1 / 90,
     SOL: 1 / 100,
     XRP: 1 / 0.5,
@@ -111,19 +106,13 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
     BNB: { sym: "🟡", decimals: 6 },
   };
 
-  // format currency value for display
   const formatCurrency = (value: number, cur = currency) => {
     if (cur && currencySymbols[cur]) {
       const { sym, decimals } = currencySymbols[cur];
-      // toLocaleString with decimals
       return `${sym}${Number(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
     }
-    // default
     return `${value.toLocaleString()}`;
   };
-
-  // Convert a "chip base amount" into selected currency
-  // Here betAmounts array is considered "base units" (USD-like). We convert to selected currency using conversionRates.
   const convertChipToCurrency = (chipBaseAmount: number, cur = currency) => {
     const rate = conversionRates[cur] ?? 1;
     return chipBaseAmount * rate;
@@ -137,33 +126,25 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
     return isNaN(n) ? 0 : n;
   };
 
-  /* -------------------------
-     Fetch dashboard / wallets
-     ------------------------- */
   useEffect(() => {
     const fetchDashboardDetails = async () => {
       try {
         const token = localStorage.getItem("token");
         const id = localStorage.getItem("userId");
-
         const res = await apiRequest(`/users/${id}/details`, true, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (res.success) {
-          setDashboardDetails(res.data);
-
-          // Prefer the wallet matching current currency, else first wallet
+          setDashboardDetails(res.data);        
           const wallets = res.data.wallets || [];
           let initialWallet = null;
           if (wallets.length > 0) {
-            // If context currency exists, try to find matching wallet (wallet may hold "currency" or "symbol")
             initialWallet =
               wallets.find((w: any) => String(w.currency || w.symbol).toUpperCase() === String(currency || "").toUpperCase()) ||
               wallets[0];
           }
-
           if (initialWallet) {
             // try common keys
             const bal = parseWalletBalance(initialWallet.balance ?? initialWallet.amount ?? 0);
@@ -173,7 +154,6 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
               setCurrency(curSymbol);
             }
           } else {
-            // No wallets found — keep balance 0
             setBalance(0);
           }
         }
@@ -183,25 +163,18 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
         setLoading(false);
       }
     };
-
     fetchDashboardDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // run once
 
-  /* ---------- SOCKET INIT ---------- */
   useEffect(() => {
     // Use root socket as requested: getSocket()
-    const socket = getSocket(""); // your server route
+    const socket = getSocket(""); 
     socketRef.current = socket;
-
     const userId = localStorage.getItem("userId") || null;
-
-    // Include currency and userId in join-room for server to know context
     socket.emit("join-room", { room: tableId, userId, currency }, (res: any) => {
       console.log("Joined room:", res);
       setLoading(false);
     });
-
     socket.on("countdown", (data: any) => {
   if (typeof data?.seconds === "number") {
     setCountdown(data.seconds);
@@ -214,10 +187,10 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   }
 });
 
-
     socket.on("spin-result", (data: any) => {
-      // server expected data.result.number
+  
       const winNum = data?.result?.number ?? data?.number;
+       setResolutions(data.resolutions || []);
       if (typeof winNum === "number") {
         console.log("Spin result from server:", data);
         handleServerResult(winNum);
@@ -226,16 +199,15 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
         console.warn("Unexpected spin-result payload:", data);
       }
     });
-
+    socket.on
     socket.on("bet-update", (data: any) => {
-      // optional: update live bets UI if needed
+      
       console.log("Live bet update:", data);
     });
 
-    // server can also push balance updates
     socket.on("balance-update", (payload: any) => {
       if (payload?.currency && payload?.balance !== undefined) {
-        // only update if currency matches selected currency
+        
         if (String(payload.currency).toUpperCase() === String(currency).toUpperCase()) {
           setBalance(parseWalletBalance(payload.balance));
         }
@@ -248,7 +220,7 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
       try {
         socket.emit("leave-room", { room: tableId, userId }, () => {});
       } catch (e) {
-        // ignore
+       
       }
       socket.off("countdown");
       socket.off("spin-result");
@@ -258,19 +230,16 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
       try {
         disconnectSocket();
       } catch (e) {
-        // ignore
+        
       }
     };
-    // include tableId and currency in deps so when currency changes we could re-emit if necessary
+    
   }, [tableId, currency]);
 
-  /* ---------- Wallet / Currency sync from TopNavbar ---------- */
   const handleCurrencyChange = (currencyType: string) => {
     if (!currencyType) return;
     const symbol = currencyType.toString().toUpperCase();
     setCurrency(symbol);
-
-    // update balance from dashboardDetails wallets if available
     const wallets = dashboardDetails?.wallets || [];
     const found = wallets.find(
       (w: any) => String(w.currency || w.symbol || w.asset).toUpperCase() === symbol
@@ -280,7 +249,7 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
       setBalance(bal);
     } else {
       // fallback: try to leave balance unchanged or set to 0
-      setBalance((prev) => prev); // no-op fallback
+      setBalance((prev) => prev); 
     }
   };
 
@@ -291,26 +260,19 @@ const addBetLocally = (value: string, amount: number = betAmount) => {
   // calculate new total
   const newTotal =
     Object.values(bets).reduce((a, b) => a + b, 0) + amount;
-
   if (newTotal > balance) {
     toast.error("Insufficient balance");
     return;
   }
-
   setBets((prev) => ({
     ...prev,
     [value]: (prev[value] || 0) + amount,
   }));
-
   setTotalBet(newTotal);
 };
-
-
-
-/* ---------- CLEAR BETS ---------- */
 const clearBets = () => {
   setBets({});
-  setTotalBet(0); // Optional: just UI reset
+  setTotalBet(0); 
 };
 
 /* ---------- SPIN ALL BETS ---------- */
@@ -344,6 +306,7 @@ const spin = () => {
     };
 
     socket.emit("place-bet", payload, (res: any) => {
+     
       if (!res?.success && res?.success !== undefined) {
         toast.error(res?.message || "Bet rejected");
 
@@ -352,7 +315,6 @@ const spin = () => {
           delete newBets[value];
           return newBets;
         });
-
         setBalance((prev) => prev + amount);
       } else {
         toast.success(`Bet on ${value} placed`);
@@ -362,6 +324,7 @@ const spin = () => {
 
   // ✅ Save recent bets (max 10)
   const completedRecentBets = spinRecentBets.map((bet) => ({
+    
     betId: uuidv4(),
     value: bet.value,
     amount: bet.amount,
@@ -369,7 +332,6 @@ const spin = () => {
     time: Date.now(),
     status: "PENDING" as const,
   }));
-
   setRecentBets((prev) =>
     [...completedRecentBets, ...prev].slice(0, 10)
   );
@@ -377,10 +339,6 @@ const spin = () => {
   // Clear bets after spin
   setBets({});
 };
-
-
-
-
   /* ---------- HANDLE SERVER RESULT ---------- */
 const handleServerResult = (winningNumber: number) => {
   setPhase("SPINNING");
@@ -422,8 +380,29 @@ const handleServerResult = (winningNumber: number) => {
 };
 
 
+const getResolution = (betId: string | number) => {
+  return resolutions.find(r => r.betId === betId);
+};
 
- 
+ useEffect(() => {
+  if (!resolutions.length) return;
+
+  setRecentBets((prev) =>
+    prev.map((bet) => {
+      const resolution = resolutions.find(
+        (r) => String(r.betId) === String(bet.betId)
+      );
+
+      if (!resolution) return bet;
+
+      return {
+        ...bet,
+        status: resolution.status,
+      };
+    })
+  );
+}, [resolutions]);
+
 
   if (loading) return <div>Joining room...</div>;
 
@@ -459,6 +438,44 @@ const handleServerResult = (winningNumber: number) => {
   });
 };
 
+const OutsideBtn = ({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: string;
+  color: "red" | "dark" | "blue" | "purple" | "green" | "orange";
+}) => {
+  const colors: Record<string, string> = {
+    red: "bg-red-600 hover:bg-red-500",
+    dark: "bg-gray-800 hover:bg-gray-700 border border-gray-600",
+    blue: "bg-blue-600 hover:bg-blue-500",
+    purple: "bg-purple-600 hover:bg-purple-500",
+    green: "bg-green-600 hover:bg-green-500",
+    orange: "bg-orange-600 hover:bg-orange-500",
+  };
+
+  return (
+    <button
+      onClick={() => addBetLocally(value)}
+      disabled={isSpinning}
+      className={`
+        relative py-3 rounded-xl font-bold text-sm
+        transition-all active:scale-95
+        ${colors[color]}
+        text-white disabled:opacity-50
+      `}
+    >
+      {label}
+      {bets[value] && (
+        <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-black text-xs rounded-full flex items-center justify-center">
+          💰
+        </span>
+      )}
+    </button>
+  );
+};
 
   /* ---------- JSX ---------- */
   return (
@@ -482,14 +499,6 @@ const handleServerResult = (winningNumber: number) => {
 
           {/* Stats */}
           <div className="flex gap-4 text-sm">
-            {/* <div className="bg-gray-700 px-3 py-1 rounded">
-              <span className="text-gray-400">Balance:</span>
-              <span className="text-green-400 ml-1 font-bold">{formatCurrency(balance)}</span>
-            </div> */}
-            {/* <div className="bg-gray-700 px-3 py-1 rounded">
-              <span className="text-gray-400">Total Bet:</span>
-              <span className="text-yellow-400 ml-1 font-bold">{formatCurrency(totalBet)}</span>
-            </div> */}
             {winningAmount !== 0 && (
               <div className="bg-gray-700 px-3 py-1 rounded">
                 <span className="text-gray-400">Last Win:</span>
@@ -522,42 +531,53 @@ const handleServerResult = (winningNumber: number) => {
                 ))}
               </div>
             </div>
-
-            {/* Current Bets */}
             {/* Recent Bets */}
-<div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-  <h3 className="text-lg font-bold text-purple-400 mb-3">🕒 Recent Bets</h3>
+          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <h3 className="text-lg font-bold text-purple-400 mb-3">🕒 Recent Bets</h3>
+            {recentBets.length === 0 ? (
+              <p className="text-gray-400 text-sm">No recent bets</p>
+            ) : (
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {recentBets.map((bet, idx) => {
+                  const statusColor =
+                    bet.status === "WIN"
+                      ? "text-green-400"
+                      : bet.status === "LOSE"
+                      ? "text-red-400"
+                      : "text-yellow-400";
 
-  {recentBets.length === 0 ? (
-    <p className="text-gray-400 text-sm">No recent bets</p>
-  ) : (
-    <div className="space-y-2 max-h-48 overflow-y-auto">
-      {recentBets.map((bet, idx) => (
-        <div
-          key={idx}
-          className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded"
-        >
-          <div className="flex flex-col">
-            <span className="font-bold text-white">
-              {bet.value.toUpperCase()}
-            </span>
-            <span className="text-xs text-gray-400">
-              {new Date(bet.time).toLocaleTimeString()}
-            </span>
+                  return (
+                    <div
+                      key={idx}
+                      className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded"
+                    >
+                      {/* LEFT */}
+                      <div className="flex flex-col">
+                        <span className="font-bold text-white">
+                          {bet.value.toUpperCase()}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(bet.time).toLocaleTimeString()}
+                        </span>
+                      </div>
+
+                      {/* RIGHT */}
+                      <div className="flex flex-col items-end">
+                        <span className="font-bold text-white">
+                          {formatCurrency(bet.amount, bet.currency)}
+                        </span>
+
+                        <span className={`text-xs font-bold ${statusColor}`}>
+                          {bet.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-
-          <span className="text-green-400 font-bold">
-            {formatCurrency(bet.amount, bet.currency)}
-          </span>
         </div>
-      ))}
-    </div>
-  )}
-</div>
-
-
-          </div>
-
           {/* Center - Roulette Wheel */}
           <div className="flex items-center justify-center bg-gray-800 rounded-lg border border-gray-700 p-6">
             <div className="relative">
@@ -668,17 +688,17 @@ const handleServerResult = (winningNumber: number) => {
 
                 {/* Winning alert */}
                  {showCountdown && (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div className="w-32 h-32 rounded-full bg-black/80 border-4 border-blue-400 flex flex-col items-center justify-center animate-pulse">
-        <div className="text-4xl font-bold text-blue-400">
-          {countdown}
-        </div>
-        <div className="text-sm text-gray-300 font-bold">
-          NEXT SPIN
-        </div>
-      </div>
-    </div>
-  )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-32 h-32 rounded-full bg-black/80 border-4 border-blue-400 flex flex-col items-center justify-center animate-pulse">
+                        <div className="text-4xl font-bold text-blue-400">
+                          {countdown}
+                        </div>
+                        <div className="text-sm text-gray-300 font-bold">
+                          NEXT SPIN
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 {showWinningAlert && result !== null && (
                   <div className="absolute inset-0 flex items-center justify-center z-30">
                     <div className="relative">
@@ -695,63 +715,80 @@ const handleServerResult = (winningNumber: number) => {
                       <div className="absolute -top-1 -right-3 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: "0.2s" }}></div>
                     </div>
                   </div>
-                
-  )}
+                )}
               </div>
-
-              {/* Result display */}
-              {/* {result !== null && (
-                <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
-                  <div
-                    className={`px-4 py-2 rounded-lg font-bold text-lg border-2 ${
-                      result === 0 ? "bg-green-600 border-green-400" : redNumbers.includes(result) ? "bg-red-600 border-red-400" : "bg-gray-700 border-gray-500"
-                    } text-white shadow-lg animate-pulse`}
-                  >
-                    🎯 {result}
-                  </div>
-                </div>
-              )} */}
             </div>
           </div>
-
           {/* Right Panel - Betting Table */}
-          <div className="space-y-4">
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <h3 className="text-lg font-bold text-green-400 mb-4">🎲 Betting Table</h3>
+          <div className="space-y-4 w-full">
 
-              {/* Betting Amount Controls */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-400 mb-2">Bet Amount</label>
-                <div className="flex gap-2 mb-3">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-6 border border-gray-700 shadow-xl">
+
+              {/* Header */}
+              <h3 className="text-xl font-extrabold text-green-400 mb-4 flex items-center gap-2">
+                🎲 Betting Table
+              </h3>
+
+              {/* Bet Amount (Sticky on Mobile) */}
+              <div className="mb-5 sticky bottom-0 sm:static z-20 bg-gray-900/90 backdrop-blur p-3 rounded-xl border border-gray-700">
+                <label className="block text-xs uppercase tracking-wide text-gray-400 mb-2">
+                  Bet Amount
+                </label>
+
+                <div className="grid grid-cols-3 sm:flex gap-2 mb-2">
                   {betAmounts.map((amount) => (
                     <button
                       key={amount}
                       onClick={() => setBetAmount(amount)}
-                      className={`px-3 py-2 text-sm font-bold rounded transition-all ${betAmount === amount ? "bg-blue-600 text-white border-2 border-blue-400" : "bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600"}`}
+                      className={`
+                        py-2 rounded-lg font-bold text-sm transition-all
+                        ${betAmount === amount
+                          ? "bg-blue-600 text-white ring-2 ring-blue-400 shadow-lg"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"}
+                      `}
                     >
                       {formatCurrency(convertChipToCurrency(amount))}
                     </button>
                   ))}
                 </div>
-                <div className="text-sm text-gray-400">
-                  Selected: <span className="text-blue-400 font-bold">{formatCurrency(convertChipToCurrency(betAmount))}</span>
+
+                <div className="text-xs text-gray-400">
+                  Selected:&nbsp;
+                  <span className="text-blue-400 font-bold">
+                    {formatCurrency(convertChipToCurrency(betAmount))}
+                  </span>
                 </div>
               </div>
 
-              {/* Number Grid */}
-              <div className="mb-4">
-                <div className="text-sm font-medium text-gray-400 mb-2">Numbers</div>
-                <div className="grid grid-cols-6 gap-1 mb-2">
+              {/* Numbers */}
+              <div className="mb-6">
+                <div className="text-sm font-semibold text-gray-300 mb-2">
+                  Numbers
+                </div>
+
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {[0, ...Array.from({ length: 36 }, (_, i) => i + 1)].map((num) => (
                     <button
                       key={num}
                       onClick={() => addBetLocally(num.toString())}
                       disabled={isSpinning}
-                      className={`h-8 text-xs font-bold rounded transition-all relative ${num === 0 ? "bg-green-600 hover:bg-green-500" : redNumbers.includes(num) ? "bg-red-600 hover:bg-red-500" : "bg-gray-700 hover:bg-gray-600"} text-white disabled:opacity-50`}
+                      className={`
+                        relative h-10 sm:h-12 rounded-lg font-bold text-sm
+                        transition-all active:scale-95
+                        ${num === 0
+                          ? "bg-green-600 hover:bg-green-500"
+                          : redNumbers.includes(num)
+                          ? "bg-red-600 hover:bg-red-500"
+                          : "bg-gray-700 hover:bg-gray-600"}
+                        text-white disabled:opacity-50
+                      `}
                     >
                       {num}
+
                       {bets[num.toString()] && (
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full text-black text-xs flex items-center justify-center">💰</div>
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-black text-xs rounded-full flex items-center justify-center shadow">
+                          💰
+                        </span>
                       )}
                     </button>
                   ))}
@@ -759,55 +796,22 @@ const handleServerResult = (winningNumber: number) => {
               </div>
 
               {/* Outside Bets */}
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-400 mb-2">Outside Bets</div>
-
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => addBetLocally("red")} disabled={isSpinning} className="bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
-                    Red (1:1)
-                    {bets["red"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                  <button onClick={() => addBetLocally("black")} disabled={isSpinning} className="bg-gray-800 hover:bg-gray-700 disabled:opacity-50 text-white font-bold py-2 px-4 rounded border border-gray-600 transition-all relative">
-                    Black (1:1)
-                    {bets["black"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
+              <div className="space-y-3">
+                <div className="text-sm font-semibold text-gray-300">
+                  Outside Bets
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => addBetLocally("even")} disabled={isSpinning} className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
-                    Even (1:1)
-                    {bets["even"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                  <button onClick={() => addBetLocally("odd")} disabled={isSpinning} className="bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
-                    Odd (1:1)
-                    {bets["odd"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <OutsideBtn label="Red" value="red" color="red" />
+                  <OutsideBtn label="Black" value="black" color="dark" />
+                  <OutsideBtn label="Even" value="even" color="blue" />
+                  <OutsideBtn label="Odd" value="odd" color="purple" />
+                  <OutsideBtn label="1–18" value="1-18" color="green" />
+                  <OutsideBtn label="19–36" value="19-36" color="green" />
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  <button onClick={() => addBetLocally("1-18")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
-                    1-18 (1:1)
-                    {bets["1-18"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                  <button onClick={() => addBetLocally("19-36")} disabled={isSpinning} className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold py-2 px-4 rounded transition-all relative">
-                    19-36 (1:1)
-                    {bets["19-36"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1">
-                  <button onClick={() => addBetLocally("1-12")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
-                    1-12 (2:1)
-                    {bets["1-12"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                  <button onClick={() => addBetLocally("13-24")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
-                    13-24 (2:1)
-                    {bets["13-24"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
-                  <button onClick={() => addBetLocally("25-36")} disabled={isSpinning} className="bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2 px-2 text-sm rounded transition-all relative">
-                    25-36 (2:1)
-                    {bets["25-36"] && <span className="absolute -top-1 -right-1 text-xs">💰</span>}
-                  </button>
+                <div className="grid grid-cols-3 gap-2">
+                  <OutsideBtn label="1–12" value="1-12" color="orange" />
+                  <OutsideBtn label="13–24" value="13-24" color="orange" />
+                  <OutsideBtn label="25–36" value="25-36" color="orange" />
                 </div>
               </div>
             </div>
@@ -834,22 +838,21 @@ const handleServerResult = (winningNumber: number) => {
             
 
            <button
-  onClick={() => spin()} // ✅ call spin with no arguments
-  disabled={totalBet === 0 || isSpinning}
-  className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"
->
-  {isSpinning ? (
-    <div className="flex items-center gap-2">
-      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-      SPINNING...
-    </div>
-  ) : (
-    <div className="flex items-center gap-2 p-2">
-      🎲 SPIN ({formatCurrency(totalBet)})
-    </div>
-  )}
-</button>
-
+              onClick={() => spin()} // ✅ call spin with no arguments
+              disabled={totalBet === 0 || isSpinning}
+              className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+            >
+              {isSpinning ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  SPINNING...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-2">
+                  🎲 SPIN ({formatCurrency(totalBet)})
+                </div>
+              )}
+            </button>
           </div>
         </div>
       </div>
