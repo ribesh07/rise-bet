@@ -156,6 +156,7 @@ model Bet {
   odds         Decimal?     @db.Decimal(5,2)
   potentialWin Decimal?    @db.Decimal(12,2)
   amount        Decimal     @db.Decimal(12,2)
+  amountInINR  Decimal?  @db.Decimal(18, 2)
   payout       Decimal?    @db.Decimal(12,2) @default(0.00)
   status       BetStatus  @default(PENDING)
   createdAt    DateTime    @default(now())
@@ -231,4 +232,13 @@ model PromoUsage {
   user      User     @relation(fields: [userId], references: [id])
 
   @@unique([promoId, userId]) // prevents double use
+}
+
+
+model ExchangeRate {
+  id        Int      @id @default(autoincrement())
+  currency  Currency @unique
+  rateInINR Decimal  @db.Decimal(18, 8)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }

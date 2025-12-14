@@ -438,6 +438,16 @@ async createBet(data: {
     });
 
    if (!wallet) throw new Error("Wallet not found");
+
+   const rate = await tx.exchangeRate.findUnique({
+    where: { currency },
+  });
+
+  if (!rate) {
+    throw new Error(`Rate not found for ${currency}`);
+  }
+
+  const amountInINR = Number(amount) * Number(rate.rateInINR);
    
    
    // 2. Atomic balance check + decrement
@@ -457,6 +467,7 @@ async createBet(data: {
         room,
         payload,
         amount,
+        amountInINR,
         game: payload.game,
         currency,
       },

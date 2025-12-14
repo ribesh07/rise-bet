@@ -23,6 +23,21 @@ async function main() {
     },
   });
 
+  await prisma.exchangeRate.createMany({
+    data: [
+      { currency: Currency.INR, rateInINR: 1 },
+      { currency: Currency.USDT, rateInINR: 83.25 },
+      { currency: Currency.USDC, rateInINR: 83.20 },
+      { currency: Currency.BTC, rateInINR: 5600000 },
+      { currency: Currency.ETH, rateInINR: 310000 },
+      { currency: Currency.BNB, rateInINR: 21000 },
+      { currency: Currency.SOL, rateInINR: 7500 },
+      { currency: Currency.XRP, rateInINR: 52 },
+      { currency: Currency.TRX, rateInINR: 7.2 },
+      { currency: Currency.LTC, rateInINR: 6800 },
+    ],
+  });
+
   console.log('Created admin user:', user.id, email, 'password:', password);
 }
 
