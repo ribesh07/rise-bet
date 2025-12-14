@@ -23,7 +23,7 @@ const Dashboard: React.FC = () => {
   const [search, setSearch] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showVipForm, setShowVipForm] = useState(false);
-
+  
   // NEW STATES FOR API DATA
   const [dashboardDetails, setDashboardDetails] = useState<any>(null);
   const [loading, setLoading] = useState(true);

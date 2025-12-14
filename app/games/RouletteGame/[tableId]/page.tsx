@@ -57,7 +57,7 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
 
 const betAmounts = [0.5,1,5, 10, 25, 50, 100];
 type RecentBet = {
-  betId: string;
+  betsids: string;
   value: string;
   amount: number;
   currency: string;
@@ -189,8 +189,9 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
 
     socket.on("spin-result", (data: any) => {
   
-      const winNum = data?.result?.number ?? data?.number;
-       setResolutions(data.resolutions || []);
+      const winNum = data?.result?.number ;
+      setResolutions(prev => [...prev, ...(data.resolutions || [])]);
+
       if (typeof winNum === "number") {
         console.log("Spin result from server:", data);
         handleServerResult(winNum);
@@ -203,6 +204,48 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
     socket.on("bet-update", (data: any) => {
       
       console.log("Live bet update:", data);
+     setRecentBets(prev => {
+        const rawBet = data?.bet?.bet;
+        if (!rawBet) return prev;
+
+        const betId = String(rawBet.id);
+
+        // prevent duplicate betId
+        if (prev.some(b => b.betsids === betId)) {
+          return prev;
+        }
+
+        const newBet: RecentBet = {
+          betsids: betId,
+          value: rawBet.payload?.value ?? "", // number / color / etc
+          amount: Number(rawBet.amount),
+          currency: rawBet.currency,
+          time: new Date(rawBet.createdAt).getTime(),
+          status: "PENDING"
+        };
+
+        return [...prev, newBet];
+      });
+     setBets((prev) => {
+  const newBets = { ...prev };
+
+  const betData = data?.bet?.bet;
+  if (!betData) return prev;
+
+  const betsArray = Array.isArray(betData) ? betData : [betData];
+
+  betsArray.forEach((bet: any) => {
+    const rawValue = bet.value ?? bet.payload?.value;
+    if (!rawValue) return;
+
+    const val = String(rawValue).toUpperCase();
+    newBets[val] = (newBets[val] || 0) + Number(bet.amount || 0);
+  });
+
+  return newBets;
+});
+
+
     });
 
     socket.on("balance-update", (payload: any) => {
@@ -306,7 +349,7 @@ const spin = () => {
     };
 
     socket.emit("place-bet", payload, (res: any) => {
-     
+    //  console.log("Bet placement result from server:", res.resolutions);
       if (!res?.success && res?.success !== undefined) {
         toast.error(res?.message || "Bet rejected");
 
@@ -325,16 +368,16 @@ const spin = () => {
   // ✅ Save recent bets (max 10)
   const completedRecentBets = spinRecentBets.map((bet) => ({
     
-    betId: uuidv4(),
+    betsids: uuidv4(),
     value: bet.value,
     amount: bet.amount,
     currency,
     time: Date.now(),
     status: "PENDING" as const,
   }));
-  setRecentBets((prev) =>
-    [...completedRecentBets, ...prev].slice(0, 10)
-  );
+  // setRecentBets((prev) =>
+  //   [...completedRecentBets, ...prev].slice(0, 10)
+  // );
 
   // Clear bets after spin
   setBets({});
@@ -384,24 +427,25 @@ const getResolution = (betId: string | number) => {
   return resolutions.find(r => r.betId === betId);
 };
 
- useEffect(() => {
+useEffect(() => {
   if (!resolutions.length) return;
 
-  setRecentBets((prev) =>
-    prev.map((bet) => {
+  setRecentBets(prev =>
+    prev.map(bet => {
       const resolution = resolutions.find(
-        (r) => String(r.betId) === String(bet.betId)
+        r => String(r.betId) === String(bet.betsids)
       );
 
       if (!resolution) return bet;
 
       return {
         ...bet,
-        status: resolution.status,
+        status: resolution.status, // WIN | LOSE | LOST
       };
     })
   );
 }, [resolutions]);
+
 
 
   if (loading) return <div>Joining room...</div>;
@@ -420,7 +464,7 @@ const getResolution = (betId: string | number) => {
     userId: localStorage.getItem("userId"),
     gameId: "roulette",
     room: tableId,
-    betId: uuidv4(),
+    // betId: uuidv4(),
     betType,
     amount,
     currency,
