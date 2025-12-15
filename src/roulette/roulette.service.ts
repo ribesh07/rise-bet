@@ -87,6 +87,16 @@ export class RouletteService {
                 description: `Roulette win (betId:${bet.id})`,
               },
             });
+
+            //match update for win
+            const match = await tx.match.update({
+              where: { id: bet.matchId },
+              data: {
+                status: 'WON',
+              }
+            });
+
+            
             // credit wallet
             await tx.wallet.update({
               where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
@@ -111,6 +121,13 @@ export class RouletteService {
                 createdAt: new Date(),
                 description: `Roulette lost (betId:${bet.id})`,
               },
+            });
+
+              const match = await tx.match.update({
+              where: { id: bet.matchId },
+              data: {
+                status: 'LOST',
+              }
             });
             // // credit wallet
             // await tx.wallet.update({

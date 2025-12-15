@@ -150,6 +150,7 @@ model Bet {
   matchId      Int
   table       String?
   game         String?
+  sports    String? 
   room         String?
   currency     Currency
   payload      Json
