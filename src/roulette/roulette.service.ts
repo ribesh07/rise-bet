@@ -559,7 +559,6 @@ async getActiveMatch(room: string , name : string) {
     match = await this.prisma.match.create({
       data: {
         tableId: room,
-        players: [],
         startTime: new Date(),
         name : name,
         status: "ACTIVE"
