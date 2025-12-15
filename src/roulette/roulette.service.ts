@@ -402,39 +402,73 @@ async forceSpin(tableId: string) {
   }
 
 
-async addPlayerToMatch(room: string, player: { userId: number; username: string }) {
-  let match = await this.prisma.match.findFirst({
-    where: { tableId: room, status: "ACTIVE", name : "ROULETTE" }
-  });
-
-  if (!match) {
-    // Create new match/round
-    match = await this.prisma.match.create({
-      data: {
+async addPlayerToMatch(
+  room: string,
+  player: { userId: number; username: string }
+) {
+  return this.prisma.$transaction(async (tx) => {
+    // find active match
+    let match = await tx.match.findFirst({
+      where: {
         tableId: room,
-        players: [player],
-        startTime: new Date(),
-        name : "ROULETTE"
-      }
+        status: "ACTIVE",
+        name: "ROULETTE",
+      },
     });
-  } else {
-    // Add unique players
-    const players = (match.players ?? []) as any[];
 
-    const exists = players.some(p => p.userId === player.userId);
+    // create new match
+    if (!match) {
+      match = await tx.match.create({
+        data: {
+          tableId: room,
+          name: "ROULETTE",
+          status: "ACTIVE",
+          startTime: new Date(),
+          countPlayers: 1,
+          players: {
+            create: {
+              userId: player.userId,
+              username: player.username,
+            },
+          },
+        },
+      });
 
-    if (!exists) {
-      players.push(player);
+      return match;
+    }
 
-      await this.prisma.match.update({
+    // try adding player
+    try {
+      await tx.matchPlayer.create({
+        data: {
+          matchId: match.id,
+          userId: player.userId,
+          username: player.username,
+        },
+      });
+
+      // increment count safely
+      return tx.match.update({
         where: { id: match.id },
-        data: { players }
+        data: {
+          countPlayers: { increment: 1 },
+        },
+        include: {
+          players: true,
+        },
+      });
+    } catch (err) {
+      // duplicate join (unique constraint)
+      return tx.match.findUnique({
+        where: { id: match.id },
+        include: {
+          players: true,
+        },
       });
     }
-  }
-
-  return match;
+  });
 }
+
 
 
 async createBet(data: { 
@@ -527,7 +561,8 @@ async getActiveMatch(room: string , name : string) {
         tableId: room,
         players: [],
         startTime: new Date(),
-        name : name
+        name : name,
+        status: "ACTIVE"
       }
     });
   }

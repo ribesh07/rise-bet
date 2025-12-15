@@ -171,10 +171,22 @@ model Match {
   name      String?
    tableId     String
   status      BetStatus  @default(PENDING)     // ACTIVE | SPINNING | FINISHED
-  players     Json? 
+  players       MatchPlayer[]
+  countPlayers Int? @default(0)
   startTime DateTime
   endTime   DateTime?
   bets      Bet[]
+}
+
+model MatchPlayer {
+  id       Int   @id @default(autoincrement())
+  matchId  Int
+  userId   Int
+  username String
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  @@unique([matchId, userId]) 
 }
 
 
