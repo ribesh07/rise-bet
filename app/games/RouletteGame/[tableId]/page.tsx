@@ -14,10 +14,16 @@ function generateTableId(): string {
   return uuidv4();
 }
 
+type betupdateid = {
+  id: number;}
+
 const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }) => {
   const [balance, setBalance] = useState<number>(0);
   const [resolutions, setResolutions] = useState<Resolution[]>([]);
-  const pendingRecentBets: RecentBet[] = [];
+  const [resolutionbetupdate, setresolutionbetupdate] = useState<betupdateid[]>([]);
+  const [showResultStatus, setShowResultStatus] = useState(false);
+ const [resolutionbet, setresolutionbet] = useState<Resolution[]>([]);
+  const [status, setstatus] = useState<string>("");
   const [totalBet, setTotalBet] = useState<number>(0);
   const [winningAmount, setWinningAmount] = useState<number>(0);
   const [bets, setBets] = useState<BetsMap>({});
@@ -39,6 +45,7 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   type GamePhase = "COUNTDOWN" | "SPINNING" | "RESULT";
   const [phase, setPhase] = useState<GamePhase>("COUNTDOWN");
   const showCountdown = phase === "COUNTDOWN";
+  const [resultshow, setResultshow] = useState(false);
 
   const wheelNumbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
@@ -191,19 +198,29 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   
       const winNum = data?.result?.number ;
       setResolutions(prev => [...prev, ...(data.resolutions || [])]);
-
+      setstatus(data.resolutions.status || "");
+      if(data.resolutions ){
+            setResultshow(true);
+            console.log("Bet ID matched for resolution update.");
+      }
       if (typeof winNum === "number") {
         console.log("Spin result from server:", data);
-        handleServerResult(winNum);
+        handleServerResult(winNum); 
         setGameHistory((prev) => [...prev, winNum]);
+        if(data.resolutions.betId === resolutionbetupdate ){
+            setResultshow(true);
+            console.log("Bet ID matched for resolution update.", data.resolutions.betId,resolutionbetupdate);
+            console.log("Resolution Status:", data.resolutions.betId,resolutionbetupdate);
+      }
       } else {
         console.warn("Unexpected spin-result payload:", data);
       }
     });
-    socket.on
+    
     socket.on("bet-update", (data: any) => {
       
       console.log("Live bet update:", data);
+      setresolutionbetupdate(data.bet.bet.id || []);
      setRecentBets(prev => {
         const rawBet = data?.bet?.bet;
         if (!rawBet) return prev;
@@ -297,22 +314,28 @@ const [recentBets, setRecentBets] = useState<RecentBet[]>([]);
   };
 
 /* ---------- PLACE INDIVIDUAL BET ---------- */
-const addBetLocally = (value: string, amount: number = betAmount) => {
+const addBetLocally = (value: string, usdtAmount: number = betAmount) => {
   if (isSpinning) return;
 
-  // calculate new total
-  const newTotal =
-    Object.values(bets).reduce((a, b) => a + b, 0) + amount;
-  if (newTotal > balance) {
+  const newTotalUSDT =
+    Object.values(bets).reduce((a, b) => a + b, 0) + usdtAmount;
+
+  // 🔥 convert ONLY for balance check
+  const totalInCurrency = convertChipToCurrency(newTotalUSDT);
+
+  if (totalInCurrency > balance) {
     toast.error("Insufficient balance");
     return;
   }
-  setBets((prev) => ({
+
+  setBets(prev => ({
     ...prev,
-    [value]: (prev[value] || 0) + amount,
+    [value]: (prev[value] || 0) + usdtAmount,
   }));
-  setTotalBet(newTotal);
+
+  setTotalBet(newTotalUSDT); // ✅ store USDT
 };
+
 const clearBets = () => {
   setBets({});
   setTotalBet(0); 
@@ -336,34 +359,29 @@ const spin = () => {
     type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
   }));
 
-  Object.entries(bets).forEach(([value, amount]) => {
-    const payload = {
-      room: tableId,
-      bet: {
-        type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
-        value: value.toUpperCase(),
-        amount,
-        currency,
-        game: "ROULETTE",
-      },
-    };
+ Object.entries(bets).forEach(([value, usdtAmount]) => {
+  const convertedAmount = convertChipToCurrency(usdtAmount);
 
-    socket.emit("place-bet", payload, (res: any) => {
-    //  console.log("Bet placement result from server:", res.resolutions);
-      if (!res?.success && res?.success !== undefined) {
-        toast.error(res?.message || "Bet rejected");
+  const payload = {
+    room: tableId,
+    bet: {
+      type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
+      value: value.toUpperCase(),
+      amount: Number(convertedAmount.toFixed(8)), // 🔥 send UI value
+      currency,
+      game: "ROULETTE",
+    },
+  };
 
-        setBets((prev) => {
-          const newBets = { ...prev };
-          delete newBets[value];
-          return newBets;
-        });
-        setBalance((prev) => prev + amount);
-      } else {
-        toast.success(`Bet on ${value} placed`);
-      }
-    });
+  socket.emit("place-bet", payload, (res: any) => {
+    if (!res?.success && res?.success !== undefined) {
+      toast.error(res?.message || "Bet rejected");
+    } else {
+      toast.success(`Bet on ${value} placed`);
+    }
   });
+});
+
 
   // ✅ Save recent bets (max 10)
   const completedRecentBets = spinRecentBets.map((bet) => ({
@@ -375,11 +393,6 @@ const spin = () => {
     time: Date.now(),
     status: "PENDING" as const,
   }));
-  // setRecentBets((prev) =>
-  //   [...completedRecentBets, ...prev].slice(0, 10)
-  // );
-
-  // Clear bets after spin
   setBets({});
 };
   /* ---------- HANDLE SERVER RESULT ---------- */
@@ -402,11 +415,15 @@ const handleServerResult = (winningNumber: number) => {
   setTimeout(() => setBallVisible(false), 4200);
 
   // show winner
-  setTimeout(() => {
-    setResult(winningNumber);
-    setShowWinningAlert(true);
-    setPhase("RESULT");
-  }, 4500);
+ setTimeout(() => {
+  setResult(winningNumber);
+  setShowWinningAlert(true);
+  setPhase("RESULT");
+
+  // 🔥 SHOW STATUS (WIN / LOSE) ONCE
+  setShowResultStatus(true);
+}, 4500);
+
 
   // hide winner and RESET
   setTimeout(() => {
@@ -429,7 +446,7 @@ const getResolution = (betId: string | number) => {
 
 useEffect(() => {
   if (!resolutions.length) return;
-
+  setresolutionbet (resolutions);
   setRecentBets(prev =>
     prev.map(bet => {
       const resolution = resolutions.find(
@@ -446,6 +463,15 @@ useEffect(() => {
   );
 }, [resolutions]);
 
+useEffect(() => {
+  if (!showResultStatus) return;
+
+  const timer = window.setTimeout(() => {
+    setShowResultStatus(false);
+  }, 5000);
+
+  return () => window.clearTimeout(timer);
+}, [showResultStatus]);
 
 
   if (loading) return <div>Joining room...</div>;
@@ -481,6 +507,7 @@ useEffect(() => {
     }
   });
 };
+
 
 const OutsideBtn = ({
   label,
@@ -523,7 +550,7 @@ const OutsideBtn = ({
 
   /* ---------- JSX ---------- */
   return (
-    <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
+    <div className="flex min-h-screen roulette-header-bg text-white overflow-x-hidden relative flex-col">
       <TopNavbar
         searchValue={search}
         onSearchChange={setSearch}
@@ -535,104 +562,119 @@ const OutsideBtn = ({
       />
 
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-4">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-bold text-blue-400">🎰 Roulette</h1>
-          </div>
+     
 
-          {/* Stats */}
-          <div className="flex gap-4 text-sm">
-            {winningAmount !== 0 && (
-              <div className="bg-gray-700 px-3 py-1 rounded">
-                <span className="text-gray-400">Last Win:</span>
-                <span className={`ml-1 font-bold ${winningAmount > 0 ? "text-green-400" : "text-red-400"}`}>
-                  {formatCurrency(winningAmount)}
-                </span>
-              </div>
-            )}
-          </div>
+<div className="min-h-screen roulette-header-bg text-white">
+
+  {/* ================= HEADER ================= */}
+  {/* <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
+    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <h1 className="text-2xl font-bold text-blue-400">🎰 Roulette</h1>
+
+      {winningAmount !== 0 && (
+        <div className="bg-gray-700 px-3 py-1 rounded text-sm">
+          <span className="text-gray-400">Last Win:</span>
+          <span className={`ml-1 font-bold ${winningAmount > 0 ? "text-green-400" : "text-red-400"}`}>
+            {formatCurrency(winningAmount)}
+          </span>
+        </div>
+      )}
+    </div>
+  </div> */}
+
+  {/* ================= MAIN ================= */}
+  <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      {/* ================= LEFT : HISTORY ================= */}
+      <div className="order-3 lg:order-1 space-y-4">
+
+        {/* Recent Results */}
+        <div className="roulette-recent-header-bg rounded-xl p-4 border border-gray-700 shadow-inner">
+  <div className="flex items-center justify-between mb-3">
+    <h3 className="text-lg font-extrabold text-green-400">Recent Results</h3>
+      
+
+     <button
+          onClick={() => setGameHistory([])}
+          className="bg-green-600 hover:bg-green-500 px-3 py-3 rounded-lg font-bold"
+        >
+          🗑️ Clear History
+        </button>
+  </div>
+
+  <div className="flex flex-wrap gap-2">
+    {gameHistory.slice(-10).map((num, idx) => {
+      const isRed = redNumbers.includes(num);
+      const isGreen = num === 0;
+
+      return (
+        <div
+          key={idx}
+          className={`
+            w-9 h-9 sm:w-10 sm:h-10
+            rounded-full
+            flex items-center justify-center
+            text-xs sm:text-sm font-extrabold
+            text-white
+            shadow-lg
+            border-2
+            ${
+              isGreen
+                ? "bg-green-600 border-green-400"
+                : isRed
+                ? "bg-red-600 border-red-400"
+                : "bg-gray-700 border-gray-500"
+            }
+          `}
+        >
+          {num}
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
+        {/* Recent Bets */}
+        <div className="roulette-amount-header-bg p-4 rounded-lg border border-gray-700 shadow-inner">
+          <h3 className="text-lg font-bold text-purple-400 mb-3">🕒 Recent Bets</h3>
+          {recentBets.length === 0 ? (
+            <p className="text-gray-400 text-sm">No recent bets</p>
+          ) : (
+            <div className="space-y-2 max-h-56 overflow-y-auto">
+              {recentBets.map((bet, idx) => {
+                const statusColor =
+                  bet.status === "WIN"
+                    ? "text-green-400"
+                    : bet.status === "LOSE"
+                    ? "text-red-400"
+                    : "text-yellow-400";
+
+                return (
+                  <div key={idx} className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded">
+                    <div>
+                      <div className="font-bold">{bet.value.toUpperCase()}</div>
+                      <div className="text-xs text-gray-400">{new Date(bet.time).toLocaleTimeString()}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold">{formatCurrency(bet.amount, bet.currency)}</div>
+                      <div className={`text-xs font-bold ${statusColor}`}>{bet.status}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Main Game Area */}
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Game History & Stats */}
-          <div className="space-y-4">
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-              <h3 className="text-lg font-bold text-blue-400 mb-3">🎯 Recent Results</h3>
-              <div className="flex flex-wrap gap-2">
-                {gameHistory.slice(-10).map((num, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                      num === 0 ? "bg-green-500" : redNumbers.includes(num) ? "bg-red-500" : "bg-gray-600"
-                    } text-white`}
-                  >
-                    {num}
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Recent Bets */}
-          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <h3 className="text-lg font-bold text-purple-400 mb-3">🕒 Recent Bets</h3>
-            {recentBets.length === 0 ? (
-              <p className="text-gray-400 text-sm">No recent bets</p>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {recentBets.map((bet, idx) => {
-                  const statusColor =
-                    bet.status === "WIN"
-                      ? "text-green-400"
-                      : bet.status === "LOSE"
-                      ? "text-red-400"
-                      : "text-yellow-400";
+      {/* ================= CENTER : WHEEL ================= */}
+      <div className="order-1 lg:order-2 flex justify-center">
+        <div className="">
 
-                  return (
-                    <div
-                      key={idx}
-                      className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded"
-                    >
-                      {/* LEFT */}
-                      <div className="flex flex-col">
-                        <span className="font-bold text-white">
-                          {bet.value.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-gray-400">
-                          {new Date(bet.time).toLocaleTimeString()}
-                        </span>
-                      </div>
-
-                      {/* RIGHT */}
-                      <div className="flex flex-col items-end">
-                        <span className="font-bold text-white">
-                          {formatCurrency(bet.amount, bet.currency)}
-                        </span>
-
-                        <span className={`text-xs font-bold ${statusColor}`}>
-                          {bet.status}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-          {/* Center - Roulette Wheel */}
-          <div className="flex items-center justify-center bg-gray-800 rounded-lg border border-gray-700 p-6">
-            <div className="relative">
-              {/* Pointer */}
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-30">
-                <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
-                <div className="w-2 h-2 bg-yellow-400 rounded-full mx-auto -mt-1 shadow-lg"></div>
-              </div>
-
-              {/* Wheel */}
-              <div className="w-80 h-80 rounded-full bg-gradient-to-br from-amber-800 to-amber-900 border-4 border-amber-600 shadow-2xl relative">
+         {/* Wheel */}
+              <div className="w-80 h-80 rounded-full bg-gradient-to-br from-gray-800 to-gray-900 border-4 border-gray-600 shadow-2xl relative">
                 <div className="absolute inset-0 rounded-full">
                   {wheelNumbers.map((num, idx) => {
                     const angle = (idx * 360) / 37;
@@ -746,7 +788,7 @@ const OutsideBtn = ({
                 {showWinningAlert && result !== null && (
                   <div className="absolute inset-0 flex items-center justify-center z-30">
                     <div className="relative">
-                      <div className="w-32 h-32 bg-black/80 rounded-full flex items-center justify-center border-4 border-yellow-400 shadow-2xl animate-pulse">
+                      <div className="w-32 h-32 bg-black/80 rounded-full flex items-center justify-center border-4 border-yellow-400 ">
                        
                         <div className="text-center">
                           <div className={`text-4xl font-bold mb-1 ${result === 0 ? "text-green-400" : redNumbers.includes(result) ? "text-red-400" : "text-white"}`}>
@@ -756,150 +798,144 @@ const OutsideBtn = ({
                         </div>
                       </div>
                       <div className="absolute -top-2 -left-2 w-2 h-2 bg-yellow-400 rounded-full animate-ping"></div>
-                      <div className="absolute -top-1 -right-3 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: "0.2s" }}></div>
+                      <div className="absolute -top-1 -right-3 w-1 h-1 bg-white rounded-full animate-ping"></div>
                     </div>
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-          {/* Right Panel - Betting Table */}
-          <div className="space-y-4 w-full">
 
-            <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 sm:p-6 border border-gray-700 shadow-xl">
-
-              {/* Header */}
-              <h3 className="text-xl font-extrabold text-green-400 mb-4 flex items-center gap-2">
-                🎲 Betting Table
-              </h3>
-
-              {/* Bet Amount (Sticky on Mobile) */}
-              <div className="mb-5 sticky bottom-0 sm:static z-20 bg-gray-900/90 backdrop-blur p-3 rounded-xl border border-gray-700">
-                <label className="block text-xs uppercase tracking-wide text-gray-400 mb-2">
-                  Bet Amount
-                </label>
-
-                <div className="grid grid-cols-3 sm:flex gap-2 mb-2">
-                  {betAmounts.map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setBetAmount(amount)}
-                      className={`
-                        py-2 rounded-lg font-bold text-sm transition-all
-                        ${betAmount === amount
-                          ? "bg-blue-600 text-white ring-2 ring-blue-400 shadow-lg"
-                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"}
-                      `}
-                    >
-                      {formatCurrency(convertChipToCurrency(amount))}
-                    </button>
-                  ))}
-                </div>
-
-                <div className="text-xs text-gray-400">
-                  Selected:&nbsp;
-                  <span className="text-blue-400 font-bold">
-                    {formatCurrency(convertChipToCurrency(betAmount))}
-                  </span>
-                </div>
-              </div>
-
-              {/* Numbers */}
-              <div className="mb-6">
-                <div className="text-sm font-semibold text-gray-300 mb-2">
-                  Numbers
-                </div>
-
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {[0, ...Array.from({ length: 36 }, (_, i) => i + 1)].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => addBetLocally(num.toString())}
-                      disabled={isSpinning}
-                      className={`
-                        relative h-10 sm:h-12 rounded-lg font-bold text-sm
-                        transition-all active:scale-95
-                        ${num === 0
-                          ? "bg-green-600 hover:bg-green-500"
-                          : redNumbers.includes(num)
-                          ? "bg-red-600 hover:bg-red-500"
-                          : "bg-gray-700 hover:bg-gray-600"}
-                        text-white disabled:opacity-50
-                      `}
-                    >
-                      {num}
-
-                      {bets[num.toString()] && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 text-black text-xs rounded-full flex items-center justify-center shadow">
-                          💰
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Outside Bets */}
-              <div className="space-y-3">
-                <div className="text-sm font-semibold text-gray-300">
-                  Outside Bets
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <OutsideBtn label="Red" value="red" color="red" />
-                  <OutsideBtn label="Black" value="black" color="dark" />
-                  <OutsideBtn label="Even" value="even" color="blue" />
-                  <OutsideBtn label="Odd" value="odd" color="purple" />
-                  <OutsideBtn label="1–18" value="1-18" color="green" />
-                  <OutsideBtn label="19–36" value="19-36" color="green" />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <OutsideBtn label="1–12" value="1-12" color="orange" />
-                  <OutsideBtn label="13–24" value="13-24" color="orange" />
-                  <OutsideBtn label="25–36" value="25-36" color="orange" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Control Panel */}
-        <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
-          <div className="text-center">
-              {isSpinning ? <div className="text-blue-400 font-bold text-lg animate-pulse">🌀 Ball is revolving around the wheel...</div> : <div className="text-gray-400">Place your bets and spin the wheel!</div>}
-            </div>
-          <div className="flex justify-between items-center">
-            
-            <div className="flex gap-3">
-              <button onClick={clearBets} disabled={totalBet === 0 || isSpinning} className="bg-red-600 hover:bg-red-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold px-4 py-2 rounded transition-colors flex items-center gap-2">
-                ❌ Clear Bets
-              </button>
-
-              <button onClick={() => setGameHistory([])} className="bg-gray-600 hover:bg-gray-500 text-white font-bold px-4 py-2 rounded transition-colors flex items-center gap-2">
-                🗑️ Clear History
-              </button>
-            </div>
-
-            
-
-           <button
-              onClick={() => spin()} // ✅ call spin with no arguments
-              disabled={totalBet === 0 || isSpinning}
-              className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed text-white font-bold px-8 py-3 rounded-lg transition-all transform hover:scale-105 active:scale-95 shadow-lg"
-            >
-              {isSpinning ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  SPINNING...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 p-2">
-                  🎲 SPIN ({formatCurrency(totalBet)})
-                </div>
-              )}
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* ================= RIGHT : BET TABLE ================= */}
+      <div className="order-2 lg:order-3 space-y-4">
+        <div className="roulette-balance-header-bg rounded-2xl p-4 sm:p-6 border border-gray-700 shadow-xl">
+
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-extrabold text-green-400">🎲 Betting Table</h3>
+            {/* <span className="text-xs px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/30">
+              Place Your Bet
+            </span> */}
+            <button
+          onClick={() => spin()}
+          disabled={totalBet === 0 || isSpinning}
+          className="bg-green-600 hover:bg-green-500 disabled:bg-gray-600 px-3 py-3 rounded-lg font-bold"
+        >
+          🎲 SPIN ({formatCurrency(convertChipToCurrency(totalBet))})
+        </button>
+          </div>
+        <div className="mt-6 bg-gray-800 rounded-lg p-4 border border-gray-700">
+      <div className="text-center mb-4">
+       {isSpinning ? (
+  <div className="text-blue-400 font-bold animate-pulse">
+    🌀 Ball is revolving around the wheel...
+  </div>
+) : (
+  showResultStatus && (
+    <div className="space-y-2 max-h-56 overflow-y-auto">
+              {/* {recentBets.map((bet, idx) => {
+                const statusColor =
+                  bet.status === "WIN"
+                    ? "text-green-400"
+                    : bet.status === "LOSE"
+                    ? "text-red-400"
+                    : "text-yellow-400";
+
+                return (
+                  <div key={idx} className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded">
+                    <div className="text-center ">
+                      <div className={`text-xs font-bold ${statusColor}`}>{bet.status}</div>
+                    </div>
+                  </div>
+                );
+              })} */}
+
+
+              {resultshow && (<div className="flex justify-center items-center text-sm bg-gray-700/50 px-3 py-2 rounded">
+                lose
+                </div>
+)}
+
+            </div>
+  )
+)}
+
+      </div>
+     
+    </div>
+
+          {/* Bet Amount */}
+          <div className="bg-gray-900/80 p-4 rounded-xl border border-gray-700 mb-5">
+            <label className="text-xs text-gray-400 uppercase tracking-widest">Bet Amount</label>
+
+            <div className="flex flex-wrap gap-3 mt-3">
+
+              {betAmounts.map(amount => (
+                <button
+                  key={amount}
+                  onClick={() => setBetAmount(amount)}
+                  className={`py-2 rounded-xl font-bold text-sm transition-all ${
+                    betAmount === amount
+                      ? "bg-blue-600 text-white scale-105 ring-2 ring-blue-400"
+                      : "bg-gray-800 text-gray-300 hover:bg-gray-700"
+                  }`}
+                >
+                  {formatCurrency(convertChipToCurrency(amount))}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Numbers */}
+          <div className="mb-5">
+            <div className="text-sm font-semibold text-gray-300 mb-2">Numbers</div>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {[0, ...Array.from({ length: 36 }, (_, i) => i + 1)].map(num => (
+                <button
+                  key={num}
+                  disabled={isSpinning}
+                  onClick={() => addBetLocally(num.toString())}
+                  className={`h-10 rounded-lg font-bold text-sm text-white transition-all ${
+                    num === 0
+                      ? "bg-green-600"
+                      : redNumbers.includes(num)
+                      ? "bg-red-600"
+                      : "bg-gray-700"
+                  } disabled:opacity-50`}
+                >
+                  {num}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Outside Bets */}
+         <div className="space-y-2">
+  <div className="grid grid-cols-2 gap-2">
+    <OutsideBtn label="Red" value="red" color="red" />
+    <OutsideBtn label="Black" value="black" color="dark" />
+    <OutsideBtn label="Even" value="even" color="blue" />
+    <OutsideBtn label="Odd" value="odd" color="purple" />
+    <OutsideBtn label="1–18" value="1-18" color="green" />
+    <OutsideBtn label="19–36" value="19-36" color="green" />
+  </div>
+
+  <div className="grid grid-cols-3 gap-2">
+    <OutsideBtn label="1–12" value="1-12" color="orange" />
+    <OutsideBtn label="13–24" value="13-24" color="orange" />
+    <OutsideBtn label="25–36" value="25-36" color="orange" />
+  </div>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    {/* ================= CONTROLS ================= */}
+   
+  </div>
+</div>
+
     </div>
   );
 };
