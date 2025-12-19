@@ -46,6 +46,9 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   const [phase, setPhase] = useState<GamePhase>("COUNTDOWN");
   const showCountdown = phase === "COUNTDOWN";
   const [resultshow, setResultshow] = useState(false);
+  const lastShownBetIdRef = useRef<string | null>(null);
+
+  
 
   const wheelNumbers = [
     0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10,
@@ -384,17 +387,28 @@ const spin = () => {
 
 
   // ✅ Save recent bets (max 10)
-  const completedRecentBets = spinRecentBets.map((bet) => ({
+  // const completedRecentBets = spinRecentBets.map((bet) => ({
     
-    betsids: uuidv4(),
-    value: bet.value,
-    amount: bet.amount,
-    currency,
-    time: Date.now(),
-    status: "PENDING" as const,
-  }));
+  //   betsids: uuidv4(),
+  //   value: bet.value,
+  //   amount: bet.amount,
+  //   currency,
+  //   time: Date.now(),
+  //   status: "PENDING" as const,
+  // }));
   setBets({});
 };
+
+const latestResultBet = React.useMemo(() => {
+  if (!recentBets.length) return null;
+
+  // prefer resolved bet (WIN / LOSE / LOST)
+  const resolved = [...recentBets]
+    .reverse()
+    .find(b => b.status !== "PENDING");
+
+  return resolved ?? recentBets[recentBets.length - 1];
+}, [recentBets]);
   /* ---------- HANDLE SERVER RESULT ---------- */
 const handleServerResult = (winningNumber: number) => {
   setPhase("SPINNING");
@@ -444,9 +458,12 @@ const getResolution = (betId: string | number) => {
   return resolutions.find(r => r.betId === betId);
 };
 
+
 useEffect(() => {
   if (!resolutions.length) return;
-  setresolutionbet (resolutions);
+
+  let newResolvedBetId: string | null = null;
+
   setRecentBets(prev =>
     prev.map(bet => {
       const resolution = resolutions.find(
@@ -455,23 +472,43 @@ useEffect(() => {
 
       if (!resolution) return bet;
 
+      // ✅ detect NEW resolution
+      if (
+        bet.status === "PENDING" 
+        
+      ) {
+        newResolvedBetId = String(bet.betsids);
+      }
+
       return {
         ...bet,
-        status: resolution.status, // WIN | LOSE | LOST
+        status: resolution.status,
       };
     })
   );
+
+  // ✅ show ONLY if new resolution happened
+  if (
+    newResolvedBetId &&
+    lastShownBetIdRef.current !== newResolvedBetId
+  ) {
+    lastShownBetIdRef.current = newResolvedBetId;
+    setShowResultStatus(true);
+  }
 }, [resolutions]);
+
 
 useEffect(() => {
   if (!showResultStatus) return;
 
-  const timer = window.setTimeout(() => {
+  const timer = setTimeout(() => {
     setShowResultStatus(false);
   }, 5000);
 
-  return () => window.clearTimeout(timer);
+  return () => clearTimeout(timer);
 }, [showResultStatus]);
+
+
 
 
   if (loading) return <div>Joining room...</div>;
@@ -565,22 +602,6 @@ const OutsideBtn = ({
      
 
 <div className="min-h-screen roulette-header-bg text-white">
-
-  {/* ================= HEADER ================= */}
-  {/* <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <h1 className="text-2xl font-bold text-blue-400">🎰 Roulette</h1>
-
-      {winningAmount !== 0 && (
-        <div className="bg-gray-700 px-3 py-1 rounded text-sm">
-          <span className="text-gray-400">Last Win:</span>
-          <span className={`ml-1 font-bold ${winningAmount > 0 ? "text-green-400" : "text-red-400"}`}>
-            {formatCurrency(winningAmount)}
-          </span>
-        </div>
-      )}
-    </div>
-  </div> */}
 
   {/* ================= MAIN ================= */}
   <div className="max-w-7xl mx-auto px-4 py-6">
@@ -813,9 +834,7 @@ const OutsideBtn = ({
 
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-extrabold text-green-400">🎲 Betting Table</h3>
-            {/* <span className="text-xs px-3 py-1 rounded-full bg-green-500/10 text-green-400 border border-green-500/30">
-              Place Your Bet
-            </span> */}
+           
             <button
           onClick={() => spin()}
           disabled={totalBet === 0 || isSpinning}
@@ -831,34 +850,43 @@ const OutsideBtn = ({
     🌀 Ball is revolving around the wheel...
   </div>
 ) : (
-  showResultStatus && (
-    <div className="space-y-2 max-h-56 overflow-y-auto">
-              {/* {recentBets.map((bet, idx) => {
-                const statusColor =
-                  bet.status === "WIN"
-                    ? "text-green-400"
-                    : bet.status === "LOSE"
-                    ? "text-red-400"
-                    : "text-yellow-400";
+  showResultStatus &&
+  latestResultBet && (
+    <div className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded animate-fade-in">
+      <div>
+        <div className="font-bold">
+          {latestResultBet.value.toUpperCase()}
+        </div>
+        <div className="text-xs text-gray-400">
+          {new Date(latestResultBet.time).toLocaleTimeString()}
+        </div>
+      </div>
 
-                return (
-                  <div key={idx} className="flex justify-between items-center text-sm bg-gray-700/50 px-3 py-2 rounded">
-                    <div className="text-center ">
-                      <div className={`text-xs font-bold ${statusColor}`}>{bet.status}</div>
-                    </div>
-                  </div>
-                );
-              })} */}
+      <div className="text-right">
+        <div className="font-bold">
+          {formatCurrency(
+            latestResultBet.amount,
+            latestResultBet.currency
+          )}
+        </div>
 
-
-              {resultshow && (<div className="flex justify-center items-center text-sm bg-gray-700/50 px-3 py-2 rounded">
-                lose
-                </div>
-)}
-
-            </div>
+        <div
+          className={`text-xs font-bold ${
+            latestResultBet.status === "WIN"
+              ? "text-green-400"
+              : latestResultBet.status === "LOSE"
+              ? "text-red-400"
+              : "text-yellow-400"
+          }`}
+        >
+          {latestResultBet.status}
+        </div>
+      </div>
+    </div>
   )
 )}
+
+
 
       </div>
      
