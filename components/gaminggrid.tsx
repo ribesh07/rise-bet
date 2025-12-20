@@ -36,9 +36,9 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) 
     { name: "Baccarat", image: "/images/baccarat.jpg", playing: 191, route: "/games/BaccaratGame" },
     { name: "Blackjack", image: "/images/blackjack.jpg", playing: 284, route: "/games/BlackjackGame" },
     { name: "Poker", image: "/images/poker.jpg", playing: 436, route: "/games/PokerGame" },
-    { name: "Big Bass Bonanza", image: "/images/Big_Bass_Bonanza.jpg", playing: 1738, route: "/games/Big_bass_bonanzaGame" },
-    { name: "Sweet Bonanza", image: "/images/sweet_bonanza.jpg", playing: 384, route: "/games/Sweet_bonanzaGame" },
-    { name: "Gate Of Olympus", image: "/images/Gates_of_olympus.jpg", playing: 0, route: "/games/Gate_of_olympusGame" },
+    { name: "Coin Flip", image: "/games/flip/avove.jpeg", playing: 1738, route: "/games/CoinFlip" },
+    { name: "Dragon Tower", image: "/games/dragontower/avove.jpeg", playing: 384, route: "/games/Dragon_tower" },
+    { name: "Rock paper", image: "/games/rockpaper/avove.jpeg", playing: 0, route: "/games/Rock_paper" },
     { name: "Dual At Dawn", image: "/images/dual_at_dawn.jpg", playing: 0, route: "/games/Dual_at_dawnGame" },
   ];
 

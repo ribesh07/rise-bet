@@ -12,7 +12,12 @@ const trendingGames = [
   { id: 5, name: "Hi-Lo", players: 257, provider: "Hacksaw Gaming", image: "/images/hi_lo.jpg" },
   { id: 6, name: "Dice", players: 317, provider: "Pragmatic Play", image: "/images/dice.jpg" },
   { id: 7, name: "Baccarat", players: 129, provider: "Massive Studios", image: "/images/baccarat.jpg" },
-  { id: 8, name: "Poker", players: 175, provider: "Pragmatic Play", image: "/images/poker.jpg" }
+  { id: 8, name: "Poker", players: 175, provider: "Pragmatic Play", image: "/images/poker.jpg" },
+  { id: 9, name: "Blackjack", players: 198, provider: "Massive Studios", image: "/images/blackjack.jpg" },
+  { id: 10, name: "Wingo", players: 290, provider: "Zeus Play", image: "/images/wingo.jpg" },
+  { id: 11, name: "Coin Flip", players: 1738, provider: "Rise Bet", image: "/games/flip/avove.jpeg" },
+  { id: 12, name: "Dragon Tower", players: 384, provider: "Rise Bet", image: "/games/dragontower/avove.jpeg" },
+  { id: 13, name: "Rock paper", players: 0, provider: "Rise Bet", image: "/games/rockpaper/avove.jpeg" },
 ];
 
 export const TrendingGames: React.FC = () => {

@@ -144,6 +144,38 @@ body {
   position: relative;
 }
 
+.sweet-header-bg {
+  background-image: url('/games/sweetbonanza/bg.png'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.sweetslot-header-bg {
+  background-image: url('/games/sweetbonanza/slot-bg.png'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.coinflip-header-bg {
+  background-image: url('/games/rockpaper/background.jpg'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.rockpaper-header-bg {
+  background-image: url('/games/rockpaper/background2.jpg'); /* your background image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
 .frosted-card-bg {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
@@ -304,3 +336,14 @@ body {
   }
 }
 
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
