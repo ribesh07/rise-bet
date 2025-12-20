@@ -34,7 +34,7 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) 
     { name: "Mines", image: "/images/mines.jpg", playing: 370, route: "/games/MinesGame" },
     { name: "Hi-Lo", image: "/images/hi_lo.jpg", playing: 232, route: "/games/HiloGame" },
     { name: "Baccarat", image: "/images/baccarat.jpg", playing: 191, route: "/games/BaccaratGame" },
-    { name: "Blackjack", image: "/images/blackjack.jpg", playing: 284, route: "/games/BlackjackGame" },
+    { name: "Blackjack", image: "/images/blackjack.jpg", playing: 284, route: "/games/BlackjacksGame" },
     { name: "Poker", image: "/images/poker.jpg", playing: 436, route: "/games/PokerGame" },
     { name: "Coin Flip", image: "/games/flip/avove.jpeg", playing: 1738, route: "/games/CoinFlip" },
     { name: "Dragon Tower", image: "/games/dragontower/avove.jpeg", playing: 384, route: "/games/Dragon_tower" },
