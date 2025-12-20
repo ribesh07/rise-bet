@@ -5,19 +5,20 @@ import { TrendingUp } from 'lucide-react';
 import ComingSoonModal from '@/components/form/loginmodel'; // <----- IMPORTANT
 
 const trendingGames = [
-  { id: 1, name: "Crash", players: 482, provider: "Pragmatic Play", image: "/images/crash.jpg" },
-  { id: 2, name: "Plinko", players: 438, provider: "Pragmatic Play", image: "/images/plinko.jpg" },
-  { id: 3, name: "Roulette", players: 307, provider: "Zeus Play", image: "/images/roulette.jpg" },
-  { id: 4, name: "Mines", players: 422, provider: "Pragmatic Play", image: "/images/mines.jpg" },
-  { id: 5, name: "Hi-Lo", players: 257, provider: "Hacksaw Gaming", image: "/images/hi_lo.jpg" },
-  { id: 6, name: "Dice", players: 317, provider: "Pragmatic Play", image: "/images/dice.jpg" },
-  { id: 7, name: "Baccarat", players: 129, provider: "Massive Studios", image: "/images/baccarat.jpg" },
-  { id: 8, name: "Poker", players: 175, provider: "Pragmatic Play", image: "/images/poker.jpg" },
-  { id: 9, name: "Blackjack", players: 198, provider: "Massive Studios", image: "/images/blackjack.jpg" },
-  { id: 10, name: "Wingo", players: 290, provider: "Zeus Play", image: "/images/wingo.jpg" },
+  { id: 1, name: "Crash", players: 482, provider: "Rise Bet", image: "/images/crash.jpg" },
+  { id: 2, name: "Plinko", players: 438, provider: "Rise Bet", image: "/images/plinko.jpg" },
+  { id: 3, name: "Roulette", players: 307, provider: "Rise Bet", image: "/images/roulette.jpg" },
+  { id: 4, name: "Mines", players: 422, provider: "Rise Bet", image: "/images/mines.jpg" },
+  { id: 5, name: "Hi-Lo", players: 257, provider: "Rise Bet", image: "/images/hi_lo.jpg" },
+  { id: 6, name: "Dice", players: 317, provider: "Rise Bet", image: "/images/dice.jpg" },
+  { id: 7, name: "Baccarat", players: 129, provider: "Rise Bet", image: "/images/baccarat.jpg" },
+  { id: 8, name: "Poker", players: 175, provider: "Rise Bet", image: "/images/poker.jpg" },
+  { id: 9, name: "Blackjack", players: 198, provider: "Rise Bet", image: "/images/blackjack.jpg" },
+  { id: 10, name: "Wingo", players: 290, provider: "Rise Bet", image: "/images/wingo.jpg" },
   { id: 11, name: "Coin Flip", players: 1738, provider: "Rise Bet", image: "/games/flip/avove.jpeg" },
   { id: 12, name: "Dragon Tower", players: 384, provider: "Rise Bet", image: "/games/dragontower/avove.jpeg" },
   { id: 13, name: "Rock paper", players: 0, provider: "Rise Bet", image: "/games/rockpaper/avove.jpeg" },
+  { id: 14, name: "Chicken", players: 0, provider: "Rise Bet", image: "/games/chicken/avove.png" },
 ];
 
 export const TrendingGames: React.FC = () => {

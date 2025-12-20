@@ -39,7 +39,7 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(({ search }, ref) 
     { name: "Coin Flip", image: "/games/flip/avove.jpeg", playing: 1738, route: "/games/CoinFlip" },
     { name: "Dragon Tower", image: "/games/dragontower/avove.jpeg", playing: 384, route: "/games/Dragon_tower" },
     { name: "Rock paper", image: "/games/rockpaper/avove.jpeg", playing: 0, route: "/games/Rock_paper" },
-    { name: "Dual At Dawn", image: "/images/dual_at_dawn.jpg", playing: 0, route: "/games/Dual_at_dawnGame" },
+    { name: "Chicken", image: "/games/chicken/avove.png", playing: 0, route: "/games/Chicken" },
   ];
 
   const filteredGames = games.filter((game) =>
