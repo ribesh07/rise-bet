@@ -35,7 +35,7 @@ const VipBenefits = () => {
   return (
     <section className="py-16 px-4 border-t border-gray-700">
       <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-        rise VIP Club benefits
+        Rise VIP Club benefits
       </h2>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">

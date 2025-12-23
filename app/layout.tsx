@@ -20,7 +20,11 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logomobile.png", // favicon
   },
-
+  openGraph: {
+    title: "RISE - BET",
+    description: "Total Betting and gaming site for all your needs !!!",
+    images: ["/logomobile.png"], // OG image for social sharing
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

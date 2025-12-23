@@ -15,7 +15,7 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import Footer from "@/components/footer";
 import { RecentBets } from "@/components/dashboard/recentbet";
 import { apiRequest } from "@/utils/ApiHelper"; // ensure this path is correct
-
+import { Star, Gamepad } from 'lucide-react';
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -158,18 +158,22 @@ const Dashboard: React.FC = () => {
                   <div className="w-full pb-2 flex justify-center">
                     <div className="w-full max-w-sm">
                       <ImageHead
+                      icon={<Star size={20} className="mr-1" />}
                         title="Casino"
                         count={32339}
                         image="/images/casino1.jpg"
+                        color="blue"
                       />
                     </div>
                   </div>
                   <div className="w-full pb-2 flex justify-center">
                     <div className="w-full max-w-sm">
                       <ImageHead
-                        title="Sports (soon...)"
+                      icon={<Gamepad size={20} className="mr-1" />}
+                        title="Sports (Comming soon)"
                         count={0}
                         image="/images/sports1.jpg"
+                        color="red"
                       />
                     </div>
                   </div>
