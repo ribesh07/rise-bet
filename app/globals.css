@@ -264,3 +264,13 @@ input, textarea, select, button {
   border-radius: 999px;
   background: #22c55e;
 }
+
+/* Hide scrollbar but keep scrolling (Stake style) */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}

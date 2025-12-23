@@ -239,8 +239,6 @@ const Dashboard: React.FC = () => {
 
             <GamingGrid ref={gamingGridRef} search={search} />
           </section>
-
-          {/* Recent Bets + Footer */}
           <RecentBets />
           <Footer />
         </motion.main>
