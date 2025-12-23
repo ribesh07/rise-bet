@@ -171,9 +171,9 @@ const Dashboard: React.FC = () => {
         <section>
           <TrendingGames />
         </section>
-        <section>
+        {/* <section>
           <TrendingSports />
-        </section>
+        </section> */}
         <section>
           <Promotions />
         </section>

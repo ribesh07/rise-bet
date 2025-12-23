@@ -21,10 +21,10 @@ const ImageHead: React.FC<ImageHeadProps> = ({
         <div className="stake-card-title">
           <div className="absolute bottom-0 left-0 p-4 bg-black/50 w-full flex items-center">
             {icon}
-            <span className="text-white font-semibold ml-1">{title}</span>
+            
           </div>
         </div>
-
+        <span className="text-white font-semibold ml-1">{title}</span>
         <div className="stake-card-count">
           <span className="stake-dot" />
           {count.toLocaleString()}
