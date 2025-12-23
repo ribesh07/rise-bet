@@ -156,8 +156,7 @@ const Dashboard: React.FC = () => {
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <TopNavbar 
-        />
+        <TopNavbar  />
       </motion.div>
 
       {/* Main Content */}
