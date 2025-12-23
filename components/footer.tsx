@@ -180,10 +180,10 @@ export default function Footer() {
       </a>
     </p>
      <div>
-          <Link href="/">
+         
             <img src="/logo.png" className="hidden md:block w-28 cursor-pointer" />
-            <img src="/logomobile.png" className="block md:hidden w-10 h-10 cursor-pointer" />
-          </Link>
+           
+          
         </div>
 
   </div>
