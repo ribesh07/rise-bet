@@ -1,9 +1,9 @@
 type ImageHeadProps = {
-   icon?: React.ReactNode;
+  icon?: React.ReactNode;
   title: string;
   count: number;
   image: string;
-  color?: 'blue' | 'green'|'red';
+  color?: "blue" | "green" | "red";
 };
 
 const ImageHead: React.FC<ImageHeadProps> = ({
@@ -11,21 +11,36 @@ const ImageHead: React.FC<ImageHeadProps> = ({
   title,
   count,
   image,
-  color = 'blue',
+  color = "blue",
 }) => {
   return (
     <div className={`stake-card ${color}`}>
-      <img src={image} alt={title} />
+      {/* IMAGE */}
+      <div className="relative w-full aspect-[16/9] overflow-hidden">
+        <img
+          src={image}
+          alt={title}
+          className="w-full h-full object-cover"
+        />
+      </div>
 
-      <div className="stake-card-footer">
-        <div className="stake-card-title">
-          <div className="absolute bottom-0 left-0 p-4 bg-black/50 w-full flex items-center">
-            {icon}
-            
-          </div>
+      {/* FOOTER (UNDER IMAGE – Stake style) */}
+      <div className="flex items-center justify-between px-4 py-3 bg-[#102531]">
+        {/* LEFT: ICON + TITLE */}
+        <div className="flex items-center gap-2 min-w-0">
+          {icon && (
+            <span className="flex items-center justify-center w-5 h-5 text-white/90">
+              {icon}
+            </span>
+          )}
+
+          <span className="text-white font-semibold text-base leading-tight truncate">
+            {title}
+          </span>
         </div>
-        <span className="text-white font-semibold ml-1">{title}</span>
-        <div className="stake-card-count">
+
+        {/* RIGHT: COUNT */}
+        <div className="flex items-center gap-2 text-sm font-semibold text-white">
           <span className="stake-dot" />
           {count.toLocaleString()}
         </div>

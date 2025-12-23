@@ -237,14 +237,14 @@ export const HeroSection: React.FC = () => {
       {/* ================= MOBILE CARDS ================= */}
       <div className="relative z-10 mt-4 grid grid-cols-2 gap-2 px-2 md:hidden">
         <ImageHead
-          icon={<Star size={20} className="mr-1" />}
+         
           title="Casino"
           count={42775}
           image="/images/casino1.jpg"
           color="blue"
         />
         <ImageHead
-          icon={<Gamepad size={20} className="mr-1" />}
+         
           title="Sports"
           count={11231}
           image="/images/sports1.jpg"

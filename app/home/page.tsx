@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
                     <div className="w-full max-w-sm">
                       <ImageHead
                       icon={<Star size={20} className="mr-1" />}
-                        title=""
+                        title="Casino"
                         count={32339}
                         image="/images/casino1.jpg"
                         color="blue"
@@ -170,7 +170,7 @@ const Dashboard: React.FC = () => {
                     <div className="w-full max-w-sm">
                       <ImageHead
                       icon={<Gamepad size={20} className="mr-1" />}
-                        title=""
+                        title="Sports (Comming soon)"
                         count={0}
                         image="/images/sports1.jpg"
                         color="red"
