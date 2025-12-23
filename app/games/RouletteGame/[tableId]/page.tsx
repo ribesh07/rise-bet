@@ -372,7 +372,7 @@ const spin = () => {
       value: value.toUpperCase(),
       amount: Number(convertedAmount.toFixed(8)), // 🔥 send UI value
       currency,
-      game: "ROULETTE",
+      game: "Roulette",
     },
   };
 

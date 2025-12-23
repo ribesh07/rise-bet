@@ -1,28 +1,37 @@
-"use client";
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-
-interface ImageCardProps {
+type ImageHeadProps = {
+   icon?: React.ReactNode;
   title: string;
-  count?: number;
+  count: number;
   image: string;
-}
+  color?: 'blue' | 'green'|'red';
+};
 
-const ImageHead: React.FC<ImageCardProps> = ({ title, count, image }) => (
-  <Card className="bg-[#1e293b] border-none hover:bg-[#243249] transition-colors cursor-pointer">
-    <CardContent className="p-0">
-      <img
-  src={image}
-  alt={title}
-  className="w-full h-auto object-cover"
-/>
+const ImageHead: React.FC<ImageHeadProps> = ({
+  icon,
+  title,
+  count,
+  image,
+  color = 'blue',
+}) => {
+  return (
+    <div className={`stake-card ${color}`}>
+      <img src={image} alt={title} />
 
-      <div className="p-3 flex  justify-between">
-        <div className="text-sm font-semibold">{title}</div>
-        {count !== undefined && <span className="text-green-400 text-xs">{count.toLocaleString()}</span>}
+      <div className="stake-card-footer">
+        <div className="stake-card-title">
+          <div className="absolute bottom-0 left-0 p-4 bg-black/50 w-full flex items-center">
+            {icon}
+            <span className="text-white font-semibold ml-1">{title}</span>
+          </div>
+        </div>
+
+        <div className="stake-card-count">
+          <span className="stake-dot" />
+          {count.toLocaleString()}
+        </div>
       </div>
-    </CardContent>
-  </Card>
-);
+    </div>
+  );
+};
 
 export default ImageHead;

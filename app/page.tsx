@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { SidebarWrapper } from '@/components/dashboard/sidebarwapper';
-import  TopNavbar  from '@/components/dashboard/topnavbar';
+import TopNavbar from '@/components/dashboard/topnavbar';
 import { HeroSection } from '@/components/dashboard/herosection';
 import { TrendingGames } from '@/components/dashboard/trendinggame';
 import { TrendingSports } from '@/components/dashboard/trendingsports';
@@ -14,7 +14,7 @@ import { LoginForm } from '@/components/auths/loginform';
 import { SignupForm } from '@/components/auths/signupform';
 import Image from 'next/image';
 
-// ✅ Shared AuthModal component (same as TopNavbar)
+// ---------------- Auth Modal ----------------
 const AuthModal: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -24,11 +24,8 @@ const AuthModal: React.FC<{
   const [modalMode, setModalMode] = useState<'login' | 'register'>(initialType);
 
   useEffect(() => {
-  if (open) {
-    setModalMode(initialType);
-  }
-}, [open, initialType]);
-
+    if (open) setModalMode(initialType);
+  }, [open, initialType]);
 
   useEffect(() => {
     document.body.style.overflow = open ? 'hidden' : '';
@@ -43,6 +40,7 @@ const AuthModal: React.FC<{
     <AnimatePresence>
       {open && (
         <>
+          {/* Backdrop */}
           <motion.div
             className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
             initial={{ opacity: 0 }}
@@ -52,6 +50,7 @@ const AuthModal: React.FC<{
             onClick={onClose}
           />
 
+          {/* Modal */}
           <motion.div
             className="fixed inset-0 flex items-center justify-center p-4 z-50"
             initial={{ scale: isMobile ? 1 : 0.8, opacity: 0 }}
@@ -68,13 +67,7 @@ const AuthModal: React.FC<{
               {/* Header */}
               <div className="flex justify-between items-center mb-4">
                 <div className="relative w-32 h-15">
-                  <Image
-                    src="/logo.png"
-                    alt="Logo"
-                    fill
-                    style={{ objectFit: 'contain' }}
-                    priority
-                  />
+                  <Image src="/logo.png" alt="Logo" fill style={{ objectFit: 'contain' }} priority />
                 </div>
                 <button
                   onClick={onClose}
@@ -86,15 +79,9 @@ const AuthModal: React.FC<{
 
               {/* Forms */}
               {modalMode === 'login' ? (
-                <LoginForm
-                  onSuccess={onClose}
-                  onSwitch={() => setModalMode('register')}
-                />
+                <LoginForm onSuccess={onClose} onSwitch={() => setModalMode('register')} />
               ) : (
-                <SignupForm
-                  onSuccess={onClose}
-                  onSwitch={() => setModalMode('login')}
-                />
+                <SignupForm onSuccess={onClose} onSwitch={() => setModalMode('login')} />
               )}
             </div>
           </motion.div>
@@ -104,14 +91,15 @@ const AuthModal: React.FC<{
   );
 };
 
+// ---------------- Dashboard ----------------
 const Dashboard: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-
   const [authOpen, setAuthOpen] = useState(false);
   const [authType, setAuthType] = useState<'login' | 'register'>('login');
 
+  // Responsive check
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
@@ -123,18 +111,15 @@ const Dashboard: React.FC = () => {
   const collapsedWidth = 20;
 
   const handleSidebarToggle = () => {
-    if (isMobile) {
-      setSidebarOpen((prev) => !prev);
-    } else {
-      setSidebarCollapsed((prev) => !prev);
-    }
+    if (isMobile) setSidebarOpen((prev) => !prev);
+    else setSidebarCollapsed((prev) => !prev);
   };
 
   const handleSidebarClose = () => {
     if (isMobile) setSidebarOpen(false);
   };
 
-  // ✅ Listen for HeroSection event to open modal
+  // HeroSection event listener
   useEffect(() => {
     const handleHeroAuth = (event: any) => {
       setAuthType(event.detail);
@@ -144,7 +129,7 @@ const Dashboard: React.FC = () => {
     return () => window.removeEventListener('openAuthModal', handleHeroAuth);
   }, []);
 
-  // ✅ Navbar auth click handler
+  // Navbar auth click handler
   const handleAuthClick = (type: 'login' | 'register') => {
     setAuthType(type);
     setAuthOpen(true);
@@ -155,16 +140,11 @@ const Dashboard: React.FC = () => {
       {/* Desktop Sidebar */}
       {!isMobile && (
         <motion.div
-          animate={{
-            width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
-          }}
+          animate={{ width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed top-0 left-0 h-screen bg-[#0f1420] shadow-lg overflow-hidden z-50 flex flex-col"
         >
-          <SidebarWrapper
-            sidebarOpen={!sidebarCollapsed}
-            setSidebarOpen={handleSidebarToggle}
-          />
+          <SidebarWrapper sidebarOpen={!sidebarCollapsed} setSidebarOpen={handleSidebarToggle} />
         </motion.div>
       )}
 
@@ -172,27 +152,19 @@ const Dashboard: React.FC = () => {
       <motion.div
         className="fixed top-0 left-0 right-0 z-40"
         animate={{
-          marginLeft: !isMobile
-            ? sidebarCollapsed
-              ? collapsedWidth * 4
-              : sidebarWidth * 4
-            : 0,
+          marginLeft: !isMobile ? (sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4) : 0,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        <TopNavbar
+        <TopNavbar 
         />
       </motion.div>
 
-      {/* Main scrollable content */}
+      {/* Main Content */}
       <motion.main
         className="flex-1 flex flex-col overflow-auto pt-[112px] pb-16 px-3 md:px-8"
         animate={{
-          marginLeft: !isMobile
-            ? sidebarCollapsed
-              ? collapsedWidth * 4
-              : sidebarWidth * 4
-            : 0,
+          marginLeft: !isMobile ? (sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4) : 0,
         }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
@@ -222,34 +194,31 @@ const Dashboard: React.FC = () => {
       {/* Mobile Sidebar */}
       <AnimatePresence>
         {isMobile && sidebarOpen && (
-          <motion.div
-            initial={{ x: -256 }}
-            animate={{ x: 0 }}
-            exit={{ x: -256 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg flex flex-col"
-          >
-            <SidebarWrapper
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={handleSidebarToggle}
+          <>
+            <motion.div
+              initial={{ x: -256 }}
+              animate={{ x: 0 }}
+              exit={{ x: -256 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg flex flex-col"
+            >
+              <SidebarWrapper sidebarOpen={sidebarOpen} setSidebarOpen={handleSidebarToggle} />
+            </motion.div>
+
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.3 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black z-40"
+              onClick={handleSidebarClose}
             />
-          </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* Overlay for mobile sidebar */}
-      {isMobile && sidebarOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black z-40"
-          onClick={handleSidebarClose}
-        />
-      )}
-
-      {/* ✅ Auth Modal (works for Hero + Navbar) */}
+      {/* Auth Modal */}
       <AuthModal
         open={authOpen}
         onClose={() => setAuthOpen(false)}

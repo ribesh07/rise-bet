@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-const LANES = 4;
+const LANES = 5;
 const MULTIPLIERS = [1.15, 1.37, 1.64, 2.0];
 
 const VEHICLES = [
@@ -142,17 +142,26 @@ export default function ChickenRoadExact() {
 
           {/* LANE DIVIDERS */}
        {/* LANE DIVIDERS (VERTICAL, EVEN WIDTH) */}
+{/* LANE DIVIDERS USING line.svg */}
+{/* LANE DIVIDERS (REPEATED line.svg) */}
 {Array.from({ length: LANES - 1 }).map((_, i) => (
   <div
     key={i}
-    className="absolute border-l border-dashed border-white/25"
+    className="absolute opacity-40 pointer-events-none"
     style={{
-      left: LANE_X_START + (i + 1) * LANE_WIDTH,
+      left: LANE_X_START + (i + 1) * LANE_WIDTH - 3,
       top: 0,
       bottom: 0,
+      width: "6px",
+      backgroundImage: "url(/games/chicken/line.svg)",
+      backgroundRepeat: "repeat-y",
+      backgroundPosition: "center",
+      backgroundSize: "6px 18px", // height controls dash gap
     }}
   />
 ))}
+
+
 
 
 
@@ -161,13 +170,32 @@ export default function ChickenRoadExact() {
             <img
               key={v.id}
               src={v.src}
-              className="absolute w-28 z-10"
+              className="absolute w-16 pl-1 z-10"
               style={{
                 left: `${LANE_X_START + v.lane * LANE_WIDTH}px`,
                 top: v.y,
               }}
             />
           ))}
+{/* TRAFFIC LIGHT (CSS ONLY) */}
+{/* TRAFFIC LIGHT WITH POLE */}
+<div
+  className="absolute z-20 flex flex-col items-center"
+  style={{
+    left: 40 + CHICKEN_X_OFFSET - 8,
+    top: 20,
+  }}
+>
+  {/* LIGHT BOX */}
+  <div className="traffic-box">
+    <div className="traffic-light top" />
+    <div className="traffic-light bottom" />
+  </div>
+
+  {/* POLE */}
+  
+</div>
+
 
           {/* CHICKEN */}
           <motion.img
