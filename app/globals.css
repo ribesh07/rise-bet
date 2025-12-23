@@ -1,30 +1,60 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* ================= ROOT ================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0b1624;
+  --foreground: #e5e7eb;
 }
-
-
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1624;
+    --foreground: #e5e7eb;
   }
 }
 
+/* ================= BODY / FONT ================= */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Proxima Nova", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font-family:
+    "DM Sans",
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  font-weight: 500;
+  letter-spacing: 0.15px;
+
+  font-variant-numeric: lining-nums tabular-nums;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Headings – Stake style */
+h1, h2, h3, h4, h5 {
+  font-family: "DM Sans", "Inter", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+}
+
+/* Inputs & buttons */
+input, textarea, select, button {
+  font-family: "DM Sans", "Inter", sans-serif;
+}
+
+/* ================= PHONE INPUT ================= */
 .phone-input input {
-  background-color: #0f0f0f;
-  border: 1px solid #3f3f3f;
-  color: white;
+  background-color: #0f172a;
+  border: 1px solid #243249;
+  color: #e5e7eb;
   padding: 12px;
   border-radius: 0.5rem;
   width: 100%;
@@ -32,205 +62,109 @@ body {
 }
 
 .phone-input input::placeholder {
-  color: #666;
+  color: #6b7280;
 }
 
 .phone-input .PhoneInputCountry {
-  background: #1a1a1a;
-  border-right: 1px solid #333;
+  background: #0f172a;
+  border-right: 1px solid #243249;
   padding: 0 8px;
   border-radius: 0.5rem 0 0 0.5rem;
 }
 
 .phone-input .PhoneInputCountrySelect {
-  background: #1a1a1a;
+  background: #0f172a;
   color: white;
 }
 
-
-
+/* ================= HEADER OVERLAYS ================= */
 .header-gradient {
   background: linear-gradient(
-    rgba(15, 23, 42, 0.7),
-    rgba(15, 23, 42, 0.7)
+    rgba(11, 22, 36, 0.8),
+    rgba(11, 22, 36, 0.8)
   );
   position: absolute;
   inset: 0;
   z-index: 0;
 }
 
-/* Frosted glass effect for mobile */
-.scroll-container {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
-}
-
-.scroll-container::-webkit-scrollbar {
-  display: none;             /* Chrome, Safari, Opera */
-}
-
-
+/* ================= BACKGROUND IMAGES ================= */
 .header-bg {
-  background-image: url('/images/header_bg.png'); /* your background image */
+  background-image: url('/images/header_bg.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  ;
 }
 
-.vip-header-bg {
-  background-image: url('/images/vip_header.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.roulette-header-bg {
-  background-image: url('/roulette/background.png'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.roulette-amount-header-bg {
-  background-image: url('/roulette/recent.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.roulette-recent-header-bg {
-  background-image: url('/roulette/amount.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.roulette-balance-header-bg {
-  background-image: url('/roulette/balance.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.dragontower-header-bg {
-  background-image: url('/games/dragontower/background.png'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-.dragontower-top-header-bg {
-  background-image: url('/games/dragontower/top.png'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.flip-header-bg {
-  background-image: url('/games/flip/background.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.sweet-header-bg {
-  background-image: url('/games/sweetbonanza/bg.png'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.sweetslot-header-bg {
-  background-image: url('/games/sweetbonanza/slot-bg.png'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
-.coinflip-header-bg {
-  background-image: url('/games/rockpaper/background.jpg'); /* your background image */
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-}
-
+.vip-header-bg,
+.roulette-header-bg,
+.roulette-amount-header-bg,
+.roulette-recent-header-bg,
+.roulette-balance-header-bg,
+.dragontower-header-bg,
+.dragontower-top-header-bg,
+.flip-header-bg,
+.sweet-header-bg,
+.sweetslot-header-bg,
+.coinflip-header-bg,
 .rockpaper-header-bg {
-  background-image: url('/games/rockpaper/background2.jpg'); /* your background image */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   position: relative;
 }
 
+.vip-header-bg { background-image: url('/images/vip_header.jpg'); }
+.roulette-header-bg { background-image: url('/roulette/background.png'); }
+.roulette-amount-header-bg { background-image: url('/roulette/recent.jpg'); }
+.roulette-recent-header-bg { background-image: url('/roulette/amount.jpg'); }
+.roulette-balance-header-bg { background-image: url('/roulette/balance.jpg'); }
+.dragontower-header-bg { background-image: url('/games/dragontower/background.png'); }
+.dragontower-top-header-bg { background-image: url('/games/dragontower/top.png'); }
+.flip-header-bg { background-image: url('/games/flip/background.jpg'); }
+.sweet-header-bg { background-image: url('/games/sweetbonanza/bg.png'); }
+.sweetslot-header-bg { background-image: url('/games/sweetbonanza/slot-bg.png'); }
+.coinflip-header-bg { background-image: url('/games/rockpaper/background.jpg'); }
+.rockpaper-header-bg { background-image: url('/games/rockpaper/background2.jpg'); }
+
+/* ================= GLASS CARD ================= */
 .frosted-card-bg {
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-radius: 1rem;
-  transition: backdrop-filter 0.3s ease, opacity 0.3s ease;
-}
-/* Hide scrollbar but keep scroll functionality */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;     /* Firefox */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.06),
+    0 10px 30px rgba(0,0,0,0.6);
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
+/* ================= SCROLLBARS ================= */
+.scrollbar-hide,
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Hide scrollbar on mobile */
-@media (max-width: 768px) {
-  .rise-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .rise-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-/* Custom rise-style scrollbar for desktop */
+/* Stake-style scrollbar (desktop) */
 @media (min-width: 769px) {
   .rise-scrollbar::-webkit-scrollbar {
-    height: 6px; /* thin scrollbar */
+    height: 6px;
   }
 
   .rise-scrollbar::-webkit-scrollbar-track {
-    background: #0b1624; /* dark inset track */
+    background: #0b1624;
     border-radius: 9999px;
-    margin-inline: 6px;
   }
 
   .rise-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #007aff, #00baff);
-    border-radius: 9999px;
-    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .rise-scrollbar:hover::-webkit-scrollbar-thumb {
     background: linear-gradient(90deg, #1ec7ff, #00aaff);
-    box-shadow: 0 0 6px #00baff;
+    border-radius: 9999px;
+    box-shadow: 0 0 6px rgba(0,186,255,0.6);
   }
 
   .rise-scrollbar {
@@ -239,76 +173,26 @@ body {
   }
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fade-in {
-  animation: fade-in 0.15s ease-out forwards;
-}
-
-/* Optional custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #2b3340;
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: #4a9fff;
-}
+/* ================= ANIMATIONS ================= */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out;
 }
 
-/* globals.css */
-.bg-gold {
-  background: linear-gradient(145deg, #f5d98a, #b68a2c);
-}
-
-@keyframes spinSlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(720deg); }
-}
-
-.animate-spin-slow {
-  animation: spinSlow 1.2s ease-out;
-}
-
+/* ================= DICE ================= */
 .dice-window {
-  width: 78px;
-  height: 78px;
+  width: 90px;
+  height: 90px;
   overflow: hidden;
   border-radius: 14px;
   background: #0b1220;
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,0.08),
     0 10px 30px rgba(0,0,0,0.6);
-}
-
-.dice-sprite {
-  width: 78px;
-  height: calc(78px * 26);
-  background-size: 100% auto;
-  will-change: transform;
-}
-
-.dice-window {
-  width: 90px;
-  height: 90px;
-  overflow: hidden;
 }
 
 .dice-face {
@@ -318,320 +202,62 @@ body {
   background-position: center;
 }
 
-/* 🔁 Continuous rolling */
-.dice-face.rolling {
-  animation: diceRoll 0.7s steps(26) infinite;
-}
-
-/* sprite animation */
-@keyframes diceRoll {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 0 -2028px; /* 78px × 26 frames */
-  }
-}
-
-.preserve-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-  transform: rotateY(180deg);
-}
-
-/* Traffic light bulbs */
-.traffic-light {
-  width: 14px;
-  height: 14px;
-  border-radius: 9999px;
-  background-color: #3a3a3a;
-  box-shadow: inset 0 0 4px #000;
-}
-
-/* Top bulb animation */
-.traffic-light.top {
-  animation: blinkTop 1s infinite;
-}
-
-/* Bottom bulb animation */
-.traffic-light.bottom {
-  animation: blinkBottom 1s infinite;
-}
-
-@keyframes blinkTop {
-  0%,
-  49% {
-    background-color: #facc15; /* yellow */
-    box-shadow: 0 0 8px #facc15;
-  }
-  50%,
-  100% {
-    background-color: #3a3a3a;
-    box-shadow: none;
-  }
-}
-
-@keyframes blinkBottom {
-  0%,
-  49% {
-    background-color: #3a3a3a;
-    box-shadow: none;
-  }
-  50%,
-  100% {
-    background-color: #facc15; /* yellow */
-    box-shadow: 0 0 8px #facc15;
-  }
-}
-
-/* Traffic light container */
-.traffic-box {
-  width: 34px;
-  padding: 6px 0;
-  background: #0a0a0a;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: inset 0 0 6px #000;
-}
-
-/* Bulbs */
-.traffic-light {
-  width: 14px;
-  height: 14px;
-  border-radius: 9999px;
-  background-color: #2e2e2e;
-}
-
-/* Top bulb animation */
-.traffic-light.top {
-  animation: blinkTop 1s infinite;
-}
-
-/* Bottom bulb animation */
-.traffic-light.bottom {
-  animation: blinkBottom 1s infinite;
-}
-
-@keyframes blinkTop {
-  0%,
-  49% {
-    background-color: #facc15;
-    box-shadow: 0 0 10px #facc15;
-  }
-  50%,
-  100% {
-    background-color: #2e2e2e;
-    box-shadow: none;
-  }
-}
-
-@keyframes blinkBottom {
-  0%,
-  49% {
-    background-color: #2e2e2e;
-    box-shadow: none;
-  }
-  50%,
-  100% {
-    background-color: #facc15;
-    box-shadow: 0 0 10px #facc15;
-  }
-}
-
-/* ===== Stake Category Card ===== */
+/* ================= STAKE CATEGORY CARD ================= */
 .stake-card {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
   background: #102531;
   cursor: pointer;
-
-  border: 2px solid transparent;
-  background-clip: padding-box;
-
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Blue / Green outline */
 .stake-card.blue {
   box-shadow:
-    0 0 0 2px rgba(26, 156, 255, 0.9),
-    0 12px 30px rgba(26, 156, 255, 0.35);
+    0 0 0 2px rgba(26,156,255,0.9),
+    0 14px 36px rgba(26,156,255,0.4);
 }
 
 .stake-card.red {
   box-shadow:
-    0 0 0 2px rgba(230, 74, 74, 0.9),
-    0 12px 30px rgba(230, 74, 74, 0.35);
+    0 0 0 2px rgba(230,74,74,0.9),
+    0 14px 36px rgba(230,74,74,0.4);
 }
 
 .stake-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
-/* Card image */
-.stake-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Dark overlay */
 .stake-card::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to top,
-    rgba(0, 0, 0, 0.65),
-    rgba(0, 0, 0, 0.15)
+    rgba(0,0,0,0.7),
+    rgba(0,0,0,0.2)
   );
 }
 
-/* Bottom info bar */
 .stake-card-footer {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
   padding: 12px 14px;
-  background: rgba(16, 37, 49, 0.95);
+  background: rgba(16,37,49,0.95);
+  display: flex;
+  justify-content: space-between;
   z-index: 10;
 }
 
-/* Title */
-.stake-card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-}
-
-/* Count */
+.stake-card-title,
 .stake-card-count {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
   font-weight: 600;
   color: white;
 }
 
-/* Green dot */
-.stake-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #22c55e;
-}
-
-/* ===== Stake Category Card ===== */
-.stake-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: 14px;
-  background: #102531;
-  cursor: pointer;
-
-  border: 2px solid transparent;
-  background-clip: padding-box;
-
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* Blue / Green outline */
-.stake-card.blue {
-  box-shadow:
-    0 0 0 2px rgba(26, 156, 255, 0.9),
-    0 12px 30px rgba(26, 156, 255, 0.35);
-}
-
-.stake-card.red {
-  box-shadow:
-    0 0 0 2px rgba(230, 74, 74, 0.9),
-    0 12px 30px rgba(230, 74, 74, 0.35);
-}
-
-.stake-card:hover {
-  transform: translateY(-2px);
-}
-
-/* Card image */
-.stake-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Dark overlay */
-.stake-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.65),
-    rgba(0, 0, 0, 0.15)
-  );
-}
-
-/* Bottom info bar */
-.stake-card-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  padding: 12px 14px;
-  background: rgba(16, 37, 49, 0.95);
-  z-index: 10;
-}
-
-/* Title */
-.stake-card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: white;
-}
-
-/* Count */
-.stake-card-count {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: white;
-}
-
-/* Green dot */
 .stake-dot {
   width: 8px;
   height: 8px;
