@@ -13,61 +13,20 @@ import {
   Zap,
   RefreshCw,
   Lock,
-  Trophy } from "lucide-react";
+  ClipboardList} from "lucide-react";
 import { motion } from "framer-motion";
-import { apiRequest } from "@/utils/ApiHelper";
-
-interface UserVipCardProps {
-  username?: string;
-  vipProgress?: number;
-  currentLevelName?: string;
-  nextLevelName?: string;
+interface GameCardProps {
+  
   onClose?: () => void;
 }
-
-const UserVipCard: React.FC<UserVipCardProps> = ({
-  username,
-  vipProgress,
-  currentLevelName,
-  nextLevelName,
+const GameCard: React.FC<GameCardProps> = ({
+  
   onClose,
 }) => {
-  // 👇 local states (API will overwrite them)
-  const [user, setUser] = useState(username || "Loading...");
-  const [progress, setProgress] = useState(vipProgress || 0);
-  const [currentLevel, setCurrentLevel] = useState(currentLevelName || "Bronze");
-  const [nextLevelVal, setNextLevelVal] = useState(nextLevelName || "Silver");
+
 
   // 👇 FETCH FROM API
-  useEffect(() => {
-    const loadVipData = async () => {
-      try {
-        const id = localStorage.getItem("userId");
-        const token = localStorage.getItem("token");
-
-        const res = await apiRequest(`/users/${id}/details`, true, {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (res.success) {
-          setUser(res.data.username);
-          setCurrentLevel(res.data.currentLevelName);
-          setNextLevelVal(res.data.nextLevelName);
-
-          // Animate progress
-          setTimeout(() => {
-            setProgress(res.data.progressPercent);
-          }, 250);
-        }
-      } catch (err) {
-        console.error("VIP fetch error:", err);
-      }
-    };
-
-    loadVipData();
-  }, []);
-
+  
   return (
     <motion.div
       className="bg-[#0C1A2A] w-[450px] rounded-2xl p-6 shadow-xl relative text-white"
@@ -80,7 +39,7 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
 
         <div className="flex justify-between items-center mb-4">
           <div className="text-xl font-semibold flex items-center mb-5">
-            <Trophy size={24} className="mr-2" /> Vip
+            <ClipboardList size={24} className="mr-2" /> Game Info
           </div>
 
           <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -88,112 +47,22 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
           </button>
         </div>
 
-        <Tabs defaultValue="overview">
+        <Tabs defaultValue="Rules">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="rewards">Rewards</TabsTrigger>
+            <TabsTrigger value="Rules">Rules</TabsTrigger>
+            <TabsTrigger value="Max Betting Limits">Max Betting Limits</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="mt-4">
-            <Card className="w-full py-6 header-bg rounded-2xl border-none shadow-inner">
-              <CardContent className="p-3">
-                <ProgressCard
-                  username={user}
-                  progressPercentage={progress}
-                  currentLevelName={currentLevel}
-                  nextLevelName={nextLevelVal}
-                />
-              </CardContent>
-            </Card>
+          <TabsContent value="Rules" className="mt-4">
+          
 
             {/* VIP Benefits (Scrollable Section) */}
             <div className="mt-4 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar space-y-2">
-              <details className="bg-[#151b23]/90 rounded-xl p-3 cursor-pointer backdrop-blur-md open:pb-4">
-                <summary className="flex justify-between items-center font-medium select-none">
-                  VIP Benefits
-                  <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180" />
-                </summary>
-
-                {/* Benefit List */}
-                <div className="mt-3 text-sm text-gray-300 leading-relaxed space-y-5">
-                  {/* Bronze */}
-                  <div>
-                    <p className="font-semibold text-[#cd7f32] flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#cd7f32]" /> Bronze
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Bonus from Support in currency of your choice</li>
-                      <li>Rakeback enabled</li>
-                      <li>Weekly bonuses</li>
-                      <li>Monthly bonuses</li>
-                      <li>VIP Telegram channel access</li>
-                    </ul>
-                  </div>
-                  <hr className="border-gray-700/50" /> 
-                  {/* Silver */}
-                  <div>
-                    <p className="font-semibold text-[#c0c0c0] flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#c0c0c0]" /> Silver
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Bonus from Support in currency of your choice</li>
-                      <li>Monthly bonus increased</li>
-                    </ul>
-                  </div>
-                  <hr className="border-gray-700/50" /> 
-                  {/* Gold */}
-                  <div>
-                    <p className="font-semibold text-[#ffd700] flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#ffd700]" /> Gold
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Bonus from Support in currency of your choice</li>
-                      <li>Monthly bonus increased</li>
-                    </ul>
-                  </div>
-                  <hr className="border-gray-700/50" />
-                  {/* Platinum I - III */}
-                  <div>
-                    <p className="font-semibold text-[#40e0d0] flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#40e0d0]" /> Platinum I - III
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Bonus from Support in currency of your choice</li>
-                      <li>Monthly bonus increased</li>
-                    </ul>
-                  </div>
-                  <hr className="border-gray-700/50" />
-                  {/* Platinum IV - VI */}
-                  <div>
-                    <p className="font-semibold text-[#00ffff] flex items-center gap-2">
-                      <Star className="w-4 h-4 text-[#00ffff]" /> Platinum IV - VI
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Dedicated VIP host</li>
-                      <li>Unlimited Reloads while maintaining a VIP host</li>
-                      <li>Bonus from VIP host in currency of your choice</li>
-                      <li>Weekly & monthly bonuses increased</li>
-                    </ul>
-                  </div>
-                  <hr className="border-gray-700/50" />
-                  {/* Diamond I - V */}
-                  <div>
-                    <p className="font-semibold text-[#00bfff] flex items-center gap-2">
-                      <Gem className="w-4 h-4 text-[#00bfff]" /> Diamond I - V
-                    </p>
-                    <ul className="list-disc list-inside text-gray-400 mt-1 ml-2 space-y-1">
-                      <li>Bonus from VIP host in currency of your choice</li>
-                      <li>Exclusively customised benefits</li>
-                      <li>Weekly & monthly bonuses increased</li>
-                    </ul>
-                  </div>
-                </div>
-               </details>
             
               {/* VIP Host Section */}
               <details className="bg-[#151b23]/90 rounded-xl p-3 mt-2 cursor-pointer backdrop-blur-md open:pb-4">
               <summary className="flex justify-between items-center font-medium select-none">
-           VIP Host
+           Game Rules
           <ChevronDown className="w-4 h-4 text-gray-400 transition-transform duration-300 group-open:rotate-180" />
            </summary>
 
@@ -237,9 +106,9 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
              
               </TabsContent>
     
-          {/* Rewards Tab */}
+          {/* Max Betting Limits Tab */}
          <TabsContent
-          value="rewards"
+          value="Max Betting Limits"
           className="mt-4 space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar"
         >
           {/* Monthly Bonus - Unlocked */}
@@ -342,4 +211,4 @@ const UserVipCard: React.FC<UserVipCardProps> = ({
   );
 };
 
-export default UserVipCard;
+export default GameCard;

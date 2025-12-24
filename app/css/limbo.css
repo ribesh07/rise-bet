@@ -1,0 +1,164 @@
+* {
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0b1620;
+}
+
+.limbo-container {
+  display: flex;
+  height: 100vh;
+  color: #fff;
+}
+
+/* LEFT PANEL */
+.lp {
+  width: 280px;
+  padding: 14px;
+  background: #223746;
+}
+
+.lp-toggle {
+  display: flex;
+  background: #152733;
+  border-radius: 999px;
+  padding: 4px;
+  margin-bottom: 18px;
+}
+
+.lp-toggle-btn {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #9fb2c1;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.lp-toggle-btn.active {
+  background: #2a3f4f;
+  color: #fff;
+}
+
+.lp-block {
+  margin-bottom: 16px;
+}
+
+.lp-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #9fb2c1;
+  margin-bottom: 6px;
+}
+
+.lp-input {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  background: #152733;
+  border-radius: 8px;
+}
+
+.lp-input input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  padding-left: 12px;
+  outline: none;
+}
+
+.lp-currency {
+  background: #1dff00;
+  color: #000;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-right: 6px;
+}
+
+.lp-sep {
+  width: 1px;
+  height: 22px;
+  background: #3b5566;
+  margin-right: 6px;
+}
+
+.lp-action {
+  padding: 0 10px;
+  font-weight: 600;
+}
+
+.lp-bet {
+  width: 100%;
+  height: 44px;
+  background: #1dff00;
+  border: none;
+  border-radius: 8px;
+  color: #000;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+/* CENTER */
+.center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.multiplier {
+  font-size: 96px;
+  font-weight: 800;
+  transition: transform 0.15s ease;
+}
+
+.multiplier.win {
+  color: #1dff00;
+  transform: scale(1.05);
+}
+
+.multiplier.lose {
+  color: #ff4d4f;
+  transform: scale(0.98);
+}
+
+/* BOTTOM */
+.bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 310px;
+  right: 20px;
+  display: flex;
+  gap: 20px;
+}
+
+.bottom-box {
+  flex: 1;
+}
+
+.bottom-box label {
+  display: block;
+  font-size: 13px;
+  color: #9fb2c1;
+  margin-bottom: 6px;
+}
+
+.bottom-box input {
+  width: 100%;
+  height: 44px;
+  background: #152733;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding-left: 12px;
+}

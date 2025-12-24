@@ -202,7 +202,7 @@
 //     // 🔥 GENERATE RANDOM TX ID  
 //     const txId = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-//     // 🔥 SEND STAKE-STYLE NOTIFICATION  
+//     // 🔥 SEND Rise-STYLE NOTIFICATION  
 //     pushNotification({
 //       title: "Withdrawal Successful",
 //       message: `You withdrew ${val} ${selectedCoin.symbol}.`,

@@ -500,7 +500,7 @@
 // //             className={`px-5 py-2 text-sm rounded-md font-semibold transition
 // //               ${
 // //                 isEmailVerified
-// //                   ? "bg-green-700 cursor-not-allowed opacity-50" // dull green (Stake-style)
+// //                   ? "bg-green-700 cursor-not-allowed opacity-50" // dull green (Rise-style)
 // //                   : "bg-green-600 hover:bg-green-700"
 // //               }
 // //             `}
@@ -667,7 +667,7 @@
 //             className={`px-5 py-2 text-sm rounded-md font-semibold transition
 //               ${
 //                 isEmailVerified
-//                   ? "bg-green-700 cursor-not-allowed opacity-50" // dull green (Stake style)
+//                   ? "bg-green-700 cursor-not-allowed opacity-50" // dull green (Rise style)
 //                   : "bg-green-600 hover:bg-green-700"
 //               }
 //             `}
@@ -789,7 +789,7 @@
 
 //       if (res.success) {
 //         toast.success("Phone number updated successfully!");
-//         setIsPhoneVerified(true); // lock phone like Stake
+//         setIsPhoneVerified(true); // lock phone like Rise
 //       } else {
 //         toast.error(res.message || "Failed to update phone");
 //       }

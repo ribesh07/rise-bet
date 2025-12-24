@@ -35,7 +35,7 @@
 //     // 🔥 Generate random transaction ID
 //     const txId = Math.random().toString(36).substring(2, 10).toUpperCase();
 
-//     // 🔥 PUSH STAKE-STYLE NOTIFICATION
+//     // 🔥 PUSH Rise-STYLE NOTIFICATION
 //     pushNotification({
 //       title: "Deposit Successful",
 //       message: `You deposited ₹${val}.`,

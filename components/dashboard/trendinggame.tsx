@@ -82,6 +82,8 @@ const trendingGames = [
   { id: 12, name: "Dragon Tower", players: 384, provider: "Rise Bet", image: "/games/dragontower/avove.jpeg" },
   { id: 13, name: "Rock paper", players: 0, provider: "Rise Bet", image: "/games/rockpaper/avove.jpeg" },
   { id: 14, name: "Chicken", players: 0, provider: "Rise Bet", image: "/games/chicken/avove.png" },
+  { id: 10, name: "Limbo", players: 290, provider: "Rise Bet", image: "/images/limbo.png" },
+
 ];
 
 export const TrendingGames: React.FC = () => {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 const ROWS = 9;
 const COLS = 3;
 
-// Stake-style multiplier ladder (bottom → top)
+// Rise-style multiplier ladder (bottom → top)
 const MULTIPLIERS = [1.2, 1.5, 1.9, 2.4, 3.1, 4.2, 6.0, 9.0];
 
 // Difficulty → win chance per pick
@@ -78,7 +78,7 @@ export default function DragonTowerGame(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-[#0b1c26] text-white flex gap-6 p-6">
-      {/* LEFT PANEL – Stake style */}
+      {/* LEFT PANEL – Rise style */}
       <div className="w-80 bg-[#122733] rounded-xl p-4 space-y-4">
         <div className="flex bg-[#0b1c26] rounded-lg p-1">
           <button className="flex-1 py-2 rounded-md bg-[#122733]">Manual</button>

@@ -14,7 +14,7 @@ const ImageHead: React.FC<ImageHeadProps> = ({
   color = "blue",
 }) => {
   return (
-    <div className={`stake-card ${color}`}>
+    <div className={`Rise-card ${color}`}>
       {/* IMAGE */}
       <div className="relative w-full aspect-[16/9] overflow-hidden">
         <img
@@ -24,7 +24,7 @@ const ImageHead: React.FC<ImageHeadProps> = ({
         />
       </div>
 
-      {/* FOOTER (UNDER IMAGE – Stake style) */}
+      {/* FOOTER (UNDER IMAGE – Rise style) */}
       <div className="flex items-center justify-between px-4 py-3 bg-[#102531]">
         {/* LEFT: ICON + TITLE */}
         <div className="flex items-center gap-2 min-w-0">
@@ -41,7 +41,7 @@ const ImageHead: React.FC<ImageHeadProps> = ({
 
         {/* RIGHT: COUNT */}
         <div className="flex items-center gap-2 text-sm font-semibold text-white">
-          <span className="stake-dot" />
+          <span className="Rise-dot" />
           {count.toLocaleString()}
         </div>
       </div>

@@ -314,7 +314,7 @@ const walletIcons = [
 
 const FIAT = ["INR", "USD", "EUR"];
 
-/* 🔥 STAKE-STYLE BALANCE FORMAT */
+/* 🔥 Rise-STYLE BALANCE FORMAT */
 const formatBalance = (symbol: string, balance?: number | null) => {
   if (!balance || isNaN(balance)) return "0";
 

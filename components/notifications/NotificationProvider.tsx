@@ -29,7 +29,7 @@ interface NotificationContextType {
   removeToast: (id: string) => void;
 }
 
-const LOCAL_KEY = "stake_notifications_v1";
+const LOCAL_KEY = "Rise_notifications_v1";
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {

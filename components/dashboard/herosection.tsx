@@ -113,7 +113,7 @@
 //         )}
 //       </div>
 
-//       {/* ===== MOBILE (1:1 STAKE) ===== */}
+//       {/* ===== MOBILE (1:1 Rise) ===== */}
 //       {isMobile && (
 //         <div className="relative z-10 mt-4 grid grid-cols-2 gap-2 px-2">
 //           <ImageHead

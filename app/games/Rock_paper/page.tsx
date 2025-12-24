@@ -25,7 +25,7 @@
 //   return "lose";
 // }
 
-// export default function RockPaperScissorsStake() {
+// export default function RockPaperScissorsRise() {
 //   const [bet, setBet] = useState(0);
 //   const [started, setStarted] = useState(false);
 //   const [playerPick, setPlayerPick] = useState<string | null>(null);
@@ -279,7 +279,7 @@ function getResult(player: string, house: string) {
   return "lose";
 }
 
-export default function RockPaperScissorsStake() {
+export default function RockPaperScissorsRise() {
   const [bet, setBet] = useState(0);
   const [started, setStarted] = useState(false);
 

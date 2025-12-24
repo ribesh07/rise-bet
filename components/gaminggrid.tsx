@@ -43,6 +43,8 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(
       { name: "Dragon Tower", image: "/games/dragontower/avove.jpeg", playing: 384, route: "/games/Dragon_tower" },
       { name: "Rock Paper", image: "/games/rockpaper/avove.jpeg", playing: 0, route: "/games/Rock_paper" },
       { name: "Chicken", image: "/games/chicken/avove.png", playing: 0, route: "/games/Chicken" },
+      { name: "Limbo", image: "/images/limbo.png", playing: 436, route: "/games/LimboGame" },
+      
     ];
 
     const filteredGames = games.filter((game) =>

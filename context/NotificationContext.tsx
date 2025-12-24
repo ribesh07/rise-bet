@@ -48,7 +48,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     setAllNotifications((prev) => [newNotification, ...prev]);
     setToasts((prev) => [...prev, newNotification]);
 
-    // SOUND only for new (unseen) notifications - Stake behavior
+    // SOUND only for new (unseen) notifications - Rise behavior
     if (Date.now() - lastSeen > 300) {
       // playNotificationSound();
     }

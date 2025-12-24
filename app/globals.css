@@ -38,7 +38,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Headings – Stake style */
+/* Headings – Rise style */
 h1, h2, h3, h4, h5 {
   font-family: "DM Sans", "Inter", sans-serif;
   font-weight: 700;
@@ -150,7 +150,7 @@ input, textarea, select, button {
   display: none;
 }
 
-/* Stake-style scrollbar (desktop) */
+/* Rise-style scrollbar (desktop) */
 @media (min-width: 769px) {
   .rise-scrollbar::-webkit-scrollbar {
     height: 6px;
@@ -202,8 +202,8 @@ input, textarea, select, button {
   background-position: center;
 }
 
-/* ================= STAKE CATEGORY CARD ================= */
-.stake-card {
+/* ================= Rise CATEGORY CARD ================= */
+.Rise-card {
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -213,23 +213,23 @@ input, textarea, select, button {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.stake-card.blue {
+.Rise-card.blue {
   box-shadow:
     0 0 0 2px rgba(26,156,255,0.9),
     0 14px 36px rgba(26,156,255,0.4);
 }
 
-.stake-card.red {
+.Rise-card.red {
   box-shadow:
     0 0 0 2px rgba(230,74,74,0.9),
     0 14px 36px rgba(230,74,74,0.4);
 }
 
-.stake-card:hover {
+.Rise-card:hover {
   transform: translateY(-3px);
 }
 
-.stake-card::after {
+.Rise-card::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -240,7 +240,7 @@ input, textarea, select, button {
   );
 }
 
-.stake-card-footer {
+.Rise-card-footer {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -252,20 +252,20 @@ input, textarea, select, button {
   z-index: 10;
 }
 
-.stake-card-title,
-.stake-card-count {
+.Rise-card-title,
+.Rise-card-count {
   font-weight: 600;
   color: white;
 }
 
-.stake-dot {
+.Rise-dot {
   width: 8px;
   height: 8px;
   border-radius: 999px;
   background: #22c55e;
 }
 
-/* Hide scrollbar but keep scrolling (Stake style) */
+/* Hide scrollbar but keep scrolling (Rise style) */
 .no-scrollbar {
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
@@ -273,4 +273,71 @@ input, textarea, select, button {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
+}
+
+/* MANHOLE */
+.manhole {
+  position: relative;
+  width: 72px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #243f4e, #0b1c26);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s ease;
+}
+
+.manhole .ring {
+  width: 88%;
+  height: 75%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #3b5d6e, #1b3442);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.manhole .plate {
+  width: 55%;
+  height: 55%;
+  display: flex;
+  gap: 4px;
+}
+
+.manhole .plate span {
+  flex: 1;
+  border-radius: 4px;
+  background: linear-gradient(to bottom, #081821, #02090e);
+}
+
+/* OPEN */
+.manhole.open {
+  transform: translateY(-12px) rotate(-12deg);
+}
+
+/* FIRE */
+.manhole .fire {
+  position: absolute;
+  bottom: 6px;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle at bottom, #ffcc00, #ff4500, transparent);
+  opacity: 0;
+  animation: fire 1.2s infinite;
+}
+
+.manhole.open .fire {
+  opacity: 1;
+}
+
+@keyframes fire {
+  0% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-6px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+
+/* WIN GLOW */
+.lane-win .manhole {
+  box-shadow: 0 0 14px #00ff9c;
 }

@@ -155,11 +155,11 @@ const UserDropdown: React.FC = () => {
       />
 
       {open && (
-        <div className="absolute right-0 mt-2 w-52 bg-[#1e293b] border border-gray-700 rounded-xl shadow-xl z-50 py-2">
+        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-700 rounded-xl shadow-xl z-50 py-2">
           {menuItems.map((item, idx) => (
             <button
               key={idx}
-              className="flex items-center gap-3 px-4 py-2 w-full text-left text-sm text-gray-200 hover:bg-[#243249] transition"
+              className="flex items-center gap-3 px-4 py-2 w-full text-left text-sm text-gray-800 hover:bg-gray-300 transition"
               onClick={() => handleClick(item)}
             >
               <item.icon size={18} />
