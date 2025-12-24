@@ -25,13 +25,57 @@ export class RouletteService {
     this.logger.log('Socket.IO server set on RouletteService');
   }
 
-  createTable(room: string, spinInterval = 15000) {
-    if (this.tables.has(room)) return;
-    const table: Table = { room, state: 'waiting', countdown: spinInterval / 1000 };
-    table.intervalId = setInterval(() => this.gameLoop(room, spinInterval), 1000);
-    this.tables.set(room, table);
-    this.logger.log(`Table ${room} created`);
-  }
+createTable(room: string, spinInterval = 15000) {
+  if (this.tables.has(room)) return;
+
+  const table: Table = {
+    room,
+    state: 'waiting',
+    countdown: spinInterval / 1000,
+    intervalId: undefined, // ⬅️ timer NOT started
+  };
+
+  this.tables.set(room, table);
+  this.logger.log(`Table ${room} created (timer idle)`);
+}
+
+shouldForceWin(params: {
+  stats: { totalGames: number; consecutiveWins: number } | null;
+  betAmount: number;
+  balance: number;
+}): boolean {
+  const { stats, betAmount, balance } = params;
+
+  // First game
+  if (!stats || stats.totalGames === 0) return true;
+
+  // Low balance safety
+  if (balance <= 10) return true;
+
+  // Small bet advantage (max 2 wins)
+  if (betAmount <= 10 && stats.consecutiveWins < 2) return true;
+
+  return false;
+}
+
+
+private startTimerIfNeeded(room: string, spinInterval = 15000) {
+  const table = this.tables.get(room);
+  if (!table) return;
+
+  if (table.intervalId) return;
+
+  table.intervalId = setInterval(
+    () => this.gameLoop(room, spinInterval),
+    1000
+  );
+
+  table.state = 'waiting';
+  table.countdown = spinInterval / 1000;
+
+  this.logger.log(`⏱️ Timer started for table ${room}`);
+}
+
 
   destroyTable(room: string) {
     const t = this.tables.get(room);
@@ -40,113 +84,200 @@ export class RouletteService {
     this.tables.delete(room);
   }
 
-  private async gameLoop(room: string, spinInterval: number) {
-    const table = this.tables.get(room);
-    if (!table) return;
-    table.countdown -= 1;
-    // broadcast countdown
-    if (this.io) {
-      this.io.to(room).emit('countdown', { seconds: table.countdown });
-      } else {
-        this.logger.warn('Socket server not available; skipping emit');
-      }
-
-    if (table.countdown <= 0) {
-      table.state = 'spinning';
-      table.countdown = spinInterval / 1000; // reset for next round
-      // perform spin
-      const result = spinWheel();
-      // fetch pending bets for this room/table (game='roulette' and match room)
-      const pendingBets = await this.prisma.bet.findMany({
-        where: { game: 'ROULETTE', status: BetStatus.PENDING,room },
-      });
-      console.log(`Spun wheel for table ${room}, result:`, result);
-      console.warn(`Found ${pendingBets.length} pending bets to resolve`);
-      console.dir(pendingBets);
-      // resolve bets atomically per bet
-      const resolutions : any = [];
-      for (const bet of pendingBets) {
-        console.log('Resolving bet:', bet);
-        const payload = bet.payload as any;
-        const multiplier = evaluateBet(payload, result);
-        console.log(`Bet payload:`, payload, `=> multiplier:`, multiplier);
-        if (multiplier > 0) {
-          const payout = Number(bet.amount) * Number(multiplier);
-          // update DB atomic: set bet won, create transaction, credit wallet
-          await this.prisma.$transaction(async (tx) => {
-            // mark bet won
-            await tx.bet.update({ where: { id: bet.id }, data: { status: 'WON', payout: payout, updatedAt: new Date() }});
-            // create transaction WIN
-            await tx.transaction.create({
-              data: {
-                userId: bet.userId,
-                type: 'WIN',
-                amount: payout,
-                currency: bet.currency,
-                createdAt: new Date(),
-                description: `Roulette win (betId:${bet.id})`,
-              },
-            });
-
-            //match update for win
-            const match = await tx.match.update({
-              where: { id: bet.matchId },
-              data: {
-                status: 'WON',
-              }
-            });
-
-            
-            // credit wallet
-            await tx.wallet.update({
-              where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
-              data: { balance: { increment: payout }  },
-            });
-          });
-          console.log(`Bet ${bet.id} won, payout: ${payout}`);
-          // console.log(resolutions);
-          resolutions.push({ betId: bet.id, status: 'WON', payout, userId: bet.userId });
-        } else {
-
-          // mark bet LOST
-          await this.prisma.$transaction(async (tx) => {
-            await tx.bet.update({ where: { id: bet.id }, data: { status: 'LOST', payout: bet.amount, updatedAt: new Date() }});
-            // create transaction WIN
-            await tx.transaction.create({
-              data: {
-                userId: bet.userId,
-                type: TransactionType.LOST,
-                amount: bet.amount,
-                currency: bet.currency,
-                createdAt: new Date(),
-                description: `Roulette lost (betId:${bet.id})`,
-              },
-            });
-
-              const match = await tx.match.update({
-              where: { id: bet.matchId },
-              data: {
-                status: 'LOST',
-              }
-            });
-            // // credit wallet
-            // await tx.wallet.update({
-            //   where: { userId_currency: { userId: bet.userId, currency: bet.currency } },
-            //   data: { balance: { decrement : bet.amount }  },
-            // });
-          });
-
-          console.log(`Bet ${bet.id} lost.`);
-          // mark lost
-          resolutions.push({ betId: bet.id, status: 'LOST' , userId: bet.userId });
-        }
-      }
-      
-      console.log(resolutions);
-      // broadcast spin result + resolutions
-      this.io.to(room).emit('spin-result', { result, resolutions });
-    } 
+   decideMultiplier(params: {
+  baseMultiplier: number;
+  stats: { consecutiveWins: number } | null;
+  forceWin: boolean;
+}) {
+  // 1️⃣ Max 2 consecutive wins
+  if (Number(params.stats?.consecutiveWins) >= 2) {
+    return -1;
   }
+
+  // 2️⃣ First game → win
+  if (!params.stats) {
+    return Math.max(1, params.baseMultiplier);
+  }
+
+  // 3️⃣ Force win rules
+  if (params.forceWin && params.baseMultiplier > 0) {
+    return Math.max(1, params.baseMultiplier);
+  }
+
+  return params.baseMultiplier;
+}
+
+
+private async gameLoop(room: string, spinInterval: number) {
+  const table = this.tables.get(room);
+  if (!table) return;
+
+  // ⏱ Countdown tick
+  table.countdown -= 1;
+
+  if (this.io) {
+    this.io.to(room).emit('countdown', { seconds: table.countdown });
+  }
+
+  // 🛑 Not time to spin yet
+  if (table.countdown > 0) return;
+
+  // 🔒 SPIN LOCK (prevents double execution)
+  if (table.state === 'spinning') return;
+  table.state = 'spinning';
+
+  // reset countdown for next round
+  table.countdown = spinInterval / 1000;
+
+  let result;
+  const resolutions: any[] = [];
+
+  try {
+    // 🎡 Perform spin
+    result = spinWheel();
+
+    // 🎯 Fetch pending bets
+    const pendingBets = await this.prisma.bet.findMany({
+      where: {
+        game: 'ROULETTE',
+        status: BetStatus.PENDING,
+        room,
+      },
+    });
+
+    this.logger.log(
+      `Spun wheel for ${room}. Pending bets: ${pendingBets.length}`,
+    );
+
+    // 🛑 No bets → stop timer
+    if (pendingBets.length === 0) {
+      this.logger.log(`No pending bets, stopping table ${room}`);
+      this.destroyTable(room);
+      return;
+    }
+
+    // 💰 Resolve each bet (isolated + atomic)
+    for (const bet of pendingBets) {
+      await this.prisma.$transaction(async (tx) => {
+        // 🔍 Wallet
+        const wallet = await tx.wallet.findUnique({
+          where: {
+            userId_currency: {
+              userId: bet.userId,
+              currency: bet.currency,
+            },
+          },
+        });
+
+        // 📊 Stats
+        const stats = await tx.userGameStats.findUnique({
+          where: { userId: bet.userId },
+        });
+
+        // 🎯 Forced-win decision
+        const forceWin = this.shouldForceWin({
+          stats,
+          betAmount: Number(bet.amount),
+          balance: Number(wallet?.balance ?? 0),
+        });
+
+        // 🎲 Base roulette result
+        const baseMultiplier = evaluateBet(
+          bet.payload as any,
+          result,
+        );
+
+        // 🧠 Final multiplier decision
+        const multiplier = this.decideMultiplier({
+          baseMultiplier,
+          stats,
+          forceWin,
+
+        });
+
+        const isWin = multiplier > 0;
+        const payout = isWin ? Number(bet.amount) * multiplier : 0;
+
+        // 🧾 Update bet
+        await tx.bet.update({
+          where: { id: bet.id },
+          data: {
+            status: isWin ? BetStatus.WON : BetStatus.LOST,
+            payout,
+            updatedAt: new Date(),
+          },
+        });
+
+        // 💰 Wallet update (only on win)
+        if (isWin) {
+          await tx.wallet.update({
+            where: {
+              userId_currency: {
+                userId: bet.userId,
+                currency: bet.currency,
+              },
+            },
+            data: {
+              balance: { increment: payout },
+            },
+          });
+        }
+
+        // 📈 Update stats
+        await tx.userGameStats.upsert({
+          where: { userId: bet.userId },
+          update: {
+            totalGames: { increment: 1 },
+            consecutiveWins: isWin ? { increment: 1 } : 0,
+            lastResult: isWin ? 'WON' : 'LOST',
+          },
+          create: {
+            userId: bet.userId,
+            game: 'ROULETTE',
+            totalGames: 1,
+            consecutiveWins: isWin ? 1 : 0,
+            lastResult: isWin ? 'WON' : 'LOST',
+          },
+        });
+
+        // 🧾 Transaction log
+        await tx.transaction.create({
+          data: {
+            userId: bet.userId,
+            type: isWin ? TransactionType.WIN : TransactionType.LOST,
+            amount: isWin ? payout : bet.amount,
+            currency: bet.currency,
+            description: `Roulette ${
+              isWin ? 'win' : 'loss'
+            } (betId:${bet.id})`,
+          },
+        });
+
+        // 📤 Collect resolution
+        resolutions.push({
+          betId: bet.id,
+          status: isWin ? 'WON' : 'LOST',
+          payout,
+          userId: bet.userId,
+        });
+      });
+    }
+
+    // 📡 Broadcast result
+    if (this.io) {
+      this.io.to(room).emit('spin-result', {
+        result,
+        resolutions,
+      });
+    }
+  } catch (err) {
+    this.logger.error(`Spin failed for room ${room}`, err);
+  } finally {
+    // 🔓 ALWAYS unlock spin
+    table.state = 'waiting';
+  }
+}
+
 
   // Called by gateway when user places bet
   // async placeBet(userId: number, room: string, betDto: any) {
@@ -534,6 +665,9 @@ async createBet(data: {
         description: `Bet placed on ${payload.game}`,
       },
     });
+
+      this.createTable(room);
+      this.startTimerIfNeeded(room);
 
     // 5. Return both
     return {

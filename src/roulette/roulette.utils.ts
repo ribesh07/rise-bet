@@ -18,13 +18,13 @@ export function evaluateBet(payload: any, result: RouletteResult) {
   console.log('Evaluating bet:', payload, 'against result:', result);
   switch (payload.type) {
     case 'STRAIGHT':
-      return payload.value === result.number ? 35 : -1;
+      return payload.value === result.number ? 3 : -1;
     case 'COLOR':
-      return payload.value === result.color ? 1 : -1;
+      return payload.value === result.color ? 1.25 : -1;
     case 'ODD':
-      return result.number !== 0 && (result.number % 2 === 1) ? 1 : -1;
+      return result.number !== 0 && (result.number % 2 === 1) ? 1.5 : -1;
     case 'EVEN':
-      return result.number !== 0 && (result.number % 2 === 0) ? 1 : -1;
+      return result.number !== 0 && (result.number % 2 === 0) ? 2 : -1;
     case 'DOZEN':
       {
         const n = result.number;
@@ -45,9 +45,9 @@ export function evaluateBet(payload: any, result: RouletteResult) {
         return -1;
       }
     case 'HIGH':
-      return result.number >= 19 && result.number <= 36 ? 1 : -1;
+      return result.number >= 19 && result.number <= 36 ? 1.5 : -1;
     case 'LOW':
-      return result.number >= 1 && result.number <= 18 ? 1 : -1;
+      return result.number >= 1 && result.number <= 18 ? 1.25 : -1;
     default:
       return -1;
   }
