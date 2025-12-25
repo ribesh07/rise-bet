@@ -26,7 +26,7 @@ export default function RiseTopBar() {
       {/* Right Fairness button */}
       <button className="flex items-center gap-2 bg-[#09161f] hover:bg-[#223a49] transition px-3 py-1.5 rounded-md text-sm text-white">
         <Check size={16} className="text-green-400" />
-        Fairness
+        Rise Original
       </button>
     </div>
   );

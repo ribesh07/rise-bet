@@ -473,11 +473,11 @@ export default function WingoFull() {
       <div className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
            style={{ backgroundImage:`url('/color/bg.webp')`, backgroundSize:'cover', backgroundPosition:'center' }}>
         
-        <motion.img src={`/color/ball_${currentDraw?.number ?? 0}.webp`} animate={ballControls}
+        <motion.img src={`/color/ball_${currentDraw?.number }.webp`}
                     style={{ width:96, height:96, borderRadius:48, objectFit:'cover' }} />
 
         {/* BIG Countdown Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-red-500 drop-shadow-lg">
+        <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-gray-500 drop-shadow-lg">
           {bettingLocked ? "TRADE CLOSED" : ''}
         </div>
         
