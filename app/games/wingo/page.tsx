@@ -470,26 +470,52 @@ export default function WingoFull() {
   </div>
 )}
       {/* Ball Display */}
-      <div className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
-           style={{ backgroundImage:`url('/color/bg.webp')`, backgroundSize:'cover', backgroundPosition:'center' }}>
-        
-        <motion.img src={`/color/ball_${currentDraw?.number }.webp`}
-                    style={{ width:96, height:96, borderRadius:48, objectFit:'cover' }} />
+     <div
+  className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
+  style={{
+    backgroundImage: `url('/color/bg.webp')`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+  }}
+>
+  {/* BALL — show only when time > 5 */}
+  {timeLeft > 5 && currentDraw && (
+    <motion.img
+      src={`/color/ball_${currentDraw.number}.webp`}
+      style={{ width: 96, height: 96, borderRadius: 48, objectFit: 'cover' }}
+    />
+  )}
 
-        {/* BIG Countdown Overlay */}
-        <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-gray-500 drop-shadow-lg">
-          {bettingLocked ? "TRADE CLOSED" : ''}
-        </div>
+  {/* LAST 5 SECONDS OVERLAY */}
+  {timeLeft <= 5 && (
+    <div className="absolute inset-0 flex items-center justify-center text-6xl font-extrabold drop-shadow-lg">
+      {timeLeft > 0 ? (
         
-        {/* Previous Draw Info */}
-        {currentDraw && (
-          <div className="absolute bottom-4 flex flex-col items-center gap-1">
-            <div className="px-3 py-1 rounded-full bg-white/90 text-black font-bold">{currentDraw.number}</div>
-            <div className="text-xs text-gray-200 drop-shadow">{currentDraw.color} • {currentDraw.bigSmall}</div>
-          </div>
-        )}
-        
+        <span className="text-yellow-400 animate-pulse">
+          
+          {timeLeft}
+        </span>
+      ) : (
+        <span className="text-red-500">
+          TRADE CLOSED
+        </span>
+      )}
+    </div>
+  )}
+
+  {/* Previous Draw Info (optional — hide during countdown) */}
+  {currentDraw && timeLeft > 5 && (
+    <div className="absolute bottom-4 flex flex-col items-center gap-1">
+      <div className="px-3 py-1 rounded-full bg-white/90 text-black font-bold">
+        {currentDraw.number}
       </div>
+      <div className="text-xs text-gray-200 drop-shadow">
+        {currentDraw.color} • {currentDraw.bigSmall}
+      </div>
+    </div>
+  )}
+</div>
+
   
 
 
