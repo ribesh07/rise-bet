@@ -470,56 +470,32 @@ export default function WingoFull() {
   </div>
 )}
       {/* Ball Display */}
-     <div
-  className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
-  style={{
-    backgroundImage: `url('/color/bg.webp')`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-  }}
->
-  {/* BALL — show only when time > 5 */}
-  {timeLeft > 5 && currentDraw && (
-    <motion.img
-      src={`/color/ball_${currentDraw.number}.webp`}
-      style={{ width: 96, height: 96, borderRadius: 48, objectFit: 'cover' }}
-    />
-  )}
-
-  {/* LAST 5 SECONDS OVERLAY */}
-  {timeLeft <= 5 && (
-    <div className="absolute inset-0 flex items-center justify-center text-6xl font-extrabold drop-shadow-lg">
-      {timeLeft > 0 ? (
+      <div className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
+           style={{ backgroundImage:`url('/color/bg.webp')`, backgroundSize:'cover', backgroundPosition:'center' }}>
         
-        <span className="text-yellow-400 animate-pulse">
-          
-          {timeLeft}
-        </span>
-      ) : (
-        <span className="text-red-500">
-          TRADE CLOSED
-        </span>
-      )}
-    </div>
-  )}
+        <motion.img src={`/color/ball_${currentDraw?.number }.webp`}
+                    style={{ width:96, height:96, borderRadius:48, objectFit:'cover' }} />
 
-  {/* Previous Draw Info (optional — hide during countdown) */}
-  {currentDraw && timeLeft > 5 && (
-    <div className="absolute bottom-4 flex flex-col items-center gap-1">
-      <div className="px-3 py-1 rounded-full bg-white/90 text-black font-bold">
-        {currentDraw.number}
+        {/* BIG Countdown Overlay */}
+        {/* <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-gray-500 drop-shadow-lg">
+          {bettingLocked ? "TRADE CLOSED" : ''}
+        </div> */}
+        
+        {/* Previous Draw Info */}
+        {currentDraw && (
+          <div className="absolute bottom-4 flex flex-col items-center gap-1">
+            <div className="px-3 py-1 rounded-full bg-white/90 text-black font-bold">{currentDraw.number}</div>
+            <div className="text-xs text-gray-200 drop-shadow">{currentDraw.color} • {currentDraw.bigSmall}</div>
+          </div>
+        )}
+        
       </div>
-      <div className="text-xs text-gray-200 drop-shadow">
-        {currentDraw.color} • {currentDraw.bigSmall}
-      </div>
-    </div>
-  )}
-</div>
-
   
 
 
       {/* Buttons */}
+      <div className="relative">
+
       <div className="grid grid-cols-3 gap-2 mb-3">
         <button disabled={bettingLocked} onClick={()=>onSelectColor('green')} className={`py-2 rounded ${bettingLocked?'bg-gray-600':'bg-green-600'} text-white`}>
           Green
@@ -548,6 +524,26 @@ export default function WingoFull() {
           Small
         </button>
       </div>
+      {timeLeft <= 5 && (
+  <div className="absolute inset-0 z-20
+                  flex items-center justify-center
+                   backdrop-blur-sm
+                  rounded-xl">
+
+    {timeLeft > 0 ? (
+      <div className="text-5xl font-extrabold text-yellow-400 ">
+       0 {timeLeft}
+      </div>
+    ) : (
+      <div className="text-3xl font-extrabold text-red-500">
+        TRADE CLOSED
+      </div>
+    )}
+
+  </div>
+)}
+
+    </div>
     </div>
      {/* RIGHT SIDE TAB */}
             <div className="w-full md:w-96">
