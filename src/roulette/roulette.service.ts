@@ -114,6 +114,7 @@ private async gameLoop(room: string, spinInterval: number) {
 
   // ⏱ Countdown tick
   table.countdown -= 1;
+  console.log("Getting room : ", room)
 
   if (this.io) {
     this.io.to(room).emit('countdown', { seconds: table.countdown });
@@ -144,6 +145,7 @@ private async gameLoop(room: string, spinInterval: number) {
         room,
       },
     });
+    console.log("pending bets :",pendingBets)
 
     this.logger.log(
       `Spun wheel for ${room}. Pending bets: ${pendingBets.length}`,
@@ -652,6 +654,7 @@ async createBet(data: {
         amountInINR,
         game: payload.game,
         currency,
+        status : BetStatus.PENDING
       },
     });
 
