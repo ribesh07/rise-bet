@@ -652,7 +652,7 @@ async createBet(data: {
         payload,
         amount,
         amountInINR,
-        game: payload.game,
+        game: payload.game?.toUpperCase() ?? 'ROULETTE',
         currency,
         status : BetStatus.PENDING
       },
