@@ -40,20 +40,33 @@ createTable(room: string, spinInterval = 15000) {
 }
 
 shouldForceWin(params: {
-  stats: { totalGames: number; consecutiveWins: number } | null;
+  stats: any | null;
   betAmount: number;
   balance: number;
 }): boolean {
   const { stats, betAmount, balance } = params;
 
-  // First game
-  if (!stats || stats.totalGames === 0) return true;
+  if (!balance || balance <= 0) return false;
 
-  // Low balance safety
-  if (balance <= 10) return true;
+  const betRatio = betAmount / balance;
 
-  // Small bet advantage (max 2 wins)
-  if (betAmount <= 10 && stats.consecutiveWins < 2) return true;
+  // 🔒 HARD RULE: never consecutive wins
+  if (!stats || stats?.consecutiveWins >= 2) return false;
+
+  // 🎮 First game encouragement
+  if (!stats || stats.totalGames === 0) {
+    return betRatio >= 0.3;
+  }
+
+  // 🧯 Low balance protection
+  if (balance <= 10) {
+    return betRatio >= 0.3;
+  }
+
+  // 💰 Main rule: big bet advantage
+  if (betRatio >= 0.3) {
+    return true;
+  }
 
   return false;
 }
@@ -86,26 +99,30 @@ private startTimerIfNeeded(room: string, spinInterval = 15000) {
 
    decideMultiplier(params: {
   baseMultiplier: number;
-  stats: { consecutiveWins: number } | null;
+  stats: { consecutiveWins: number; lastResult?: string | null } | null;
   forceWin: boolean;
 }) {
-  // 1️⃣ Max 2 consecutive wins
-  if (Number(params.stats?.consecutiveWins) >= 2) {
+  const { baseMultiplier, stats, forceWin } = params;
+
+  // 🟢 Natural win → ALWAYS allow
+  if (baseMultiplier > 0) {
+    return baseMultiplier;
+  }
+
+  // 🔒 Block forced wins after a win
+  if (stats?.lastResult === 'WON' ||  Number(stats?.consecutiveWins) > 1) {
     return -1;
   }
 
-  // 2️⃣ First game → win
-  if (!params.stats) {
-    return Math.max(1, params.baseMultiplier);
+  // 🎁 Forced win (safe cap)
+  if (forceWin) {
+    return 1.25; // always 1x
   }
 
-  // 3️⃣ Force win rules
-  if (params.forceWin && params.baseMultiplier > 0) {
-    return Math.max(1, params.baseMultiplier);
-  }
-
-  return params.baseMultiplier;
+  // ❌ Loss
+  return -1;
 }
+
 
 
 private async gameLoop(room: string, spinInterval: number) {
@@ -175,6 +192,8 @@ private async gameLoop(room: string, spinInterval: number) {
         const stats = await tx.userGameStats.findUnique({
           where: { userId: bet.userId },
         });
+
+        console.log(stats)
 
         // 🎯 Forced-win decision
         const forceWin = this.shouldForceWin({
@@ -632,6 +651,8 @@ async createBet(data: {
   }
 
   const amountInINR = Number(amount) * Number(rate.rateInINR);
+  console.log(amountInINR);
+
    
    
    // 2. Atomic balance check + decrement
@@ -639,6 +660,8 @@ async createBet(data: {
      where: { id: wallet.id, balance: { gte: amount } },
      data: { balance: { decrement: amount } },
     });
+
+    console.log(dec)
     
     if (dec.count === 0) throw new Error("Insufficient balance");
    
