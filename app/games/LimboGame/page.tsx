@@ -452,7 +452,7 @@ const LimboGame = () => {
      <div
       className={`
         relative z-10
-        text-5xl sm:text-6xl lg:text-7xl
+        text-3xl sm:text-6xl lg:text-7xl
         font-extrabold tracking-tight
         ${
           result === "WIN"

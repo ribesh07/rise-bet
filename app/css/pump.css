@@ -1,0 +1,58 @@
+.crash-container {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: #071d2b;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.crash-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at bottom, #0b2b3e, #071d2b);
+}
+
+.mill {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 50px;
+  opacity: 0.8;
+}
+
+.pump-line {
+  position: absolute;
+  bottom: 100px;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00ff9d, #00c37a);
+  box-shadow: 0 0 10px #00ff9d;
+}
+
+.multiplier-wrapper {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.multiplier-track {
+  display: flex;
+  gap: 10px;
+  padding-left: 20px;
+  will-change: transform;
+}
+
+.multiplier-chip {
+  min-width: 70px;
+  text-align: center;
+  padding: 10px 0;
+  background: #0f2f44;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: inset 0 0 0 1px #1e4b68;
+}

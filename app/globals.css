@@ -342,3 +342,18 @@ input, textarea, select, button {
   box-shadow: 0 0 14px #00ff9c;
 }
 
+@keyframes scaleIn {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.25s ease-out;
+}
+
