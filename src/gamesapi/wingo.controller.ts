@@ -16,7 +16,7 @@ import { PlaceLimboBetDto } from './dto/place-limbo.dto';
 import { PlaceCoinflipBetDto } from './dto/place-coinflip.dto';
 import { PlaceRpsBetDto } from './dto/place-rps.dto';
 
-@Controller('game')
+@Controller('api/v1/game')
 @UseGuards(JwtAuthGuard)
 export class WingoController {
   constructor(private readonly wingoService: WingoService) {}
