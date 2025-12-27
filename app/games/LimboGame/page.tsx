@@ -316,49 +316,110 @@ const LimboGame = () => {
       </div>
 
       {/* Bet Amount */}
-      <div className="space-y-1">
-        <div className="flex justify-between text-xs sm:text-sm text-gray-400">
-          <span>Bet Amount</span>
-          <span>{bet.toFixed(8)} BTC</span>
-        </div>
+    <div className="space-y-1">
+  <div className="flex justify-between text-xs sm:text-sm text-gray-400">
+    <span>Bet Amount</span>
+    <span>{bet.toFixed(8)} BTC</span>
+  </div>
 
-        <div className="flex">
-          <input
-            type="number"
-            value={bet}
-            onChange={(e) => setBet(Number(e.target.value))}
-            className="flex-1 bg-[#0b1c26] p-2 rounded-l-md outline-none text-sm"
-          />
-          <button
-            onClick={() => setBet(bet / 2)}
-            className="px-3 bg-[#1b3948] text-sm"
-          >
-            ½
-          </button>
-          <button
-            onClick={() => setBet(bet * 2)}
-            className="px-3 bg-[#1b3948] rounded-r-md text-sm"
-          >
-            2×
-          </button>
-        </div>
-      </div>
+  <div className="flex">
+    <input
+      type="text"
+      inputMode="decimal"
+      value={bet === 0 ? '0' : bet.toString()}
+      onChange={(e) => {
+        const value = e.target.value;
+        
+        // Allow empty or just decimal point
+        if (value === '' || value === '.') {
+          setBet(0);
+          return;
+        }
+        
+        // Remove leading zeros except for decimal cases like "0.5"
+        const cleanValue = value.replace(/^0+(?=\d)/, '');
+        
+        // Validate it's a valid number
+        if (/^\d*\.?\d*$/.test(cleanValue)) {
+          const num = parseFloat(cleanValue);
+          if (!isNaN(num)) {
+            setBet(num);
+          } else if (cleanValue === '.') {
+            setBet(0);
+          }
+        }
+      }}
+      onFocus={(e) => {
+        // Select all on focus so user can easily replace
+        if (bet === 0) {
+          e.target.select();
+        }
+      }}
+      onBlur={() => {
+        // Ensure minimum value
+        if (bet < 0 || isNaN(bet)) setBet(0);
+      }}
+      className="flex-1 bg-[#0b1c26] p-2 rounded-l-md outline-none text-sm"
+    />
+    <button
+      onClick={() => setBet(Math.max(0, bet / 2))}
+      className="px-3 bg-[#1b3948] text-sm"
+    >
+      ½
+    </button>
+    <button
+      onClick={() => setBet(bet * 2)}
+      className="px-3 bg-[#1b3948] rounded-r-md text-sm"
+    >
+      2×
+    </button>
+  </div>
+</div>
 
       {/* Target Multiplier */}
       <div className="space-y-1">
-        <div className="flex justify-between text-xs sm:text-sm text-gray-400">
-          <span>Target Multiplier</span>
-          <span>{targetMultiplier.toFixed(2)}x</span>
-        </div>
+  <div className="flex justify-between text-xs sm:text-sm text-gray-400">
+    <span>Target Multiplier</span>
+    <span>{targetMultiplier.toFixed(2)}x</span>
+  </div>
 
-        <input
-          type="number"
-          step="0.01"
-          value={targetMultiplier}
-          onChange={(e) => setTargetMultiplier(Number(e.target.value))}
-          className="w-full bg-[#0b1c26] p-2 rounded-md outline-none text-sm"
-        />
-      </div>
+  <input
+    type="text"
+    inputMode="decimal"
+    value={targetMultiplier.toString()}
+    onChange={(e) => {
+      const value = e.target.value;
+      
+      // Allow empty or just decimal point
+      if (value === '' || value === '.') {
+        setTargetMultiplier(0);
+        return;
+      }
+      
+      // Remove leading zeros except for decimal cases like "0.5"
+      const cleanValue = value.replace(/^0+(?=\d)/, '');
+      
+      // Validate it's a valid number
+      if (/^\d*\.?\d*$/.test(cleanValue)) {
+        const num = parseFloat(cleanValue);
+        if (!isNaN(num)) {
+          setTargetMultiplier(num);
+        }
+      }
+    }}
+    onFocus={(e) => {
+      // Select all on focus for easy replacement
+      e.target.select();
+    }}
+    onBlur={() => {
+      // Ensure minimum value of 1.01
+      if (targetMultiplier < 1.01 || isNaN(targetMultiplier)) {
+        setTargetMultiplier(1.01);
+      }
+    }}
+    className="w-full bg-[#0b1c26] p-2 rounded-md outline-none text-sm"
+  />
+</div>
 
       {/* AUTO INPUT */}
       {isAuto && (
@@ -368,13 +429,44 @@ const LimboGame = () => {
             <span>{remainingBets || autoBets}</span>
           </div>
 
-          <input
-            type="number"
-            min={1}
-            value={autoBets}
-            onChange={(e) => setAutoBets(Number(e.target.value))}
-            className="w-full bg-[#0b1c26] p-2 rounded-md outline-none text-sm"
-          />
+   <input
+  type="text"
+  inputMode="numeric"
+  value={autoBets === 0 ? '0' : autoBets.toString()}
+  onChange={(e) => {
+    const value = e.target.value;
+    
+    // Allow empty
+    if (value === '') {
+      setAutoBets(0);
+      return;
+    }
+    
+    // Remove leading zeros
+    const cleanValue = value.replace(/^0+(?=\d)/, '');
+    
+    // Validate it's a valid integer (no decimals for bet count)
+    if (/^\d+$/.test(cleanValue)) {
+      const num = parseInt(cleanValue, 10);
+      if (!isNaN(num) && num >= 0) {
+        setAutoBets(num);
+      }
+    }
+  }}
+  onFocus={(e) => {
+    // Select all on focus for easy replacement
+    if (autoBets === 0) {
+      e.target.select();
+    }
+  }}
+  onBlur={() => {
+    // Ensure minimum value of 1 on blur
+    if (autoBets < 1 || isNaN(autoBets)) {
+      setAutoBets(1);
+    }
+  }}
+  className="w-full bg-[#0b1c26] p-2 rounded-md outline-none text-sm"
+/>
         </div>
       )}
 
@@ -387,35 +479,18 @@ const LimboGame = () => {
       </Button>
 
       {/* Profit Box */}
-      <div className="bg-[#0b1c26] p-3 rounded-md text-sm">
-        <div className="flex justify-between text-gray-400">
-          <span>Total Profit ({targetMultiplier.toFixed(2)}x)</span>
-          <span>{profit.toFixed(8)} BTC</span>
-        </div>
-        <div className="flex justify-between mt-1 items-center">
-          <span className="text-base sm:text-lg">{profit.toFixed(2)}</span>
-          <span className="bg-green-500 text-black px-2 rounded">$</span>
-        </div>
-      </div>
+     <div className="bg-[#0b1c26] p-3 rounded-md text-sm">
+  <div className="flex justify-between text-gray-400 gap-2">
+    <span className="truncate">Total Profit ({targetMultiplier.toFixed(2)}x)</span>
+    <span className="truncate text-right">{profit.toFixed(8)} BTC</span>
+  </div>
+  <div className="flex justify-between mt-1 items-center gap-2">
+    <span className="text-base sm:text-lg truncate">{profit.toFixed(2)}</span>
+    <span className="bg-green-500 text-black px-2 rounded flex-shrink-0">$</span>
+  </div>
+</div>
     </div>
 
-    {/* MULTIPLIER (Top on mobile) */}
-    {/* <div
-      className="
-        flex-1 flex items-center justify-center bg-[#0b1c26]
-        py-10 lg:py-0
-        order-1 lg:order-2
-      "
-    >
-      <div
-        className={`multiplier text-4xl sm:text-5xl lg:text-6xl font-bold ${
-          result === "WIN" ? "win" : result === "LOSE" ? "lose" : ""
-        }`}
-      >
-        {multiplier.toFixed(2)}x
-      </div>
-    </div> */}
-    {/* MULTIPLIER (Top on mobile) */}
 <div
   className="
     flex-1 flex items-center justify-center  rounded-2xl
@@ -450,30 +525,30 @@ const LimboGame = () => {
 
     {/* Multiplier Text */}
      <div
-      className={`
-        relative z-10
-        text-3xl sm:text-3xl lg:text-3xl
-        font-extrabold tracking-tight
-        ${
-          result === "WIN"
-            ? "text-green-400"
-            : result === "LOSE"
-            ? "text-red-400"
-            : "text-white"
-        }
-      `}
-    >
-      {/* {multiplier.toFixed(2)}x */}
-    </div> 
+  className={`
+    z-10
+    text-[10px] sm:text-xl lg:text-3xl
+    font-bold tracking-tight
+    ${
+      result === "WIN"
+        ? "text-green-400"
+        : result === "LOSE"
+        ? "text-red-400"
+        : "text-white"
+    }
+  `}
+>
+</div> 
 
-    {/* Status badge */}
-     <div
-        className={`multiplier text-4xl sm:text-5xl lg:text-6xl font-bold ${
-          result === "WIN" ? "win" : result === "LOSE" ? "lose" : ""
-        }`}
-      >
-        {multiplier.toFixed(2)}x
-      </div>
+{/* Status badge */}
+<div
+  className={`multiplier text-[10px] ${
+    result === "WIN" ? "win" : result === "LOSE" ? "lose" : ""
+  }`}
+>
+  {multiplier.toFixed(2)}x
+</div>
+
   </div>
  
 </div>  

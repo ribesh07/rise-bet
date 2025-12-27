@@ -117,7 +117,7 @@ body {
 }
 
 .multiplier {
-  font-size: 96px;
+  font-size: 60px;
   font-weight: 800;
   transition: transform 0.15s ease;
 }
