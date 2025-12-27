@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import {
   BetStatus,
+  CoinSide,
   Prisma,
   RoundStatus,
   TransactionStatus,
@@ -14,6 +15,10 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlaceWingoBetDto } from './dto/place-bet.dto';
+import { randomInt } from 'crypto';
+import { PlaceLimboBetDto } from './dto/place-limbo.dto';
+import { PlaceCoinflipBetDto } from './dto/place-coinflip.dto';
+import { PlaceRpsBetDto, RpsChoice } from './dto/place-rps.dto';
 
 @Injectable()
 export class WingoService {
@@ -121,8 +126,11 @@ async placeBet(userId: number, dto: PlaceWingoBetDto) {
 
 
   // 📊 Result API
-  async getResult() {
+  async getResult(userId : any) {
     const round = await this.prisma.wingoBet.findMany({
+      where : {
+          userId: Number(userId)
+      },
     orderBy: {
       createdAt: 'desc', 
     },
@@ -130,7 +138,9 @@ async placeBet(userId: number, dto: PlaceWingoBetDto) {
 
     if (!round) throw new NotFoundException();
 
-    return round;
+    return {
+      success : true,
+      data : round};
   }
 
   // 🧮 Settlement logic
@@ -229,4 +239,547 @@ async settleBet(bet: any, result: number) {
 }
 
 
+//limbo
+  // 🎲 Generate Limbo roll (provably replaceable later)
+  generateRoll(): number {
+    const r = randomInt(1, 100_000_001); // 1 → 100,000,000
+    const roll = (99_000_000 / (100_000_000 - r)) / 1_000_000;
+    return Number(Math.min(roll, 100).toFixed(2));
+  }
+
+  async placeBetLimbo(userId: number, dto: PlaceLimboBetDto) {
+    // 1️⃣ Wallet
+    const wallet = await this.prisma.wallet.findUnique({
+      where: {
+        userId_currency: {
+          userId,
+          currency: dto.currency,
+        },
+      },
+    });
+
+    if (!wallet || Number(wallet.balance) < dto.amount) {
+      throw new BadRequestException('Insufficient balance');
+    }
+
+    // 2️⃣ Debit wallet
+    await this.prisma.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: dto.amount } },
+    });
+
+    // 3️⃣ Create Match (ONE per bet)
+    const match = await this.prisma.match.create({
+      data: {
+        name: 'LIMBO',
+        tableId: 'LIMBO',
+        status: BetStatus.SPINNING,
+        startTime: new Date(),
+      },
+    });
+
+    // 4️⃣ Roll
+    const roll = this.generateRoll();
+    const win = roll >= dto.targetMultiplier;
+    const payout = win ? dto.amount * dto.targetMultiplier : 0;
+
+    // 5️⃣ Create Bet
+    const bet = await this.prisma.bet.create({
+      data: {
+        userId,
+        matchId: match.id,
+        game: 'LIMBO',
+        currency: dto.currency,
+        amount: new Prisma.Decimal(dto.amount),
+        payout: new Prisma.Decimal(payout),
+        status: win ? BetStatus.WON : BetStatus.LOST,
+        payload: {
+          targetMultiplier: dto.targetMultiplier,
+          roll,
+          winChance: Number((99 / dto.targetMultiplier).toFixed(2)),
+        },
+      },
+    });
+
+    // 6️⃣ Wallet + Transaction
+    if (win) {
+      await this.prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: payout } },
+      });
+
+      await this.prisma.transaction.create({
+        data: {
+          userId,
+          type: TransactionType.WIN,
+          currency: dto.currency,
+          amount: new Prisma.Decimal(payout),
+          status: TransactionStatus.SUCCESS,
+          description: 'Limbo win',
+        },
+      });
+    } else {
+      await this.prisma.transaction.create({
+        data: {
+          userId,
+          type: TransactionType.LOST,
+          currency: dto.currency,
+          amount: new Prisma.Decimal(dto.amount),
+          status: TransactionStatus.SUCCESS,
+          description: 'Limbo loss',
+        },
+      });
+    }
+
+    // 7️⃣ Finish match
+    await this.prisma.match.update({
+      where: { id: match.id },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    return {
+      success : true,
+      data : {
+        result: win ? 'WIN' : 'LOSE',
+        roll,
+        targetMultiplier: dto.targetMultiplier,
+        payout,
+        profit: payout - dto.amount,
+        betId: bet.id,
+      }
+      
+    };
+  }
+
+   async getLimboResult(userId : any) {
+    const round = await this.prisma.bet.findMany({
+      where : {
+        game : 'LIMBO',
+       userId: Number(userId)
+      },
+    orderBy: {
+      createdAt: 'desc', 
+    },
+    });
+
+    if (!round) throw new NotFoundException();
+
+    return {
+      success : true,
+      data : round};
+  }
+
+//coinflip
+
+
+   // 🎲 Secure coin flip
+  flipCoin(): CoinSide {
+    return Math.random() < 0.5 ? CoinSide.HEAD : CoinSide.TAIL;
+  }
+
+  async placecoinflipBet(userId: number, dto: PlaceCoinflipBetDto) {
+    // 1️⃣ Wallet
+    const wallet = await this.prisma.wallet.findUnique({
+      where: {
+        userId_currency: {
+          userId,
+          currency: dto.currency,
+        },
+      },
+    });
+
+    if (!wallet || Number(wallet.balance) < dto.amount) {
+      throw new BadRequestException('Insufficient balance');
+    }
+
+    // 2️⃣ Get streak
+    const stats = await this.prisma.userGameStats.findUnique({
+      where: { userId },
+    });
+
+    const currentStreak = stats?.consecutiveWins ?? 0;
+
+    // 3️⃣ Multiplier doubles per win
+    const multiplier = Math.pow(2, currentStreak + 1);
+
+    // 4️⃣ Debit wallet
+    await this.prisma.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: dto.amount } },
+    });
+
+    // 5️⃣ Create Match
+    const match = await this.prisma.match.create({
+      data: {
+        name: 'COINFLIP',
+        tableId: 'COINFLIP',
+        status: BetStatus.SPINNING,
+        startTime: new Date(),
+      },
+    });
+
+    // 6️⃣ Flip result
+    const result = this.flipCoin();
+    const win = dto.choice === result;
+    const payout = win ? dto.amount * multiplier : 0;
+
+    // 7️⃣ Create Bet
+    const bet = await this.prisma.bet.create({
+      data: {
+        userId,
+        matchId: match.id,
+        game: 'COINFLIP',
+        currency: dto.currency,
+        amount: new Prisma.Decimal(dto.amount),
+        payout: new Prisma.Decimal(payout),
+        status: win ? BetStatus.WON : BetStatus.LOST,
+        payload: {
+          choice: dto.choice,
+          result,
+          streakBefore: currentStreak,
+          multiplier,
+        },
+      },
+    });
+
+    // 8️⃣ Update streak
+    if (win) {
+      await this.prisma.userGameStats.upsert({
+        where: { userId },
+        update: {
+          consecutiveWins: currentStreak + 1,
+          totalGames: { increment: 1 },
+          lastResult: 'WIN',
+        },
+        create: {
+          userId,
+          game: 'COINFLIP',
+          consecutiveWins: 1,
+          totalGames: 1,
+          lastResult: 'WIN',
+        },
+      });
+    } else {
+      await this.prisma.userGameStats.upsert({
+        where: { userId },
+        update: {
+          consecutiveWins: 0,
+          totalGames: { increment: 1 },
+          lastResult: 'LOSE',
+        },
+        create: {
+          userId,
+          game: 'COINFLIP',
+          consecutiveWins: 0,
+          totalGames: 1,
+          lastResult: 'LOSE',
+        },
+      });
+    }
+
+    // 9️⃣ Wallet + transaction
+    if (win) {
+      await this.prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: payout } },
+      });
+
+      await this.prisma.transaction.create({
+        data: {
+          userId,
+          type: TransactionType.WIN,
+          currency: dto.currency,
+          amount: new Prisma.Decimal(payout),
+          status: TransactionStatus.SUCCESS,
+          description: 'Coinflip win',
+        },
+      });
+    } else {
+      await this.prisma.transaction.create({
+        data: {
+          userId,
+          type: TransactionType.LOST,
+          currency: dto.currency,
+          amount: new Prisma.Decimal(dto.amount),
+          status: TransactionStatus.SUCCESS,
+          description: 'Coinflip loss',
+        },
+      });
+    }
+
+    // 🔟 Finish match
+    await this.prisma.match.update({
+      where: { id: match.id },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    return {
+      success : true,
+      data :{result,
+      win,
+      multiplier,
+      payout,
+      profit: payout - dto.amount,
+      streak: win ? currentStreak + 1 : 0,
+      betId: bet.id,}
+    };
+  }
+
+  // COINFLIP
+     async getCoinflipResult(userId : any) {
+    const round = await this.prisma.bet.findMany({
+      where : {
+        game : 'COINFLIP',
+       userId: Number(userId)
+      },
+    orderBy: {
+      createdAt: 'desc', 
+    },
+    });
+
+    if (!round) throw new NotFoundException();
+
+    return {
+      success : true,
+      data : round};
+  }
+
+  //RPS game
+
+
+  private getHousePick(): RpsChoice {
+    const arr = [RpsChoice.ROCK, RpsChoice.PAPER, RpsChoice.SCISSORS];
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  private getRPSResult(player: RpsChoice, house: RpsChoice) {
+    if (player === house) return 'draw';
+    if (
+      (player === RpsChoice.ROCK && house === RpsChoice.SCISSORS) ||
+      (player === RpsChoice.PAPER && house === RpsChoice.ROCK) ||
+      (player === RpsChoice.SCISSORS && house === RpsChoice.PAPER)
+    ) {
+      return 'win';
+    }
+    return 'lose';
+  }
+
+  private multiplierFor(streak: number): number {
+    if (streak === 0) return 1;
+    return Number((1.6 * Math.pow(2, streak - 1)).toFixed(2));
+  }
+
+  // 🎮 PLAY ROUND
+  async play(userId: number, dto: PlaceRpsBetDto) {
+    // 1️⃣ Find active RPS match
+    let match = await this.prisma.match.findFirst({
+      where: {
+        userId,
+        name: 'RPS',
+        status: BetStatus.ACTIVE,
+      },
+    });
+
+    // 2️⃣ New game → debit wallet once
+    if (!match) {
+      const wallet = await this.prisma.wallet.findUnique({
+        where: {
+          userId_currency: {
+            userId,
+            currency: dto.currency,
+          },
+        },
+      });
+
+      if (!wallet || Number(wallet.balance) < dto.amount) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      await this.prisma.wallet.update({
+        where: { id: wallet.id },
+        data: { balance: { decrement: dto.amount } },
+      });
+
+      match = await this.prisma.match.create({
+        data: {
+          userId,
+          name: 'RPS',
+          tableId: 'RPS',
+          status: BetStatus.ACTIVE,
+          startTime: new Date(),
+        },
+      });
+    }
+
+    const streak = match.countPlayers ?? 0;
+    const multiplier = this.multiplierFor(streak);
+
+    const house = this.getHousePick();
+    const result = this.getRPSResult(dto.choice, house);
+
+    // 3️⃣ DRAW → no bet settlement
+    if (result === 'draw') {
+      return { match : match, result: 'draw', house };
+    }
+
+    // 4️⃣ Record bet
+    await this.prisma.bet.create({
+      data: {
+        userId,
+        matchId: match.id,
+        game: 'RPS',
+        currency: dto.currency,
+        amount: new Prisma.Decimal(dto.amount),
+        payout: new Prisma.Decimal(
+          result === 'win' ? dto.amount * multiplier : 0,
+        ),
+        status: result === 'win' ? BetStatus.WON : BetStatus.LOST,
+        payload: {
+          player: dto.choice,
+          house,
+          multiplier,
+        },
+      },
+    });
+
+    // 5️⃣ WIN → increment streak
+    if (result === 'win') {
+      await this.prisma.match.update({
+        where: { id: match.id },
+        data: { countPlayers: streak + 1 },
+      });
+
+      return {
+        match,
+        result: 'win',
+        house,
+        streak: streak + 1,
+        multiplier,
+      };
+    }
+
+    // 6️⃣ LOSE → end game
+    await this.prisma.match.update({
+      where: { id: match.id },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    await this.prisma.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.LOST,
+        currency: dto.currency,
+        amount: new Prisma.Decimal(dto.amount),
+        status: TransactionStatus.SUCCESS,
+        description: 'RPS loss',
+      },
+    });
+
+    return {
+      match,
+      result: 'lose',
+      house,
+      streak: 0,
+    };
+  }
+
+  // 💰 CASH OUT
+  async cashOut(userId: number, matchId: number) {
+    const match = await this.prisma.match.findFirst({
+      where: {
+        id: matchId,
+        userId,
+        status: BetStatus.ACTIVE,
+      },
+    });
+
+    if (!match) {
+      throw new BadRequestException('No active game');
+    }
+
+    const streak = match.countPlayers ?? 0;
+    const multiplier = this.multiplierFor(streak);
+
+    const betAmount = await this.prisma.bet.findFirst({
+      where: { matchId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (!betAmount) {
+      throw new BadRequestException('Invalid game state');
+    }
+
+    const payout = Number(betAmount.amount) * multiplier;
+
+    await this.prisma.wallet.updateMany({
+      where: {
+        userId,
+        currency: betAmount.currency,
+      },
+      data: {
+        balance: { increment: payout },
+      },
+    });
+
+    await this.prisma.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.WIN,
+        currency: betAmount.currency,
+        amount: new Prisma.Decimal(payout),
+        status: TransactionStatus.SUCCESS,
+        description: 'RPS cash out',
+      },
+    });
+
+    await this.prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    return {
+      success : true,
+      data : {
+        match,
+        payout,
+        multiplier,
+        streak,
+      }
+    };
+  }
+
+    // RPS
+     async getRPSResultHistory(userId : any) {
+    const round = await this.prisma.bet.findMany({
+      where : {
+        game : 'RPS',
+       userId: Number(userId)
+      },
+    orderBy: {
+      createdAt: 'desc', 
+    },
+    });
+
+    if (!round) throw new NotFoundException();
+
+    return {
+      success : true,
+      data : round};
+  }
+
 }
+
+
+

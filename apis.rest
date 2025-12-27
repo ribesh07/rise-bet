@@ -174,3 +174,67 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 }
 
 
+
+### limbo round bet
+POST http://localhost:3084/game/limbo/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "targetMultiplier": 2.5,
+  "currency": "INR",
+  "amount": 100
+}
+
+
+### limbo round result
+GET http://localhost:3084/game/limbo/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+
+### coinflip round bet
+POST http://localhost:3084/game/coinflip/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "choice":"TAIL",
+  "currency": "INR",
+  "amount": 100
+}
+
+
+### coinflip round result
+GET http://localhost:3084/game/coinflip/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+### rps round bet
+POST http://localhost:3084/game/rps/play
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "choice": "rock",
+  "amount": 100,
+  "currency": "INR"
+}
+
+### rps round cashout
+POST http://localhost:3084/game/rps/cashout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "matchId":1524
+}
+
+### rps round result
+GET http://localhost:3084/game/rps/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+

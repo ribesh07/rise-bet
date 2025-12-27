@@ -180,10 +180,12 @@ model Bet {
 model Match {
   id        Int     @id @default(autoincrement())
   name      String?
-   tableId     String
+  tableId     String
+  userId      Int?
   status      BetStatus  @default(PENDING)     // ACTIVE | SPINNING | FINISHED
   players       MatchPlayer[]
   countPlayers Int? @default(0)
+  wins      Int?  @default(0)
   startTime DateTime
   endTime   DateTime?
   bets      Bet[]
@@ -194,6 +196,7 @@ model MatchPlayer {
   matchId  Int
   userId   Int
   username String
+  wins      Int?  @default(0)
 
   match Match @relation(fields: [matchId], references: [id])
 
@@ -283,6 +286,11 @@ enum RoundStatus {
 enum WingoBetType {
   NUMBER
   COLOR
+}
+
+enum CoinSide {
+  HEAD
+  TAIL
 }
 
 model WingoBet {

@@ -1,5 +1,5 @@
 // dto/place-limbo-bet.dto.ts
-import { IsNumber, Min } from 'class-validator';
+import { IsNumber, IsString, Min } from 'class-validator';
 import { Currency } from '@prisma/client';
 
 export class PlaceLimboBetDto {
@@ -11,5 +11,6 @@ export class PlaceLimboBetDto {
   @Min(1.01)
   targetMultiplier: number;
 
-  currency: Currency;
+  @IsString()
+  currency: Currency; 
 }

@@ -569,6 +569,134 @@
         ]
       }
     },
+    "/game/limbo/result": {
+      "get": {
+        "operationId": "WingoController_getLimboResult",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/limbo/bet": {
+      "post": {
+        "operationId": "WingoController_placeBetLimbo",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceLimboBetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/coinflip/bet": {
+      "post": {
+        "operationId": "WingoController_placecoinflipBet",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceCoinflipBetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/coinflip/result": {
+      "get": {
+        "operationId": "WingoController_getCoinflipResult",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/rps/play": {
+      "post": {
+        "operationId": "WingoController_play",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceRpsBetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/rps/cashout": {
+      "post": {
+        "operationId": "WingoController_cashOut",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/game/rps/result": {
+      "get": {
+        "operationId": "WingoController_getRPSResultHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
     "/ping": {
       "get": {
         "tags": [
@@ -640,6 +768,18 @@
         "properties": {}
       },
       "PlaceWingoBetDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "PlaceLimboBetDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "PlaceCoinflipBetDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "PlaceRpsBetDto": {
         "type": "object",
         "properties": {}
       }
