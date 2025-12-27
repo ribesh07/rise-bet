@@ -155,13 +155,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 
 
 ### wingo round result
-GET http://localhost:3084/wingo/result
+GET http://localhost:3084/game/wingo/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
 
 ### wingo round bet
-POST http://localhost:3084/wingo/bet
+POST http://localhost:3084/game/wingo/bet
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 

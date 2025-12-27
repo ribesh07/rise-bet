@@ -531,7 +531,7 @@
         ]
       }
     },
-    "/wingo/bet": {
+    "/game/wingo/bet": {
       "post": {
         "operationId": "WingoController_placeBet",
         "parameters": [],
@@ -555,7 +555,7 @@
         ]
       }
     },
-    "/wingo/result": {
+    "/game/wingo/result": {
       "get": {
         "operationId": "WingoController_getResult",
         "parameters": [],

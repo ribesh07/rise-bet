@@ -146,6 +146,50 @@ async settleBet(bet: any, result: number) {
 
   // COLOR / BIG / SMALL (same logic you already wrote)
 
+    // ---------------- NUMBER ----------------
+    if (bet.betType === WingoBetType.NUMBER) {
+      if (Number(bet.value) === result) {
+        multiplier = 9;
+        win = true;
+      }
+    }
+
+    // ---------------- COLOR & BIG/SMALL ----------------
+    if (bet.betType === WingoBetType.COLOR) {
+      const v = bet.value.toLowerCase();
+
+      // ---- GREEN ----
+      if (v === 'green') {
+        if ([1, 3, 7, 9].includes(result)) multiplier = 2;
+        if (result === 5) multiplier = 1.5;
+      }
+
+      // ---- RED ----
+      if (v === 'red') {
+        if ([2, 4, 6, 8].includes(result)) multiplier = 2;
+        if (result === 0) multiplier = 1.5;
+      }
+
+      // ---- VIOLET / PURPLE ----
+      if (v === 'violet' || v === 'purple') {
+        if ([0, 5].includes(result)) multiplier = 4.5;
+      }
+
+      // ---- BIG / SMALL ----
+      if (v === 'big') {
+        if (result >= 5 && result <= 9) multiplier = 2;
+      }
+
+      if (v === 'small') {
+        if (result >= 0 && result <= 4) multiplier = 2;
+      }
+
+      if (multiplier > 0) win = true;
+    }
+
+    // ---------------- PAYOUT ----------------
+  
+
   const payout = win ? bet.amount * multiplier : 0;
 
   await this.prisma.wingoBet.update({
