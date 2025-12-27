@@ -1,4 +1,4 @@
-import { Controller, Put, Body, UseGuards, Request, Post , Get, Param, Req, UploadedFile, UseInterceptors, BadRequestException, UploadedFiles} from '@nestjs/common';
+import { Controller, Put, Body, UseGuards, Request, Post , Get, Param, Req, UploadedFile, UseInterceptors, BadRequestException, UploadedFiles, Query} from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../..//auth/jwt-auth.guard';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -70,9 +70,11 @@ async updatePassword(
   }
   @UseGuards(JwtAuthGuard)
   @Get('bets')
-  async getUserBets(@Request() req: any) {
+  async getUserBets(@Request() req: any , 
+  @Query('game') game?: string
+  ) {
     const userId = req.user.id;
-    return this.userService.getUserBets(Number(userId));
+    return this.userService.getUserBets(Number(userId) , game);
   }
 
   @UseGuards(JwtAuthGuard)

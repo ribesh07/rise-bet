@@ -350,14 +350,25 @@ async updateUserImage(userId: number, filename: string) {
     });
   }
 
-  async getUserBets(userId: number) {
-    return this.prisma.bet.findMany({
-      where: { userId },
-      include: {
-        match: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+  async getUserBets(userId: number , game? : string) {
+
+    if(!game){
+      return this.prisma.bet.findMany({
+        where: { userId },
+        include: {
+          match: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    }else{
+      return this.prisma.bet.findMany({
+        where: { userId , game },
+        include: {
+          match: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+    }
   }
 
   //eol

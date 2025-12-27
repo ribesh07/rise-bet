@@ -225,7 +225,16 @@
     "/api/v1/users/bets": {
       "get": {
         "operationId": "UserController_getUserBets",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "game",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": ""
