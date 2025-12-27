@@ -15,6 +15,7 @@ import { randomInt } from 'crypto';
 import { PlaceLimboBetDto } from './dto/place-limbo.dto';
 import { PlaceCoinflipBetDto } from './dto/place-coinflip.dto';
 import { PlaceRpsBetDto } from './dto/place-rps.dto';
+import { PlacePumpBetDto } from './dto/place-pump.dto';
 
 @Controller('api/v1/game')
 @UseGuards(JwtAuthGuard)
@@ -75,5 +76,30 @@ export class WingoController {
   getRPSResultHistory(@Req() req:any) {
     return this.wingoService.getRPSResultHistory(req.user.id);
   }
+  
+  //pump
+  @Post('pump/start')
+  startpump(@Req() req: any, @Body() dto: PlacePumpBetDto) {
+    return this.wingoService.startPump(req.user.id, dto);
+  }
+  
+  @Get('pump/:id/pump')
+  pump(@Req() req: any, @Param('id') id: number) {
+    return this.wingoService.pump(req.user.id, Number(id));
+  }
+  
+  @Get('pump/:id/cashout')
+  cashOutpump(@Req() req : any, @Param('id') id: number) {
+    return this.wingoService.cashOutPump(req.user.id, Number(id));
+  }
+
+  // 🔹 Get result getPumpResultHistory
+  @Get('pump/result')
+  getPumpResultHistory(@Req() req:any) {
+   return this.wingoService.getPumpResultHistory(req.user.id);
+  }
+
+
+  //eol
 }
 

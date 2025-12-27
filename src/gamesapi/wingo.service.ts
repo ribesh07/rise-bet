@@ -19,6 +19,8 @@ import { randomInt } from 'crypto';
 import { PlaceLimboBetDto } from './dto/place-limbo.dto';
 import { PlaceCoinflipBetDto } from './dto/place-coinflip.dto';
 import { PlaceRpsBetDto, RpsChoice } from './dto/place-rps.dto';
+import { PlacePumpBetDto } from './dto/place-pump.dto';
+import { PumpPayload } from './entities/pump.etity';
 
 @Injectable()
 export class WingoService {
@@ -782,6 +784,232 @@ async settleBet(bet: any, result: number) {
       success : true,
       data : round};
   }
+
+
+  //pump game
+
+   DIFFICULTY = {
+  Easy:   { base: 0.01, inc: 0.008, max: 50 },
+  Medium: { base: 0.02, inc: 0.015, max: 100 },
+  Hard:   { base: 0.03, inc: 0.025, max: 200 },
+};
+
+
+  // 1️⃣ START GAME (BET)
+  async startPump(userId: number, dto: PlacePumpBetDto) {
+    const wallet = await this.prisma.wallet.findUnique({
+      where: {
+        userId_currency: {
+          userId,
+          currency: dto.currency,
+        },
+      },
+    });
+
+    if (!wallet || Number(wallet.balance) < dto.amount) {
+      throw new BadRequestException('Insufficient balance');
+    }
+
+    // Deduct ONCE
+    await this.prisma.wallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: dto.amount } },
+    });
+
+    // Create Match
+    const match = await this.prisma.match.create({
+      data: {
+        userId,
+        name: 'PUMP',
+        tableId: 'PUMP',
+        status: BetStatus.ACTIVE,
+        startTime: new Date(),
+        wins: 0,
+      },
+    });
+
+    // Create Bet (LOCKED STAKE)
+    await this.prisma.bet.create({
+      data: {
+        userId,
+        matchId: match.id,
+        game: 'PUMP',
+        currency: dto.currency,
+        amount: new Prisma.Decimal(dto.amount),
+        payout: new Prisma.Decimal(0),
+        status: BetStatus.ACTIVE,
+        payload: {
+          difficulty: dto.difficulty,
+          multiplier: 1,
+          popped: false,
+        },
+      },
+    });
+
+    return {
+      matchId: match.id,
+      multiplier: 1,
+    };
+  }
+
+  // 2️⃣ PUMP
+async pump(userId: number, matchId: number) {
+  const bet = await this.prisma.bet.findFirst({
+    where: {
+      matchId,
+      userId,
+      status: BetStatus.ACTIVE,
+      game: 'PUMP',
+    },
+  });
+
+  if (!bet) throw new BadRequestException('No active pump game');
+
+  const payload = bet.payload as PumpPayload;
+  const settings = this.DIFFICULTY[payload.difficulty];
+
+  const popChance =
+    settings.base + (payload.multiplier - 1) * settings.inc;
+
+  const popped = Math.random() < popChance;
+
+  // 💥 POPPED
+  if (popped) {
+    await this.prisma.bet.update({
+      where: { id: bet.id },
+      data: {
+        status: BetStatus.LOST,
+        payload: {
+          ...payload,
+          popped: true,
+        },
+      },
+    });
+
+    await this.prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    return {
+      result: 'LOST',
+      multiplier: payload.multiplier,
+    };
+  }
+
+  // ✅ SAFE
+  const newMultiplier = Number((payload.multiplier + 0.1).toFixed(2));
+
+  const betupdate = await this.prisma.bet.update({
+    where: { id: bet.id },
+    data: {
+      payload: {
+        ...payload,
+        multiplier: newMultiplier,
+      },
+    },
+  });
+
+  return {
+    success : true,
+    data : {
+      betupdate,
+    result: 'SAFE',
+    multiplier: newMultiplier,
+    profit: Number(bet.amount) * (newMultiplier - 1),}
+  };
+}
+
+
+  // 3️⃣ CASH OUT
+  async cashOutPump(userId: number, matchId: number) {
+    const bet = await this.prisma.bet.findFirst({
+      where: {
+        matchId,
+        userId,
+        status: BetStatus.ACTIVE,
+        game: 'PUMP',
+      },
+    });
+
+    if (!bet) throw new BadRequestException('No active game');
+
+    const { multiplier } = bet.payload as any;
+    const payout = Number(bet.amount) * multiplier;
+
+   const wallet =  await this.prisma.wallet.updateMany({
+      where: {
+        userId,
+        currency: bet.currency,
+      },
+      data: {
+        balance: { increment: payout },
+      },
+    });
+
+    const transactiondetails =  await this.prisma.transaction.create({
+      data: {
+        userId,
+        type: TransactionType.WIN,
+        currency: bet.currency,
+        amount: new Prisma.Decimal(payout),
+        status: TransactionStatus.SUCCESS,
+        description: 'Pump cash out',
+      },
+    });
+
+   const betupdate =  await this.prisma.bet.update({
+      where: { id: bet.id },
+      data: {
+        status: BetStatus.WON,
+        payout: new Prisma.Decimal(payout),
+      },
+    });
+
+    await this.prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: BetStatus.FINISHED,
+        endTime: new Date(),
+      },
+    });
+
+    return {
+      success: true,
+      data :{
+        wallet,
+        betupdate,
+        transactiondetails,
+      payout,
+      multiplier,}
+    };
+  }
+
+
+     // RPS
+     async getPumpResultHistory(userId : any) {
+    const round = await this.prisma.bet.findMany({
+      where : {
+        game : 'PUMP',
+       userId: Number(userId)
+      },
+    orderBy: {
+      createdAt: 'desc', 
+    },
+    });
+
+    if (!round) throw new NotFoundException();
+
+    return {
+      success : true,
+      data : round};
+  }
+
+
+  //eol
 
 }
 

@@ -697,6 +697,90 @@
         ]
       }
     },
+    "/api/v1/game/pump/start": {
+      "post": {
+        "operationId": "WingoController_startpump",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlacePumpBetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/api/v1/game/pump/{id}/pump": {
+      "get": {
+        "operationId": "WingoController_pump",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/api/v1/game/pump/{id}/cashout": {
+      "get": {
+        "operationId": "WingoController_cashOutpump",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/api/v1/game/pump/result": {
+      "get": {
+        "operationId": "WingoController_getPumpResultHistory",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
     "/ping": {
       "get": {
         "tags": [
@@ -780,6 +864,10 @@
         "properties": {}
       },
       "PlaceRpsBetDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "PlacePumpBetDto": {
         "type": "object",
         "properties": {}
       }
