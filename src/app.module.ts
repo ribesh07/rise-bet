@@ -12,8 +12,8 @@ import { ControlModule } from './modules/control/cotrol.module';
 // import { LiveGateway } from './live/live.gateway';
 import { RouletteModule } from './roulette/roulette.module';
 import { SocketService } from './socket/socket.service';
-import { WingoModule } from './wingo/wingo.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { WingoModule } from './gamesapi/wingo.module';
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }),
