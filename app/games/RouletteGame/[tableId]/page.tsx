@@ -302,7 +302,7 @@ const lockedBallAngleRef = useRef<number | null>(null);
   setTotalBet(newTotalUSDT);
 };
 
- const spin = () => {
+const spin = () => {
   if (Object.keys(bets).length === 0 || isSpinning) return;
 
   const socket = socketRef.current;
@@ -312,6 +312,11 @@ const lockedBallAngleRef = useRef<number | null>(null);
   setResult(null);
   setWinningAmount(0);
   setShowWinningAlert(false);
+  
+  // Show mobile wheel when spinning starts
+  if (window.innerWidth < 640) {
+    setShowMobileWheel(true);
+  }
 
   const spinRecentBets = Object.entries(bets).map(([value, amount]) => ({
     value,
@@ -319,28 +324,28 @@ const lockedBallAngleRef = useRef<number | null>(null);
     type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
   }));
 
- Object.entries(bets).forEach(([value, usdtAmount]) => {
-  const convertedAmount = convertChipToCurrency(usdtAmount);
+  Object.entries(bets).forEach(([value, usdtAmount]) => {
+    const convertedAmount = convertChipToCurrency(usdtAmount);
 
-  const payload = {
-    room: tableId,
-    bet: {
-      type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
-      value: value.toUpperCase(),
-      amount: Number(convertedAmount.toFixed(8)), // 🔥 send UI value
-      currency,
-      game: "ROULETTE",
-    },
-  };
+    const payload = {
+      room: tableId,
+      bet: {
+        type: isNaN(Number(value)) ? "COLOR" : "NUMBER",
+        value: value.toUpperCase(),
+        amount: Number(convertedAmount.toFixed(8)),
+        currency,
+        game: "ROULETTE",
+      },
+    };
 
-  socket.emit("place-bet", payload, (res: any) => {
-    if (!res?.success && res?.success !== undefined) {
-      toast.error(res?.message || "Bet rejected");
-    } else {
-      toast.success(`Bet on ${value} placed`);
-    }
+    socket.emit("place-bet", payload, (res: any) => {
+      if (!res?.success && res?.success !== undefined) {
+        toast.error(res?.message || "Bet rejected");
+      } else {
+        toast.success(`Bet on ${value} placed`);
+      }
+    });
   });
-});
   setBets({});
 };
 
@@ -366,11 +371,11 @@ const animateWheelAndBall = (winningNumber: number) => {
   const segmentAngle = 360 / wheelNumbers.length;
   const winningIndex = wheelNumbers.indexOf(winningNumber);
   
-  // The wheel rotates clockwise, so we need to position the winning number at TOP
-  // We rotate the wheel so that the winning pocket is at 0 degrees (top)
+  // Wheel rotates to put winning number at 12 o'clock (top)
   const finalWheelRotation = (wheelSpins * 360) - (winningIndex * segmentAngle);
   
-  // Ball rotates counter-clockwise and should end at 0 degrees (top) to match wheel
+  // Ball must end at 0 degrees (12 o'clock) to match the wheel's winning position
+  // Ball spins counter-clockwise, so negative rotation
   const finalBallRotation = -(ballSpins * 360);
   
   const outerRadius = 120;
@@ -385,41 +390,32 @@ const animateWheelAndBall = (winningNumber: number) => {
     const progress = Math.min(elapsed / duration, 1);
     
     if (progress < 1) {
-      if (progress < 0.8) {
-        const spinProgress = progress / 0.8;
-        const easedProgress = easeOutCubic(spinProgress);
-        
-        const currentWheelRotation = finalWheelRotation * easedProgress;
-        wheelRotationRef.current = currentWheelRotation;
-        setWheelRotation(currentWheelRotation);
-        
-        const currentBallRotation = finalBallRotation * easedProgress;
-        ballRotationRef.current = currentBallRotation;
-        setBallRotation(currentBallRotation);
-        
-        ballRadiusRef.current = outerRadius;
-        setBallRadius(outerRadius);
-      } else {
-        const dropProgress = (progress - 0.8) / 0.2;
-        const easedDrop = easeOutCubic(dropProgress);
-        
-        wheelRotationRef.current = finalWheelRotation;
-        setWheelRotation(finalWheelRotation);
-        
-        ballRotationRef.current = finalBallRotation;
-        setBallRotation(finalBallRotation);
-        
-        const currentRadius = outerRadius - (outerRadius - innerRadius) * easedDrop;
-        ballRadiusRef.current = currentRadius;
-        setBallRadius(currentRadius);
-      }
+      const easedProgress = easeOutCubic(progress);
+      
+      // Wheel rotation (clockwise)
+      const currentWheelRotation = finalWheelRotation * easedProgress;
+      wheelRotationRef.current = currentWheelRotation;
+      setWheelRotation(currentWheelRotation);
+      
+      // Ball rotation (counter-clockwise) - ends at 0° (top)
+      const currentBallRotation = finalBallRotation * easedProgress;
+      ballRotationRef.current = currentBallRotation;
+      setBallRotation(currentBallRotation);
+      
+      // Ball spirals inward gradually
+      const currentRadius = outerRadius - (outerRadius - innerRadius) * easedProgress;
+      ballRadiusRef.current = currentRadius;
+      setBallRadius(currentRadius);
       
       animationFrameRef.current = requestAnimationFrame(animate);
     } else {
+      // Final positions - both wheel winning number and ball at 12 o'clock
       wheelRotationRef.current = finalWheelRotation;
       setWheelRotation(finalWheelRotation);
+      
       ballRotationRef.current = finalBallRotation;
       setBallRotation(finalBallRotation);
+      
       ballRadiusRef.current = innerRadius;
       setBallRadius(innerRadius);
       
@@ -443,7 +439,7 @@ const animateWheelAndBall = (winningNumber: number) => {
   animationFrameRef.current = requestAnimationFrame(animate);
 };
 
-  const resetGame = () => {
+const resetGame = () => {
   setWheelRotation(prev => prev % 360);
   setBallRotation(0);
   setBallVisible(false);
@@ -455,6 +451,11 @@ const animateWheelAndBall = (winningNumber: number) => {
   setIsSpinning(false);
   setSpinFinished(false);
   setResolutions([]);
+  
+  // Hide mobile wheel after animation completes
+  if (window.innerWidth < 640) {
+    setShowMobileWheel(false);
+  }
 };
 
 
@@ -552,12 +553,6 @@ const animateWheelAndBall = (winningNumber: number) => {
     `,
   }}
 />
-
-
-
-
-
-
               </div>
 
              {/* MOBILE WHEEL POPUP */}
@@ -567,22 +562,21 @@ const animateWheelAndBall = (winningNumber: number) => {
                   {/* WHEEL */}
                   <div className="relative w-72 h-72">
                     <Image
-                      src={wheelImage}
-                      alt="wheel"
-                      fill
-                      priority
-                      className="select-none transition-transform duration-[5000ms] ease-out"
-                      style={{ transform: `rotate(${wheelRotation}deg)` }}
-                    />
+  src={wheelImage}
+  alt="wheel"
+  fill
+  priority
+  className="select-none" // no transition
+  style={{ transform: `rotate(${wheelRotation}deg)` }}
+/>
                    <div
   className="absolute top-1/2 left-1/2 w-3 h-3 bg-white rounded-full shadow-lg"
   style={{
     transform: `
       translate(-50%, -50%)
       rotate(${ballRotation}deg)
-      translateY(-120px)
+      translateY(-${ballRadius}px)
     `,
-    transition: "none",
   }}
 />
 
