@@ -19,7 +19,7 @@ export class CrashGateway {
     // Do crash logic...
 
     // Notify other gateways
-    this.socketService.broadcast('balance-update', {
+    this.socketService.broadcast('update', {
       userId: data.userId,
       newBalance: 500,
     });

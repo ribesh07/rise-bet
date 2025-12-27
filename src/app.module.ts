@@ -12,9 +12,13 @@ import { ControlModule } from './modules/control/cotrol.module';
 // import { LiveGateway } from './live/live.gateway';
 import { RouletteModule } from './roulette/roulette.module';
 import { SocketService } from './socket/socket.service';
+import { WingoModule } from './wingo/wingo.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }),ControlModule, UserModule, AuthModule, MailModule, AdminModule, RouletteModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }),
+        ScheduleModule.forRoot()
+    ,ControlModule, UserModule, AuthModule, MailModule, AdminModule, RouletteModule, WingoModule],
   controllers: [AppController],
   providers: [AppService, PrismaService, MailService, SocketService  ],
 })

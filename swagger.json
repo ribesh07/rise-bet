@@ -531,6 +531,44 @@
         ]
       }
     },
+    "/wingo/bet": {
+      "post": {
+        "operationId": "WingoController_placeBet",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceWingoBetDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
+    "/wingo/result": {
+      "get": {
+        "operationId": "WingoController_getResult",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Wingo"
+        ]
+      }
+    },
     "/ping": {
       "get": {
         "tags": [
@@ -598,6 +636,10 @@
         "properties": {}
       },
       "UpdateAdminDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "PlaceWingoBetDto": {
         "type": "object",
         "properties": {}
       }
