@@ -788,7 +788,7 @@ async settleBet(bet: any, result: number) {
 
   //pump game
 
-   DIFFICULTY = {
+DIFFICULTY = {
   Easy:   { base: 0.01, inc: 0.008, max: 50 },
   Medium: { base: 0.02, inc: 0.015, max: 100 },
   Hard:   { base: 0.03, inc: 0.025, max: 200 },
