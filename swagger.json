@@ -531,7 +531,7 @@
         ]
       }
     },
-    "/game/wingo/bet": {
+    "/api/v1/game/wingo/bet": {
       "post": {
         "operationId": "WingoController_placeBet",
         "parameters": [],
@@ -555,7 +555,7 @@
         ]
       }
     },
-    "/game/wingo/result": {
+    "/api/v1/game/wingo/result": {
       "get": {
         "operationId": "WingoController_getResult",
         "parameters": [],
@@ -569,7 +569,7 @@
         ]
       }
     },
-    "/game/limbo/result": {
+    "/api/v1/game/limbo/result": {
       "get": {
         "operationId": "WingoController_getLimboResult",
         "parameters": [],
@@ -583,7 +583,7 @@
         ]
       }
     },
-    "/game/limbo/bet": {
+    "/api/v1/game/limbo/bet": {
       "post": {
         "operationId": "WingoController_placeBetLimbo",
         "parameters": [],
@@ -607,7 +607,7 @@
         ]
       }
     },
-    "/game/coinflip/bet": {
+    "/api/v1/game/coinflip/bet": {
       "post": {
         "operationId": "WingoController_placecoinflipBet",
         "parameters": [],
@@ -631,7 +631,7 @@
         ]
       }
     },
-    "/game/coinflip/result": {
+    "/api/v1/game/coinflip/result": {
       "get": {
         "operationId": "WingoController_getCoinflipResult",
         "parameters": [],
@@ -645,7 +645,7 @@
         ]
       }
     },
-    "/game/rps/play": {
+    "/api/v1/game/rps/play": {
       "post": {
         "operationId": "WingoController_play",
         "parameters": [],
@@ -669,7 +669,7 @@
         ]
       }
     },
-    "/game/rps/cashout": {
+    "/api/v1/game/rps/cashout": {
       "post": {
         "operationId": "WingoController_cashOut",
         "parameters": [],
@@ -683,7 +683,7 @@
         ]
       }
     },
-    "/game/rps/result": {
+    "/api/v1/game/rps/result": {
       "get": {
         "operationId": "WingoController_getRPSResultHistory",
         "parameters": [],

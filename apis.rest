@@ -155,13 +155,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 
 
 ### wingo round result
-GET http://localhost:3084/game/wingo/result
+GET http://localhost:3084/api/v1.game/wingo/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
 
 ### wingo round bet
-POST http://localhost:3084/game/wingo/bet
+POST http://localhost:3084/api/v1/game/wingo/bet
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
@@ -176,7 +176,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 
 
 ### limbo round bet
-POST http://localhost:3084/game/limbo/bet
+POST http://localhost:3084/api/v1/game/limbo/bet
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
@@ -188,14 +188,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 
 
 ### limbo round result
-GET http://localhost:3084/game/limbo/result
+GET http://localhost:3084/api/v1/game/limbo/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
 
 
 ### coinflip round bet
-POST http://localhost:3084/game/coinflip/bet
+POST http://localhost:3084/api/v1/game/coinflip/bet
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
@@ -207,13 +207,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 
 
 ### coinflip round result
-GET http://localhost:3084/game/coinflip/result
+GET http://localhost:3084/api/v1/game/coinflip/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
 
 ### rps round bet
-POST http://localhost:3084/game/rps/play
+POST http://localhost:3084/api/v1/game/rps/play
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
@@ -224,7 +224,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 }
 
 ### rps round cashout
-POST http://localhost:3084/game/rps/cashout
+POST http://localhost:3084/api/v1/game/rps/cashout
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
@@ -233,7 +233,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 }
 
 ### rps round result
-GET http://localhost:3084/game/rps/result
+GET http://localhost:3084/api/v1/game/rps/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 

@@ -571,12 +571,13 @@ async settleBet(bet: any, result: number) {
   }
 
   private multiplierFor(streak: number): number {
-    if (streak === 0) return 1;
-    return Number((1.6 * Math.pow(2, streak - 1)).toFixed(2));
+    if (streak === 0) return 1.6;
+    return Number((3.2 * Math.pow(2, streak - 1)).toFixed(2));
   }
 
   // 🎮 PLAY ROUND
   async play(userId: number, dto: PlaceRpsBetDto) {
+
     // 1️⃣ Find active RPS match
     let match = await this.prisma.match.findFirst({
       where: {
@@ -596,6 +597,7 @@ async settleBet(bet: any, result: number) {
           },
         },
       });
+   
 
       if (!wallet || Number(wallet.balance) < dto.amount) {
         throw new BadRequestException('Insufficient balance');
@@ -617,7 +619,8 @@ async settleBet(bet: any, result: number) {
       });
     }
 
-    const streak = match.countPlayers ?? 0;
+  
+    const streak = match.wins ?? 0;
     const multiplier = this.multiplierFor(streak);
 
     const house = this.getHousePick();
@@ -629,16 +632,14 @@ async settleBet(bet: any, result: number) {
     }
 
     // 4️⃣ Record bet
-    await this.prisma.bet.create({
+     let betdata = await this.prisma.bet.create({
       data: {
         userId,
         matchId: match.id,
         game: 'RPS',
         currency: dto.currency,
         amount: new Prisma.Decimal(dto.amount),
-        payout: new Prisma.Decimal(
-          result === 'win' ? dto.amount * multiplier : 0,
-        ),
+        payout: 0,
         status: result === 'win' ? BetStatus.WON : BetStatus.LOST,
         payload: {
           player: dto.choice,
@@ -652,12 +653,12 @@ async settleBet(bet: any, result: number) {
     if (result === 'win') {
       await this.prisma.match.update({
         where: { id: match.id },
-        data: { countPlayers: streak + 1 },
+        data: { wins: streak + 1 },
       });
 
       return {
         match,
-        result: 'win',
+        result: 'WON',
         house,
         streak: streak + 1,
         multiplier,
@@ -686,7 +687,7 @@ async settleBet(bet: any, result: number) {
 
     return {
       match,
-      result: 'lose',
+      result: 'LOST',
       house,
       streak: 0,
     };
@@ -706,9 +707,12 @@ async settleBet(bet: any, result: number) {
       throw new BadRequestException('No active game');
     }
 
-    const streak = match.countPlayers ?? 0;
+    const streak = match.wins ?? 0;
     const multiplier = this.multiplierFor(streak);
 
+    if (match.status !== BetStatus.ACTIVE) {
+  throw new BadRequestException('Already settled');
+}
     const betAmount = await this.prisma.bet.findFirst({
       where: { matchId },
       orderBy: { createdAt: 'asc' },
