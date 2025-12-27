@@ -36,6 +36,9 @@ const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }
   const [loading, setLoading] = useState(true);
   const [tableId, setTableId] = useState<string>(tableIdProp || generateTableId());
   const socketRef = useRef<any>(null);
+  
+const ballRotationRef = useRef<number>(0);
+const ballRadiusRef = useRef<number>(120);
   const [search, setSearch] = useState("");
   const [dashboardDetails, setDashboardDetails] = useState<any>(null);
   const { currency, setCurrency } = useCurrency();
@@ -190,15 +193,14 @@ const lockedBallAngleRef = useRef<number | null>(null);
   
       const winNum = data?.result?.number ;
       setResolutions(data.resolutions || []);
-      
+      setWinningNumberFromServer(winNum); // store server result immediately
+    handleServerResult(winNum);
       setstatus(data.resolutions.status || "");
       if(data.resolutions ){
             setResultshow(true);
             console.log("Bet ID matched for resolution update.");
       }
       if (typeof winNum === "number") {
-        setWinningNumberFromServer(winNum); // store server result immediately
-    handleServerResult(winNum);
         console.log("Spin result from server:", data);
         handleServerResult(winNum); 
         setGameHistory((prev) => [...prev, winNum]);
@@ -350,110 +352,96 @@ const handleServerResult = (winningNumber: number) => {
 
   // calculate final wheel rotatio
 };
+
 const animateWheelAndBall = (winningNumber: number) => {
-  const start = performance.now();
-  const spins = 5; // number of full wheel spins
+  if (animationFrameRef.current) {
+    cancelAnimationFrame(animationFrameRef.current);
+  }
+
+  const startTime = performance.now();
+  const duration = 7000;
+  const wheelSpins = 6;
+  const ballSpins = 10;
+  
   const segmentAngle = 360 / wheelNumbers.length;
-
   const winningIndex = wheelNumbers.indexOf(winningNumber);
-  const finalWheelRotation = spins * 360 - winningIndex * segmentAngle + segmentAngle / 2;
-
+  
+  // The wheel rotates clockwise, so we need to position the winning number at TOP
+  // We rotate the wheel so that the winning pocket is at 0 degrees (top)
+  const finalWheelRotation = (wheelSpins * 360) - (winningIndex * segmentAngle);
+  
+  // Ball rotates counter-clockwise and should end at 0 degrees (top) to match wheel
+  const finalBallRotation = -(ballSpins * 360);
+  
   const outerRadius = 120;
   const innerRadius = 76;
+  
+  const easeOutCubic = (t: number): number => {
+    return 1 - Math.pow(1 - t, 3);
+  };
 
-  const animate = (now: number) => {
-    const t = Math.min((now - start) / 5000, 1); // 5s animation
-    const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-    // Rotate wheel
-    setWheelRotation(finalWheelRotation * easedT);
-
-    // Keep ball at 12 o'clock while shrinking radius at end
-    if (t < 0.75) {
-      setBallRotation(0); // always 12 o'clock
-      setBallRadius(outerRadius);
-    } else {
-      const dropT = (t - 0.75) / 0.25;
-      const easedDrop = 1 - Math.pow(1 - dropT, 3);
-      setBallRotation(0); // fixed at top
-      setBallRadius(outerRadius - (outerRadius - innerRadius) * easedDrop);
-    }
-
-    if (t < 1) {
+  const animate = (currentTime: number) => {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    
+    if (progress < 1) {
+      if (progress < 0.8) {
+        const spinProgress = progress / 0.8;
+        const easedProgress = easeOutCubic(spinProgress);
+        
+        const currentWheelRotation = finalWheelRotation * easedProgress;
+        wheelRotationRef.current = currentWheelRotation;
+        setWheelRotation(currentWheelRotation);
+        
+        const currentBallRotation = finalBallRotation * easedProgress;
+        ballRotationRef.current = currentBallRotation;
+        setBallRotation(currentBallRotation);
+        
+        ballRadiusRef.current = outerRadius;
+        setBallRadius(outerRadius);
+      } else {
+        const dropProgress = (progress - 0.8) / 0.2;
+        const easedDrop = easeOutCubic(dropProgress);
+        
+        wheelRotationRef.current = finalWheelRotation;
+        setWheelRotation(finalWheelRotation);
+        
+        ballRotationRef.current = finalBallRotation;
+        setBallRotation(finalBallRotation);
+        
+        const currentRadius = outerRadius - (outerRadius - innerRadius) * easedDrop;
+        ballRadiusRef.current = currentRadius;
+        setBallRadius(currentRadius);
+      }
+      
       animationFrameRef.current = requestAnimationFrame(animate);
     } else {
-      cancelAnimationFrame(animationFrameRef.current!);
+      wheelRotationRef.current = finalWheelRotation;
+      setWheelRotation(finalWheelRotation);
+      ballRotationRef.current = finalBallRotation;
+      setBallRotation(finalBallRotation);
+      ballRadiusRef.current = innerRadius;
+      setBallRadius(innerRadius);
+      
       setResult(winningNumber);
       setIsSpinning(false);
       setShowResultPopup(true);
-      setSpinFinished(true);
-
-      // clear bets
-      setBets({});
-      setTotalBet(0);
-
+      
+      const didWin = Object.keys(bets).some(betKey => {
+        const num = parseInt(betKey);
+        if (!isNaN(num)) return num === winningNumber;
+        if (betKey.toLowerCase() === "red") return redNumbers.includes(winningNumber);
+        if (betKey.toLowerCase() === "black") return !redNumbers.includes(winningNumber) && winningNumber !== 0;
+        return false;
+      });
+      setIsWin(didWin);
+      
       setTimeout(() => resetGame(), 4000);
     }
   };
 
   animationFrameRef.current = requestAnimationFrame(animate);
 };
-
-// const animateWheelAndBall = (winningNumber: number) => {
-//   const start = performance.now();
-//   const spins = 5;
-//   const segmentAngle = 360 / wheelNumbers.length;
-//   const winningIndex = wheelNumbers.indexOf(winningNumber);
-
-//   const finalWheelRotation = spins * 360 - winningIndex * segmentAngle + segmentAngle / 2;
-//   const outerRadius = 120;
-//   const innerRadius = 76;
-//   lockedBallAngleRef.current = null;
-
-//   const animate = (now: number) => {
-//     const t = Math.min((now - start) / 5000, 1); // 5s animation
-//     const easedT = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-
-//     const currentWheelRotation = finalWheelRotation * easedT;
-//     setWheelRotation(currentWheelRotation);
-
-//     // Ball rotation and radius
-//     if (t < 0.75) {
-//       const ballSpinSpeed = 25 * (1 - t * 0.8);
-//       ballAngleRef.current -= ballSpinSpeed;
-//       setBallRotation(ballAngleRef.current);
-//       setBallRadius(outerRadius);
-//     } else {
-//       if (lockedBallAngleRef.current === null) {
-//         // lock ball exactly on server result
-//         lockedBallAngleRef.current =
-//           finalWheelRotation - winningIndex * segmentAngle + segmentAngle / 2;
-//       }
-//       const dropT = (t - 0.75) / 0.25;
-//       const easedDrop = 1 - Math.pow(1 - dropT, 3);
-//       setBallRotation(lockedBallAngleRef.current);
-//       setBallRadius(outerRadius - (outerRadius - innerRadius) * easedDrop);
-//     }
-
-//     if (t < 1) {
-//       animationFrameRef.current = requestAnimationFrame(animate);
-//     } else {
-//       cancelAnimationFrame(animationFrameRef.current!);
-//       setResult(winningNumber);
-//       setIsSpinning(false);
-//       setShowResultPopup(true);
-//       setSpinFinished(true);
-
-//       // clear bets after result
-//       setBets({});
-//       setTotalBet(0);
-
-//       setTimeout(() => resetGame(), 4000);
-//     }
-//   };
-
-//   animationFrameRef.current = requestAnimationFrame(animate);
-// };
 
   const resetGame = () => {
   setWheelRotation(prev => prev % 360);
@@ -578,22 +566,23 @@ const animateWheelAndBall = (winningNumber: number) => {
 
                   {/* WHEEL */}
                   <div className="relative w-72 h-72">
-                     <Image
-  src={wheelImage}
-  alt="wheel"
-  fill
-  priority
-  className="select-none" // no transition
-  style={{ transform: `rotate(${wheelRotation}deg)` }}
-/>
+                    <Image
+                      src={wheelImage}
+                      alt="wheel"
+                      fill
+                      priority
+                      className="select-none transition-transform duration-[5000ms] ease-out"
+                      style={{ transform: `rotate(${wheelRotation}deg)` }}
+                    />
                    <div
   className="absolute top-1/2 left-1/2 w-3 h-3 bg-white rounded-full shadow-lg"
   style={{
     transform: `
       translate(-50%, -50%)
       rotate(${ballRotation}deg)
-      translateY(-${ballRadius}px)
+      translateY(-120px)
     `,
+    transition: "none",
   }}
 />
 
@@ -807,7 +796,7 @@ const animateWheelAndBall = (winningNumber: number) => {
         </div>
       </div>
       {/* ================= RESULT POPUP ================= */}
-          {spinFinished && showResultPopup && (
+          {showResultPopup && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
 
               <div className="
