@@ -571,8 +571,8 @@ async settleBet(bet: any, result: number) {
   }
 
   private multiplierFor(streak: number): number {
-    if (streak === 0) return 1.6;
-    return Number((3.2 * Math.pow(2, streak - 1)).toFixed(2));
+    if (streak === 0) return 1;
+    return Number((1.6 * Math.pow(2, streak - 1)).toFixed(2));
   }
 
   // 🎮 PLAY ROUND

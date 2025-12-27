@@ -229,7 +229,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 
 {
-  "matchId":1524
+  "matchId":1531
 }
 
 ### rps round result
