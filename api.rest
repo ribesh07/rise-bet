@@ -202,3 +202,19 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 GET https://api.playrise.vip/api/v1/game/limbo/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NjkzNDY4MiwiZXhwIjoxNzY5NTI2NjgyfQ.H2m43byxqC6F3YBGY4Uu9w636JXnRvpc1blW75jjbG0
+
+### coinflip round bet
+POST https://api.playrise.vip/api/v1/game/coinflip/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NjkzNDY4MiwiZXhwIjoxNzY5NTI2NjgyfQ.H2m43byxqC6F3YBGY4Uu9w636JXnRvpc1blW75jjbG0
+
+{
+  "choice":"TAIL",
+  "currency": "INR",
+  "amount": 100
+}
+
+### coinflip round result
+GET https://api.playrise.vip/api/v1/game/coinflip/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NjkzNDY4MiwiZXhwIjoxNzY5NTI2NjgyfQ.H2m43byxqC6F3YBGY4Uu9w636JXnRvpc1blW75jjbG0
