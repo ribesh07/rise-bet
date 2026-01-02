@@ -14,6 +14,7 @@ import { mkdirSync } from 'fs';
 import { AuthRequest } from 'src/types/auth-request';
 import * as fs from 'fs';
 import * as path from 'path';
+import { UPLOAD_BASE_PATH } from 'src/main';
 
 
 
@@ -91,9 +92,12 @@ async updatePassword(
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads/users',
+        destination: (req, file, cb) => {
+        const uploadPath = `${UPLOAD_BASE_PATH}/users`;
+        cb(null, uploadPath);
+      },
         filename: (req, file, cb) => {
-          const name = file.originalname.replace(/\.[^/.]+$/, ""); 
+          const name = file.originalname.replace(/\.[^/.]+$/, "");
           const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
           const timestamp = Date.now();
           const ext = extname(file.originalname);
@@ -128,8 +132,8 @@ async updatePassword(
 
           let folder = 
            file.fieldname === "profileImage"
-              ? `./uploads/users/${userId}`
-              : `./uploads/documents/${userId}`;
+              ? `${UPLOAD_BASE_PATH}/users/${userId}`
+              : `${UPLOAD_BASE_PATH}/documents/${userId}`;
 
           mkdirSync(folder, { recursive: true });
           cb(null, folder);

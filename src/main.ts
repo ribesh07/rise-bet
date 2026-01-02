@@ -3,10 +3,38 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import express from 'express';
 import * as bodyParser from 'body-parser';
 import * as swaggerDocument from './docs/swagger.json';
 import * as swaggerUi from 'swagger-ui-express';
 import { setupSwagger } from './config/swagger.config';
+import { existsSync, mkdirSync } from 'fs';
+
+export const UPLOAD_BASE_PATH =
+  process.env.NODE_ENV === 'production'
+    ? '/uploads'
+    : join(process.cwd(), 'uploads');
+
+export function ensureUploadDirs() {
+  const dirs = [
+    UPLOAD_BASE_PATH,
+    join(UPLOAD_BASE_PATH, 'users'),
+    join(UPLOAD_BASE_PATH, 'documents'),
+    join(UPLOAD_BASE_PATH, 'currency'),
+
+  ];
+
+  for (const dir of dirs) {
+    try {
+      if (!existsSync(dir)) {
+        mkdirSync(dir, { recursive: true });
+        console.log('Created upload dir:', dir);
+      }
+    } catch (err) {
+      console.error('Failed to create dir:', dir, err);
+    }
+  }
+}
 
 async function bootstrap() {
   // const app = await NestFactory.create(AppModule);
@@ -24,9 +52,13 @@ async function bootstrap() {
   // });
 
   // Use PORT from environment (set by Coolify), fallback to 3000
-    app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads',
-  });
+  //   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  //   prefix: '/uploads',
+  // });
+    app.use(
+  '/uploads',
+  express.static(UPLOAD_BASE_PATH)
+);
 
   //swagger
           setupSwagger(app);
