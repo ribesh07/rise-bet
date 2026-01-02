@@ -70,6 +70,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 GET http://[::1]:3084/api/v1/admin/control/categories HTTP/1.1
 Content-Type: application/json
 
+### get promotions
+GET http://[::1]:3084/api/v1/admin/control/promotions HTTP/1.1
+Content-Type: application/json
+
 ### get categories
 DELETE  http://[::1]:3084/api/v1/admin/control/categories/?name=Other HTTP/1.1
 Content-Type: application/json

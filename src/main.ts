@@ -12,8 +12,8 @@ import { existsSync, mkdirSync } from 'fs';
 
 export const UPLOAD_BASE_PATH =
   process.env.NODE_ENV === 'production'
-    ? 'uploads'
-    : join(process.cwd(), 'uploads');
+    ? '/app/uploads'
+    : join(process.cwd(), 'uploads'); 
 
 export function ensureUploadDirs() {
   const dirs = [
