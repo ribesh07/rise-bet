@@ -76,7 +76,7 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NjczNTAxMjIsImV4cCI6MTc2OTk0MjEyMn0.gMcSgUHgJC6CjnW4OrGp-dgOkb-_z627kkbXteAD3MU
 
 ###post login
-POST https://api.playrise.vip/api/v1/auth/admin-login
+POST http://[::1]:3084/api/v1/auth/admin-login
 Content-Type: application/json
 
 {

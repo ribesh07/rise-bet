@@ -112,7 +112,7 @@ async validateUser(pass: string, email?: string, username?: string) {
       success: true,
       message: 'Login successful',
       data: {
-        rest,
+        details : rest,
 
         access_token: this.jwtService.sign(payload),
       },

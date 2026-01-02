@@ -144,6 +144,128 @@
         ]
       }
     },
+    "/api/v1/admin/control/promotions/create": {
+      "post": {
+        "operationId": "ControlController_createPromotion",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
+    "/api/v1/admin/control/promotions": {
+      "get": {
+        "operationId": "ControlController_findAllPromotion",
+        "parameters": [
+          {
+            "name": "group",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
+    "/api/v1/admin/control/promotions/{id}": {
+      "get": {
+        "operationId": "ControlController_findOnePromotion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      },
+      "patch": {
+        "operationId": "ControlController_updatePromotion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePromotionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      },
+      "delete": {
+        "operationId": "ControlController_removePromotion",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
     "/api/v1/users/update": {
       "post": {
         "operationId": "UserController_updateUser",
@@ -864,6 +986,14 @@
         "properties": {}
       },
       "UpdateControlDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreatePromotionDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdatePromotionDto": {
         "type": "object",
         "properties": {}
       },

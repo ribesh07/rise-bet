@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateControlDto } from './dto/update-control.dto';
 import { text } from 'stream/consumers';
 import { error } from 'console';
+import { CreatePromotionDto, UpdatePromotionDto } from './dto/create-promotion.dto';
 
 @Injectable()
 export class ControlService {
@@ -98,6 +99,53 @@ export class ControlService {
       message : " Deleted SuccessFully !"
     }
 }
+
+ async createPromotion(dto: CreatePromotionDto , image : string) {
+   const data = await this.prisma.promotion.create({
+      data: {
+        ...dto,
+        image,
+        endsAt: new Date(dto.endsAt),
+      },
+    });
+
+    return {
+      success : true ,
+      data : data
+    }
+  }
+
+  findAllPromotion(group?: string) {
+    return this.prisma.promotion.findMany({
+      where: {
+        isActive: true,
+        ...(group && { group: group as any }),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findOnePromotion(id: number) {
+    return this.prisma.promotion.findUnique({
+      where: { id },
+    });
+  }
+
+  updatePromotion(id: number, dto: UpdatePromotionDto) {
+    return this.prisma.promotion.update({
+      where: { id },
+      data: {
+        ...dto,
+        ...(dto.endsAt && { endsAt: new Date(dto.endsAt) }),
+      },
+    });
+  }
+
+  deletePromotion(id: number) {
+    return this.prisma.promotion.delete({
+      where: { id },
+    });
+  }
 
 
 }

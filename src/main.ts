@@ -12,7 +12,7 @@ import { existsSync, mkdirSync } from 'fs';
 
 export const UPLOAD_BASE_PATH =
   process.env.NODE_ENV === 'production'
-    ? '/uploads'
+    ? 'uploads'
     : join(process.cwd(), 'uploads');
 
 export function ensureUploadDirs() {
@@ -20,6 +20,8 @@ export function ensureUploadDirs() {
     UPLOAD_BASE_PATH,
     join(UPLOAD_BASE_PATH, 'users'),
     join(UPLOAD_BASE_PATH, 'documents'),
+    join(UPLOAD_BASE_PATH, 'promotions'),
+    join(UPLOAD_BASE_PATH, 'blogs'),
     join(UPLOAD_BASE_PATH, 'currency'),
 
   ];
@@ -43,7 +45,32 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '10mb' })); 
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-  app.enableCors(); // allows all origins
+    app.enableCors({   // allows all origins
+    // origin: [
+    //   "http://localhost:3000",
+    //   "http://127.0.0.1:3000",
+    //   "http://127.0.0.1:3001",
+    //   'http://localhost:3001',
+    //   "http://127.0.0.1:3000",
+    //   "http://127.0.0.1:3002",
+    //   'http://localhost:3002',
+    //   "http://127.0.0.1:3000",
+    //   "http://127.0.0.1:3003",
+    //   'http://localhost:3003',
+    //   'https://j1.playrise.vip',
+    // ],
+    origin : true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true, 
+  });
+
+  ensureUploadDirs()
+
+
+if (!existsSync(UPLOAD_BASE_PATH)) {
+  mkdirSync(UPLOAD_BASE_PATH, { recursive: true });
+}
+
   // Enable CORS for your frontend domain
   // app.enableCors({
   //   origin: 'http://localhost:3001', // frontend URL

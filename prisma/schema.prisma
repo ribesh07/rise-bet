@@ -317,3 +317,24 @@ model Categories {
   id Int @id @default(autoincrement())
   name String?  @unique
 }
+
+model Promotion {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String
+  group       PromotionGroup
+  endsAt      DateTime
+
+  isActive    Boolean  @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum PromotionGroup {
+  casino
+  sport
+  community
+  poker
+}

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Query, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query, Param, Put, Delete, Patch, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import type { Request } from 'express';
 import { ControlService } from './control.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
@@ -6,6 +6,11 @@ import { UpdateControlDto } from './dto/update-control.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RouletteService } from 'src/roulette/roulette.service';
 import { CreatePromoDto } from '../user/dto/create-promo.dto';
+import { CreatePromotionDto, UpdatePromotionDto } from './dto/create-promotion.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { UPLOAD_BASE_PATH } from 'src/main';
 
 @Controller('api/v1/admin/control')
 export class ControlController {
@@ -56,6 +61,68 @@ export class ControlController {
     @Query('name') name : string
   ){
     return this.controlService.deleteCategory(name);
+  }
+
+
+ @UseGuards(JwtAuthGuard, AdminGuard)
+@Post('promotions/create')
+@UseInterceptors(
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = `${UPLOAD_BASE_PATH}/promotions`;
+        cb(null, uploadPath);
+      },
+      filename: (req, file, cb) => {
+        const name = file.originalname.replace(/\.[^/.]+$/, '');
+        const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+
+        cb(null, `${safeName}-${timestamp}${ext}`);
+      },
+    }),
+  }),
+)
+async createPromotion(
+  @Body() dto: CreatePromotionDto,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  if (!file) {
+    throw new BadRequestException('Image is required');
+  }
+  const Img = `/uploads/promotions/${file.filename}`
+
+  return this.controlService.createPromotion(
+  dto,
+    Img
+  );
+}
+
+
+  @Get("promotions")
+  findAllPromotion(@Query('group') group?: string) {
+    return this.controlService.findAllPromotion(group);
+  }
+
+  @Get('promotions/:id')
+  findOnePromotion(@Param('id') id: string) {
+    return this.controlService.findOnePromotion(+id);
+  }
+
+    @UseGuards(JwtAuthGuard, AdminGuard)
+  @Patch('promotions/:id')
+  updatePromotion(
+    @Param('id') id: string,
+    @Body() dto: UpdatePromotionDto,
+  ) {
+    return this.controlService.updatePromotion(+id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Delete('promotions/:id')
+  removePromotion(@Param('id') id: string) {
+    return this.controlService.deletePromotion(+id);
   }
 
 
