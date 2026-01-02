@@ -11,7 +11,7 @@ export class WingoCron {
     private wingoService: WingoService,
   ) {}
 
- @Cron(CronExpression.EVERY_SECOND)
+ @Cron(CronExpression.EVERY_5_SECONDS)
 async handleRounds() {
   const now = new Date();
 

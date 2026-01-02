@@ -109,6 +109,41 @@
         ]
       }
     },
+    "/api/v1/admin/control/categories": {
+      "get": {
+        "operationId": "ControlController_getCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      },
+      "delete": {
+        "operationId": "ControlController_deleteCategory",
+        "parameters": [
+          {
+            "name": "name",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
     "/api/v1/users/update": {
       "post": {
         "operationId": "UserController_updateUser",

@@ -312,3 +312,8 @@ model WingoBet {
   createdAt DateTime    @default(now())
 }
 
+
+model Categories {
+  id Int @id @default(autoincrement())
+  name String?  @unique
+}

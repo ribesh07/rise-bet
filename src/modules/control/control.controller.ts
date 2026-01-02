@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Query, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query, Param, Put, Delete } from '@nestjs/common';
 import type { Request } from 'express';
 import { ControlService } from './control.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
@@ -43,6 +43,19 @@ export class ControlController {
     const adminId = adminUser?.id;
     console.log('Admin ID from token:', adminId);
     return this.controlService.updateControl(body, adminId);
+  }
+
+  @Get('categories')
+  async getCategories( ){
+    return this.controlService.getCategories();
+  }
+
+  @UseGuards(JwtAuthGuard,AdminGuard)
+  @Delete('categories')
+  async deleteCategory( 
+    @Query('name') name : string
+  ){
+    return this.controlService.deleteCategory(name);
   }
 
 

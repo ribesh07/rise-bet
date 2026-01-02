@@ -2,6 +2,8 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateControlDto } from './dto/update-control.dto';
+import { text } from 'stream/consumers';
+import { error } from 'console';
 
 @Injectable()
 export class ControlService {
@@ -70,4 +72,32 @@ export class ControlService {
       },
     });
   }
+
+  //getCategories
+  async getCategories(){
+    const categories = await this.prisma.categories.findMany({
+      select : {
+        name : true
+      }
+    });
+    return {
+      success : true ,
+       categories: categories.map(c => c.name),
+    }
+  }
+
+  async deleteCategory(name: string) {
+    const deletedData =  this.prisma.categories.delete({
+    where: { name },
+  });
+    if(!deletedData)
+      throw Error (" Not Deleted !")
+
+    return {
+      success : true ,
+      message : " Deleted SuccessFully !"
+    }
+}
+
+
 }
