@@ -11,6 +11,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { UPLOAD_BASE_PATH } from 'src/main';
+import { CreateBlogsDto, UpdateBlogsDto } from './dto/create-blog.dto';
 
 @Controller('api/v1/admin/control')
 export class ControlController {
@@ -63,6 +64,7 @@ export class ControlController {
     return this.controlService.deleteCategory(name);
   }
 
+  // Promotions 
 
  @UseGuards(JwtAuthGuard, AdminGuard)
 @Post('promotions/create')
@@ -110,19 +112,123 @@ async createPromotion(
     return this.controlService.findOnePromotion(+id);
   }
 
-    @UseGuards(JwtAuthGuard, AdminGuard)
-  @Patch('promotions/:id')
-  updatePromotion(
-    @Param('id') id: string,
-    @Body() dto: UpdatePromotionDto,
-  ) {
-    return this.controlService.updatePromotion(+id, dto);
-  }
+@UseGuards(JwtAuthGuard, AdminGuard)
+@Patch('promotions/:id')
+@UseInterceptors(
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+         const uploadPath = `${UPLOAD_BASE_PATH}/promotions`;
+        cb(null,uploadPath);
+      },
+       filename: (req, file, cb) => {
+        const name = file.originalname.replace(/\.[^/.]+$/, '');
+        const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+
+        cb(null, `${safeName}-${timestamp}${ext}`);
+      },
+    }),
+  }),
+)
+async updatePromotion(
+  @Param('id') id: string,
+  @Body() dto: UpdatePromotionDto,
+  @UploadedFile() file?: Express.Multer.File,
+) {
+  return this.controlService.updatePromotion(+id, dto, file);
+}
+
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete('promotions/:id')
   removePromotion(@Param('id') id: string) {
     return this.controlService.deletePromotion(+id);
+  }
+
+  //Blogs
+
+
+ @UseGuards(JwtAuthGuard, AdminGuard)
+@Post('Blogs/create')
+@UseInterceptors(
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+        const uploadPath = `${UPLOAD_BASE_PATH}/blogs`;
+        cb(null, uploadPath);
+      },
+      filename: (req, file, cb) => {
+        const name = file.originalname.replace(/\.[^/.]+$/, '');
+        const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+
+        cb(null, `${safeName}-${timestamp}${ext}`);
+      },
+    }),
+  }),
+)
+async createBlogs(
+  @Body() dto: CreateBlogsDto,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  if (!file) {
+    throw new BadRequestException('Image is required');
+  }
+  const Img = `/uploads/blogs/${file.filename}`
+
+  return this.controlService.createBlogs(
+  dto,
+    Img
+  );
+}
+
+
+  @Get("Blogs")
+  findAllBlogs(@Query('group') group?: string) {
+    return this.controlService.findAllBlogs(group);
+  }
+
+  @Get('Blogs/:id')
+  findOneBlogs(@Param('id') id: string) {
+    return this.controlService.findOneBlogs(+id);
+  }
+
+@UseGuards(JwtAuthGuard, AdminGuard)
+@Patch('Blogs/:id')
+@UseInterceptors(
+  FileInterceptor('image', {
+    storage: diskStorage({
+      destination: (req, file, cb) => {
+         const uploadPath = `${UPLOAD_BASE_PATH}/Blogss`;
+        cb(null,uploadPath);
+      },
+       filename: (req, file, cb) => {
+        const name = file.originalname.replace(/\.[^/.]+$/, '');
+        const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+
+        cb(null, `${safeName}-${timestamp}${ext}`);
+      },
+    }),
+  }),
+)
+async updateBlogs(
+  @Param('id') id: string,
+  @Body() dto: UpdateBlogsDto,
+  @UploadedFile() file?: Express.Multer.File,
+) {
+  return this.controlService.updateBlogs(+id, dto, file);
+}
+
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Delete('Blogs/:id')
+  removeBlogs(@Param('id') id: string) {
+    return this.controlService.deleteBlogs(+id);
   }
 
 

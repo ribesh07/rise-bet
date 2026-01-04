@@ -338,3 +338,30 @@ enum PromotionGroup {
   community
   poker
 }
+
+model Blog {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String
+  group       String
+  publishedAt DateTime
+
+  isActive    Boolean  @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum BlogGroup {
+  AllBlogs
+  Crypto
+  HowToGuides
+  RiseNews
+  Sport
+  Poker
+  Casino
+  Esports
+  Other
+}
+

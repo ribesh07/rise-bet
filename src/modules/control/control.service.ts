@@ -1,10 +1,13 @@
 // src/modules/control/control.service.ts
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateControlDto } from './dto/update-control.dto';
 import { text } from 'stream/consumers';
 import { error } from 'console';
 import { CreatePromotionDto, UpdatePromotionDto } from './dto/create-promotion.dto';
+import { existsSync, unlinkSync } from 'fs';
+import { join } from 'path';
+import { CreateBlogsDto, UpdateBlogsDto } from './dto/create-blog.dto';
 
 @Injectable()
 export class ControlService {
@@ -100,6 +103,7 @@ export class ControlService {
     }
 }
 
+//Promotions 
  async createPromotion(dto: CreatePromotionDto , image : string) {
    const data = await this.prisma.promotion.create({
       data: {
@@ -131,15 +135,44 @@ export class ControlService {
     });
   }
 
-  updatePromotion(id: number, dto: UpdatePromotionDto) {
-    return this.prisma.promotion.update({
-      where: { id },
-      data: {
-        ...dto,
-        ...(dto.endsAt && { endsAt: new Date(dto.endsAt) }),
-      },
-    });
+  async updatePromotion(
+  id: number,
+  dto: UpdatePromotionDto,
+  file?: Express.Multer.File,
+) {
+  const promotion = await this.prisma.promotion.findUnique({
+    where: { id },
+  });
+
+  if (!promotion) {
+    throw new NotFoundException('Promotion not found');
   }
+
+  let imagePath = promotion.image;
+
+  // 🔥 If new image uploaded → replace
+  if (file) {
+    imagePath = `/uploads/promotions/${file.filename}`;
+
+    // (optional but recommended) delete old image
+    if (promotion.image) {
+      const oldPath = join(process.cwd(), promotion.image);
+      if (existsSync(oldPath)) {
+        unlinkSync(oldPath);
+      }
+    }
+  }
+
+  return this.prisma.promotion.update({
+    where: { id },
+    data: {
+      ...dto,
+      image: imagePath,
+      ...(dto.endsAt && { endsAt: new Date(dto.endsAt) }),
+    },
+  });
+}
+
 
   deletePromotion(id: number) {
     return this.prisma.promotion.delete({
@@ -147,5 +180,96 @@ export class ControlService {
     });
   }
 
+  // Blogs
+ async createBlogs(dto: CreateBlogsDto , image : string) {
+   const data = await this.prisma.blog.create({
+      data: {
+        ...dto,
+        image,
+      },
+    });
+
+    return {
+      success : true ,
+      data : data
+    }
+  }
+
+  findAllBlogs(group?: string) {
+    return this.prisma.blog.findMany({
+      where: {
+        isActive: true,
+        ...(group && { group: group as any }),
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  findOneBlogs(id: number) {
+    return this.prisma.blog.findUnique({
+      where: { id },
+    });
+  }
+
+  async updateBlogs(
+  id: number,
+  dto: UpdateBlogsDto,
+  file?: Express.Multer.File,
+) {
+  const Blogs = await this.prisma.blog.findUnique({
+    where: { id },
+  });
+
+  if (!Blogs) {
+    throw new NotFoundException('Blogs not found');
+  }
+
+  let imagePath = Blogs.image;
+
+  // 🔥 If new image uploaded → replace
+  if (file) {
+    imagePath = `/uploads/blogs/${file.filename}`;
+
+    // (optional but recommended) delete old image
+    if (Blogs.image) {
+      const oldPath = join(process.cwd(), Blogs.image);
+      if (existsSync(oldPath)) {
+        unlinkSync(oldPath);
+      }
+    }
+  }
+
+  return this.prisma.blog.update({
+    where: { id },
+    data: {
+      ...dto,
+      image: imagePath,
+    },
+  });
+}
+
+
+ async deleteBlogs(id: number) {
+   const data =  await this.prisma.blog.delete({
+      where: { id },
+    });
+    console.log(data)
+     if (data.image) {
+      const oldPath = join(process.cwd(), data.image);
+      if (existsSync(oldPath)) {
+        unlinkSync(oldPath);
+      }
+    }
+    return {
+      success : true ,
+      message : " Deleted Successfully !"
+    }
+
+  }
+
+
+
+
+  //eol
 
 }

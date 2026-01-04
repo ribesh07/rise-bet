@@ -266,6 +266,128 @@
         ]
       }
     },
+    "/api/v1/admin/control/Blogs/create": {
+      "post": {
+        "operationId": "ControlController_createBlogs",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlogsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
+    "/api/v1/admin/control/Blogs": {
+      "get": {
+        "operationId": "ControlController_findAllBlogs",
+        "parameters": [
+          {
+            "name": "group",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
+    "/api/v1/admin/control/Blogs/{id}": {
+      "get": {
+        "operationId": "ControlController_findOneBlogs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      },
+      "patch": {
+        "operationId": "ControlController_updateBlogs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBlogsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      },
+      "delete": {
+        "operationId": "ControlController_removeBlogs",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Control"
+        ]
+      }
+    },
     "/api/v1/users/update": {
       "post": {
         "operationId": "UserController_updateUser",
@@ -994,6 +1116,14 @@
         "properties": {}
       },
       "UpdatePromotionDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateBlogsDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateBlogsDto": {
         "type": "object",
         "properties": {}
       },

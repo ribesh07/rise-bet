@@ -294,6 +294,7 @@ async settleBet(bet: any, result: number) {
         currency: dto.currency,
         amount: new Prisma.Decimal(dto.amount),
         payout: new Prisma.Decimal(payout),
+        odds : roll,
         status: win ? BetStatus.WON : BetStatus.LOST,
         payload: {
           targetMultiplier: dto.targetMultiplier,
