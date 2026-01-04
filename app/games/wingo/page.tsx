@@ -1,374 +1,479 @@
-
-'use client';
-import React, { useEffect, useRef, useMemo, useState } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
+"use client";
+import React, { useState, useEffect } from 'react';
+import "@/app/css/wingo.css";
+import GameHistory from "@/components/game/wingo/GameHistory";
+import Chart from "@/components/game/wingo/Chart";
+import FollowStrategy from "@/components/game/wingo/FollowStrategy";
+import MyHistory from "@/components/game/wingo/MyHistory";
 import TopNavbar from "@/components/topnavbar";
-import { apiRequest } from '@/utils/ApiHelper';
-import { Sidebar } from '@/components/sidebar';
+import { apiRequest } from "@/utils/ApiHelper";
+import { useCurrency } from "@/context/CurrencyContext";
+import { motion, AnimatePresence } from "framer-motion";
+import Sidebar from "@/components/sidebar";
 import MobileBottomBar from "@/components/mainmobilebuttombar";
 import RiseTopBar from "@/components/game/gamebottombar";
 import GameDropdown from "@/components/game/gamedropup";
-import { useCurrency } from "@/context/CurrencyContext";
+import { MyHistoryItem } from '@/components/game/wingo/types';
+import type { GameHistoryItem as ImportedGameHistoryItem } from "@/components/game/wingo/types";
+type BetType = "color" | "number" | "bigSmall";
 
-
-const DURATIONS = [15, 60, 180, 300];
-const DUR_LABELS = ['30s', '1m', '3m', '5m'];
-const NUMBERS = [0,1,2,3,4,5,6,7,8,9];
-
-type Round = { period: number; number: number; color: string; bigSmall: 'big' | 'small' };
-
-export default function WingoFull() {
-  const [durationIndex, setDurationIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(DURATIONS[0]);
-  const [history, setHistory] = useState<Round[]>([]);
- 
-  const [betAmount, setBetAmount] = useState(10);
-  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedBigSmall, setSelectedBigSmall] = useState<'big'|'small'|null>(null);
-  const [showPopup, setShowPopup] = useState(false);
-  const [volume, setVolume] = useState(60);
-  const [betHistory, setBetHistory] = useState<any[]>([]);
-
-  const [tab, setTab] = useState<'Play'|'Player History'|'History'|'How To Play'>('Play');
-  const [currentDraw, setCurrentDraw] = useState<Round|null>(null);
-  const ballControls = useAnimation();
-  const [confirmedBet, setConfirmedBet] = useState<{number:number|null,color:string|null,bigSmall:'big'|'small'|null,amount:number}>({number:null,color:null,bigSmall:null,amount:0});
-  const [resultPopup, setResultPopup] = useState<null | {type:'win'|'lose', round: Round}>(null);
-  const confirmedBetRef = useRef(confirmedBet);
-  
-  // Betting locked when 5s or less
-  const bettingLocked = timeLeft <= 5;
-  const [search, setSearch] = useState("");
-      const [dashboardDetails, setDashboardDetails] = useState<any>(null);
-       const sidebarWidth = 64;
-    const collapsedWidth = 20;
-      const { currency, setCurrency } = useCurrency();
-      const [balance, setBalance] = useState<number>(0);
-      const [loading, setLoading] = useState(true);
-       const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-      const [sidebarOpen, setSidebarOpen] = useState(false);
-       const [isMobile, setIsMobile] = useState(false);
-       const parseWalletBalance = (b: any) => {
-          if (b === null || b === undefined) return 0;
-          if (typeof b === "number") return b;
-          const n = parseFloat(String(b));
-          return isNaN(n) ? 0 : n;
-        };
-      
-      const conversionRates: Record<string, number> = {
-          INR: 83.0, 
-          USD: 1,
-          USDT: 1,
-          BTC: 1 / 60000, 
-          ETH: 1 / 1800, 
-          LTC: 1 / 90,
-          SOL: 1 / 100,
-          XRP: 1 / 0.5,
-          TRX: 1 / 0.07,
-          BNB: 1 / 300,
-          USDC: 1,
-        };
-      
-        // Symbol map & decimals
-        const currencySymbols: Record<string, { sym: string; decimals: number }> = {
-          INR: { sym: "₹", decimals: 2 },
-          USD: { sym: "$", decimals: 2 },
-          USDT: { sym: "$", decimals: 2 },
-          USDC: { sym: "$", decimals: 2 },
-          BTC: { sym: "₿", decimals: 8 },
-          ETH: { sym: "Ξ", decimals: 8 },
-          LTC: { sym: "Ł", decimals: 8 },
-          SOL: { sym: "◎", decimals: 8 },
-          XRP: { sym: "✕", decimals: 6 },
-          TRX: { sym: "T", decimals: 6 },
-          BNB: { sym: "🟡", decimals: 6 },
-        };
-      
-        const formatCurrency = (value: number, cur = currency) => {
-          if (cur && currencySymbols[cur]) {
-            const { sym, decimals } = currencySymbols[cur];
-            return `${sym}${Number(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
-          }
-          return `${value.toLocaleString()}`;
-        };
-        const convertChipToCurrency = (chipBaseAmount: number, cur = currency) => {
-          const rate = conversionRates[cur] ?? 1;
-          return chipBaseAmount * rate;
-        };
-      
-        // Can make dynamic if needed
-      useEffect(() => {
-          const fetchDashboardDetails = async () => {
-            try {
-              const token = localStorage.getItem("token");
-              const id = localStorage.getItem("userId");
-              const res = await apiRequest(`/users/${id}/details`, true, {
-                method: "GET",
-                headers: { Authorization: `Bearer ${token}` },
-              });
-      
-              if (res.success) {
-                setDashboardDetails(res.data);        
-                const wallets = res.data.wallets || [];
-                let initialWallet = null;
-                if (wallets.length > 0) {
-                  initialWallet =
-                    wallets.find((w: any) => String(w.currency || w.symbol).toUpperCase() === String(currency || "").toUpperCase()) ||
-                    wallets[0];
-                }
-                if (initialWallet) {
-                  // try common keys
-                  const bal = parseWalletBalance(initialWallet.balance ?? initialWallet.amount ?? 0);
-                  setBalance(bal);
-                  const curSymbol = (initialWallet.currency || initialWallet.symbol || initialWallet.asset || "").toString().toUpperCase();
-                  if (curSymbol) {
-                    setCurrency(curSymbol);
-                  }
-                } else {
-                  setBalance(0);
-                }
-              }
-            } catch (err) {
-              console.error("AFFILIATE PAGE API ERROR:", err);
-            } finally {
-              setLoading(false);
-            }
-          };
-          fetchDashboardDetails();
-        }, []);
-    const generateMultiplier = () => {
-      const r = Math.random();
-      return Number(Math.min(100, (1 / (1 - r)) * 0.99).toFixed(2));
-    };
-  // ---------------- Round Generation ----------------
-  function generateRound(): Round {
-    const n = Math.floor(Math.random() * 10);
-    const colorMap: Record<number, string> = {
-      0: "red+violet", 1: "green", 2: "red", 3: "green",
-      4: "red", 5: "green+violet", 6: "red", 7: "green",
-      8: "red", 9: "green"
-    };
-    return { period: Date.now(), number: n, color: colorMap[n], bigSmall: n <= 4 ? 'small' : 'big' };
-  }
-  function generateBetId() {
-  return "BET-" + Math.random().toString(36).substring(2, 10).toUpperCase();
+interface Bet {
+  type: BetType;
+  selection: string | number;
+  amount: number;
+  period: string;
+  time: string;
 }
 
-  function playSound(type: 'win'|'lose'|'click'|'draw'){
-    const path = `/sounds/${type}.mp3`;
-    try{ const a = new Audio(path); a.volume = volume/100; a.play().catch(()=>{}); }catch(e){}
-  }
-   useEffect(() => {
-      const fetchDashboardDetails = async () => {
-        try {
-          const token = localStorage.getItem("token");
-          const id = localStorage.getItem("userId");
+export default function WinGoGame() {
+  const DURATIONS = [30, 60, 180, 300];
+  const DURATION_LABELS = ['30sec', '1 Min', '3 Min', '5 Min'];
   
-          const res = await apiRequest(`/users/${id}/details`, true, {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-         console.log("Dashboard Details Response:", res);
-          if (res.success) {
-            setDashboardDetails(res.data);
-          }
-        } catch (err) {
-          console.error("Dashboard API Error:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchDashboardDetails();
-    }, []);
+  const [durationIndex, setDurationIndex] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(DURATIONS[0]);
+  const [selectedColor, setSelectedColor] = useState<"Green" | "Red" | "Violet" | null>(null);
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  const [betType, setBetType] = useState<"Big" | "Small" | null>(null);
 
-    useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+  const [selectedMultiplier, setSelectedMultiplier] = useState('X1');
+  const [activeTab, setActiveTab] = useState('My history');
+  const [selectedHistoryItem, setSelectedHistoryItem] = useState<MyHistoryItem | null>(null);
+  const [showRulesModal, setShowRulesModal] = useState(false);
+  const [showBetModal, setShowBetModal] = useState(false);
+  const [betAmount, setBetAmount] = useState(1);
+  const [betQuantity, setBetQuantity] = useState(1);
+  const [agreeToRules, setAgreeToRules] = useState(false);
+  const [search, setSearch] = useState("");
+  const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+  const sidebarWidth = 64;
+  const collapsedWidth = 20;
+  const { currency, setCurrency } = useCurrency();
+  const [balance, setBalance] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  // API states
+  const [lastBetId, setLastBetId] = useState<number | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+    
+  const parseWalletBalance = (b: any) => {
+    console.log("🔍 Parsing wallet balance:", b);
+    if (b === null || b === undefined) {
+      console.log("❌ Balance is null/undefined, returning 0");
+      return 0;
+    }
+    if (typeof b === "number") {
+      console.log("✅ Balance is number:", b);
+      return b;
+    }
+    const n = parseFloat(String(b));
+    console.log("🔄 Parsed balance string to number:", n);
+    return isNaN(n) ? 0 : n;
+  };
+    
+  const conversionRates: Record<string, number> = {
+    INR: 83.0, 
+    USD: 1,
+    USDT: 1,
+    BTC: 1 / 60000, 
+    ETH: 1 / 1800, 
+    LTC: 1 / 90,
+    SOL: 1 / 100,
+    XRP: 1 / 0.5,
+    TRX: 1 / 0.07,
+    BNB: 1 / 300,
+    USDC: 1,
+  };
+    
+  // Symbol map & decimals
+  const currencySymbols: Record<string, { sym: string; decimals: number }> = {
+    INR: { sym: "₹", decimals: 2 },
+    USD: { sym: "$", decimals: 2 },
+    USDT: { sym: "$", decimals: 2 },
+    USDC: { sym: "$", decimals: 2 },
+    BTC: { sym: "₿", decimals: 8 },
+    ETH: { sym: "Ξ", decimals: 8 },
+    LTC: { sym: "Ł", decimals: 8 },
+    SOL: { sym: "◎", decimals: 8 },
+    XRP: { sym: "✕", decimals: 6 },
+    TRX: { sym: "T", decimals: 6 },
+    BNB: { sym: "🟡", decimals: 6 },
+  };
+    
+  const formatCurrency = (value: number, cur = currency) => {
+    if (cur && currencySymbols[cur]) {
+      const { sym, decimals } = currencySymbols[cur];
+      return `${sym}${Number(value).toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}`;
+    }
+    return `${value.toLocaleString()}`;
+  };
+  
+  const convertChipToCurrency = (chipBaseAmount: number, cur = currency) => {
+    const rate = conversionRates[cur] ?? 1;
+    return chipBaseAmount * rate;
+  };
+    
+  // ✅ Fetch Dashboard Details
+  const fetchDashboardDetails = async () => {
+    console.log("📊 Fetching dashboard details...");
+    try {
+      const token = localStorage.getItem("token");
+      const id = localStorage.getItem("userId");
+      console.log("🔑 Token:", token ? "exists" : "missing");
+      console.log("👤 User ID:", id);
+      
+      const res = await apiRequest(`/users/${id}/details`, true, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      console.log("📥 Dashboard API Response:", res);
+
+      if (res.success) {
+        setDashboardDetails(res.data);
+        console.log("✅ Dashboard details set:", res.data);
+        
+        const wallets = res.data.wallets || [];
+        console.log("💰 Available wallets:", wallets);
+        
+        let initialWallet = null;
+        if (wallets.length > 0) {
+          initialWallet =
+            wallets.find((w: any) => String(w.currency || w.symbol).toUpperCase() === String(currency || "").toUpperCase()) ||
+            wallets[0];
+          console.log("🎯 Selected wallet:", initialWallet);
+        }
+        
+        if (initialWallet) {
+          const bal = parseWalletBalance(initialWallet.balance ?? initialWallet.amount ?? 0);
+          setBalance(bal);
+          console.log("💵 Balance set to:", bal);
+          
+          const curSymbol = (initialWallet.currency || initialWallet.symbol || initialWallet.asset || "").toString().toUpperCase();
+          console.log("💱 Currency symbol:", curSymbol);
+          if (curSymbol) {
+            setCurrency(curSymbol);
+          }
+        } else {
+          console.log("⚠️ No wallet found, setting balance to 0");
+          setBalance(0);
+        }
+      } else {
+        console.error("❌ Dashboard API failed:", res);
+      }
+    } catch (err) {
+      console.error("💥 Dashboard API Error:", err);
+    } finally {
+      setLoading(false);
+      console.log("✅ Dashboard loading complete");
+    }
+  };
+useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      console.log("📱 Screen size changed - isMobile:", mobile);
+      setIsMobile(mobile);
+    };
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
-  // ---------------- Continuous Timer ----------------
   useEffect(() => {
-    confirmedBetRef.current = confirmedBet;
-  }, [confirmedBet]);
+    console.log("🚀 Component mounted, fetching initial dashboard details");
+    fetchDashboardDetails();
+  }, []);
+  
+  type GameHistoryItem = ImportedGameHistoryItem;
+
+  const [gameHistory, setGameHistory] = useState<GameHistoryItem[]>([
+    { period: '20251228152590', number: 2, bigSmall: 'Small', color: 'red' },
+    { period: '20251228152589', number: 2, bigSmall: 'Small', color: 'red' },
+    { period: '20251228152588', number: 6, bigSmall: 'Big', color: 'red' },
+    { period: '20251228152587', number: 6, bigSmall: 'Big', color: 'red' },
+    { period: '20251228152586', number: 4, bigSmall: 'Small', color: 'red' },
+    { period: '20251228152585', number: 6, bigSmall: 'Big', color: 'red' },
+    { period: '20251228152584', number: 1, bigSmall: 'Small', color: 'green' },
+    { period: '20251228152583', number: 1, bigSmall: 'Small', color: 'green' },
+    { period: '20251228152582', number: 5, bigSmall: 'Big', color: 'green' },
+    { period: '20251228152581', number: 7, bigSmall: 'Big', color: 'green' },
+  ]);
+
+  const [myHistory, setMyHistory] = useState<MyHistoryItem[]>([
+    { 
+      id: '202512281000052513', 
+      result: 3, 
+      time: '2025-12-29 02:41:11', 
+      status: 'Succeed' as 'Succeed', 
+      amount: 1.96,
+      orderNumber: 'WG20251228205611126048225072407',
+      period: '202512281000052513',
+      purchaseAmount: 1.00,
+      quantity: 1,
+      amountAfterTax: 0.98,
+      tax: 0.02,
+      select: 'Green',
+      bigSmall: 'Small',
+      winLose: 1.96
+    },
+    { 
+      id: '202512281000052513', 
+      result: 1, 
+      time: '2025-12-29 02:41:04', 
+      status: 'Failed' as 'Failed', 
+      amount: -1.00,
+      orderNumber: 'WG20251228205611126048225072406',
+      period: '202512281000052513',
+      purchaseAmount: 1.00,
+      quantity: 1,
+      amountAfterTax: 0.98,
+      tax: 0.02,
+      select: 'Red',
+      bigSmall: 'Big',
+      winLose: -1.00
+    }
+  ]);
 
   useEffect(() => {
-    setTimeLeft(DURATIONS[durationIndex]);
-
-    const iv = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          const r = generateRound();
-          animateBallAndCommit(r, confirmedBetRef.current);
-          return DURATIONS[durationIndex];
-        }
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 0) return DURATIONS[durationIndex];
         return prev - 1;
       });
     }, 1000);
-
-    return () => clearInterval(iv);
+    return () => clearInterval(timer);
   }, [durationIndex]);
 
-  // ---------------- Animate & Resolve ----------------
-  async function animateBallAndCommit(r:Round, bet = confirmedBet){
-    setCurrentDraw(null);
-    await ballControls.start({ y: [-180,-40,0], rotate:[0,360], opacity:[0,1,1], transition:{ duration:0.9, ease:'circOut' } });
-    await ballControls.start({ y:[0,-10,0], transition:{ duration:0.4 } });
-    setCurrentDraw(r);
-    setHistory(h=>[{...r},...h].slice(0,200));
-    playSound('draw');
-    resolveBets(r, bet);
-  }
-
-  function resolveBets(r: Round, bet = confirmedBet) {
-  let net = 0;
-  if (bet.amount <= 0) return;
-
-  let totalMultiplier = 0;
-  let win = false;
-
-  // ----- Number -----
-  if (bet.number !== null) {
-    if (bet.number === r.number) {
-      net += bet.amount * 9;
-      totalMultiplier = 9;
-      win = true;
-    } else {
-      net -= bet.amount;
-      totalMultiplier = -1;
-    }
-  }
-
-  // ----- Color -----
-  if (bet.color) {
-    let multiplier = -1;
-    if (bet.color === "green") {
-      if ([1, 3, 7, 9].includes(r.number)) multiplier = 2;
-      if (r.number === 5) multiplier = 1.5;
-    }
-    if (bet.color === "red") {
-      if ([2, 4, 6, 8].includes(r.number)) multiplier = 2;
-      if (r.number === 0) multiplier = 1.5;
-    }
-    if (bet.color === "violet") {
-      if ([0, 5].includes(r.number)) multiplier = 4.5;
-    }
-
-    net += bet.amount * multiplier;
-    totalMultiplier = multiplier;
-    win = multiplier > 0;
-  }
-
-  // ----- Big/Small -----
-  if (bet.bigSmall) {
-    let multiplier = -1;
-    if (bet.bigSmall === "big" && [5, 6, 7, 8, 9].includes(r.number)) multiplier = 2;
-    if (bet.bigSmall === "small" && [0, 1, 2, 3, 4].includes(r.number)) multiplier = 2;
-
-    net += bet.amount * multiplier;
-    totalMultiplier = multiplier;
-    win = multiplier > 0;
-  }
-
-  // Update balance
-  setBalance(b => b + net);
-
-  // Save Win/Loss history
-  const entry = {
-    betId: generateBetId(),
-    period: r.period,
-    betType: bet.number !== null ? "number" : bet.color ? "color" : "bigSmall",
-    betValue: bet.number ?? bet.color ?? bet.bigSmall,
-    betAmount: bet.amount,
-    multiplier: totalMultiplier,
-    resultNumber: r.number,
-    resultColor: r.color,
-    resultBigSmall: r.bigSmall,
-    winAmount: win ? net : 0,
-    lossAmount: !win ? Math.abs(net) : 0,
-    status: win ? "win" : "lose",
-    timestamp: new Date().toISOString()
+  const getDigits = (num: number) => {
+    const mins = Math.floor(num / 60);
+    const secs = num % 60;
+    return {
+      mins: mins.toString().padStart(2, "0").split(""),
+      secs: secs.toString().padStart(2, "0").split("")
+    };
   };
 
-  setBetHistory(h => [entry, ...h]);
-
-  // Popup
-  if (net > 0) {
-    setResultPopup({ type: "win", round: r });
-    playSound("win");
-  }
-  if (net < 0) {
-    setResultPopup({ type: "lose", round: r });
-    playSound("lose");
-  }
-  if (net !== 0) setTimeout(() => setResultPopup(null), 3000);
-
-  setConfirmedBet({ number: null, color: null, bigSmall: null, amount: 0 });
-}
-
-
-  // ---------------- Selection ----------------
-  function onSelectColor(c:string){ if(bettingLocked) return; setSelectedColor(c); setSelectedNumber(null); setSelectedBigSmall(null); setShowPopup(true); playSound('click'); }
-  function onSelectNumber(n:number){ if(bettingLocked) return; setSelectedNumber(n); setSelectedColor(null); setSelectedBigSmall(null); setShowPopup(true); playSound('click'); }
-  function onSelectBigSmall(bs:'big'|'small'){ if(bettingLocked) return; setSelectedBigSmall(bs); setSelectedNumber(null); setSelectedColor(null); setShowPopup(true); playSound('click'); }
-
-  function handleConfirmBet(){
-    if(bettingLocked) return;
-    const newBet = { number:selectedNumber, color:selectedColor, bigSmall:selectedBigSmall, amount:betAmount };
-    console.log("CONFIRMED BET:", newBet);
-    setConfirmedBet(newBet);
-    setBalance(b=>Math.max(0,b-betAmount));
-    setShowPopup(false); playSound('click');
-  }
-
-  function handleCancel(){ setShowPopup(false); }
-
-  const chartData = useMemo(()=>history.slice(0,30).map(r=>r.number).reverse(),[history]);
-  const handleCurrencyChange = (currencyType: string) => {
-    if (!currencyType) return;
-    const symbol = currencyType.toString().toUpperCase();
-    setCurrency(symbol);
-    const wallets = dashboardDetails?.wallets || [];
-    const found = wallets.find(
-      (w: any) => String(w.currency || w.symbol || w.asset).toUpperCase() === symbol
-    );
-    if (found) {
-      const bal = parseWalletBalance(found.balance ?? found.amount ?? 0);
-      setBalance(bal);
-    } else {
-      // fallback: try to leave balance unchanged or set to 0
-      setBalance((prev) => prev); 
-    }
+  const getColorClass = (color: string) => {
+    if (color === "red") return "bg-red-500";
+    if (color === "green") return "bg-green-500";
+    if (color === "violet") return "bg-purple-500";
+    return "bg-gray-500";
   };
 
-  // ---------------- JSX ----------------
+  const calculateWinnings = (bet: Bet, result: number) => {
+    const amountAfterTax = bet.amount * 0.98;
+    let multiplier = 0;
+    let won = false;
+
+    if (bet.type === "color") {
+      if (bet.selection === "Green") {
+        if ([1, 3, 7, 9].includes(result)) {
+          multiplier = 2;
+          won = true;
+        } else if (result === 5) {
+          multiplier = 1.5;
+          won = true;
+        }
+      } else if (bet.selection === "Red") {
+        if ([2, 4, 6, 8].includes(result)) {
+          multiplier = 2;
+          won = true;
+        } else if (result === 0) {
+          multiplier = 1.5;
+          won = true;
+        }
+      } else if (bet.selection === "Violet") {
+        if ([0, 5].includes(result)) {
+          multiplier = 4.5;
+          won = true;
+        }
+      }
+    }
+
+    if (bet.type === "number" && bet.selection === result) {
+      multiplier = 9;
+      won = true;
+    }
+
+    if (bet.type === "bigSmall") {
+      if (bet.selection === "Big" && [5, 6, 7, 8, 9].includes(result)) {
+        multiplier = 2;
+        won = true;
+      }
+      if (bet.selection === "Small" && [0, 1, 2, 3, 4].includes(result)) {
+        multiplier = 2;
+        won = true;
+      }
+    }
+
+    const winAmount = won ? amountAfterTax * multiplier : 0;
+    const netProfit = won ? winAmount - bet.amount : -bet.amount;
+
+    return {
+      won,
+      winAmount,
+      netProfit,
+      amountAfterTax
+    };
+  };
+
+  const generateGameResult = () => {
+    return Math.floor(Math.random() * 10);
+  };
+
+  const getResultColor = (num: number): "red" | "green" | "violet" => {
+    if (num === 0 || num === 5) return "violet";
+    if ([1, 3, 7, 9].includes(num)) return "green";
+    return "red";
+  };
+
+  const openBetModal = (type: BetType, selection: string | number) => {
+    if (timeRemaining <= 5) {
+      alert('Betting closed! Wait for the next round.');
+      return;
+    }
+
+    if (type === 'color') {
+      setSelectedColor(selection as "Green" | "Red" | "Violet");
+      setSelectedNumber(null);
+      setBetType(null);
+    } else if (type === 'number') {
+      setSelectedNumber(selection as number);
+      setSelectedColor(null);
+      setBetType(null);
+    } else if (type === 'bigSmall') {
+      setBetType(selection as "Big" | "Small");
+      setSelectedColor(null);
+      setSelectedNumber(null);
+    }
+
+    setBetAmount(1);
+    setBetQuantity(1);
+    setSelectedMultiplier('X1');
+    setAgreeToRules(false);
+    setShowBetModal(true);
+  };
+
+  const confirmBet = () => {
+    if (!agreeToRules) {
+      alert('Please agree to the pre-sale rules');
+      return;
+    }
+
+    const totalBet = betAmount * betQuantity;
+    
+    if (totalBet > balance) {
+      alert('Insufficient balance!');
+      return;
+    }
+    
+    setBalance(prev => prev - totalBet);
+
+    const currentPeriod = '202512281000052525';
+    const bet: Bet = {
+      type: selectedColor ? 'color' : selectedNumber !== null ? 'number' : 'bigSmall',
+      selection: selectedColor || (selectedNumber !== null ? selectedNumber : betType!),
+      amount: totalBet,
+      period: currentPeriod,
+      time: new Date().toLocaleString('en-GB', { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+      }).replace(/(\d{2})\/(\d{2})\/(\d{4}),/, '$3-$2-$1')
+    };
+
+    setTimeout(() => {
+      const result = generateGameResult();
+      const resultColor = getResultColor(result);
+      const calculation = calculateWinnings(bet, result);
+
+      if (calculation.won) {
+        setBalance(prev => prev + calculation.winAmount);
+      }
+
+      const newHistoryItem: MyHistoryItem = {
+        id: currentPeriod,
+        result: result,
+        time: bet.time,
+        status: calculation.won ? 'Succeed' as 'Succeed' : 'Failed' as 'Failed',
+        amount: calculation.netProfit,
+        orderNumber: `WG${Date.now()}${Math.floor(Math.random() * 10000)}`,
+        period: currentPeriod,
+        purchaseAmount: bet.amount,
+        quantity: 1,
+        amountAfterTax: calculation.amountAfterTax,
+        tax: bet.amount * 0.02,
+        select: bet.type === 'color' ? String(bet.selection) : bet.type === 'number' ? `Number ${bet.selection}` : String(bet.selection),
+        bigSmall: [5, 6, 7, 8, 9].includes(result) ? 'Big' : 'Small',
+        winLose: calculation.netProfit
+      };
+
+      setMyHistory(prev => [newHistoryItem, ...prev]);
+
+      const newGameHistory: GameHistoryItem = {
+        period: currentPeriod,
+        number: result,
+        bigSmall: [5, 6, 7, 8, 9].includes(result) ? 'Big' : 'Small',
+        color: resultColor
+      };
+      setGameHistory(prev => [newGameHistory, ...prev]);
+    }, timeRemaining * 1000);
+
+    setSelectedColor(null);
+    setSelectedNumber(null);
+    setBetType(null);
+    setSelectedMultiplier('X1');
+    setBetQuantity(1);
+    setAgreeToRules(false);
+    setShowBetModal(false);
+  };
+
+  const getModalColor = () => {
+    if (selectedColor === 'Green') return '#22c55e';
+    if (selectedColor === 'Red') return '#ef4444';
+    if (selectedColor === 'Violet') return '#a855f7';
+    if (selectedNumber !== null) {
+      if ([1, 3, 7, 9].includes(selectedNumber)) return '#22c55e';
+      if ([2, 4, 6, 8].includes(selectedNumber)) return '#ef4444';
+      if ([0, 5].includes(selectedNumber)) return '#a855f7';
+    }
+    if (betType === 'Big') return '#fb923c';
+    if (betType === 'Small') return '#60a5fa';
+    return '#22c55e';
+  };
+
+  const getButtonColor = (isSelected: boolean) => {
+    const baseColor = getModalColor();
+    if (!isSelected) return 'bg-gray-100 text-gray-600';
+    return `text-white`;
+  };
+
+  const digits = getDigits(timeRemaining);
+
   return (
     <div className="flex min-h-screen bg-[#1a2c38] text-white overflow-x-hidden relative flex-col">
-      <div className="flex flex-1">
-        {/* Sidebar */}
-         {/* Sidebar */}
+       <div className="flex flex-1">
         {!isMobile && (
-          <motion.div
-            animate={{
-              width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
-            }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
-          >
-            <Sidebar
-              collapsed={sidebarCollapsed}
-              setCollapsed={setSidebarCollapsed}
-              open={true}
-              setOpen={() => {}}
-            />
-          </motion.div>
-        )}
-
-        {/* Navbar */}
+                  <motion.div
+                    animate={{
+                      width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
+                  >
+                    <Sidebar
+                      collapsed={sidebarCollapsed}
+                      setCollapsed={setSidebarCollapsed}
+                      open={true}
+                      setOpen={() => {}}
+                    />
+                  </motion.div>
+                )}
+                {/* Navbar */}
         <motion.div
           className="fixed top-0 left-0 right-0 z-40"
           animate={{
@@ -380,27 +485,14 @@ export default function WingoFull() {
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <AnimatePresence>
-            <motion.div
-              initial={{ y: -50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -50, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-0 left-0 w-full z-30"
-            >
-              
-            </motion.div>
-          </AnimatePresence>
           <TopNavbar
             searchValue={search}
             onSearchChange={setSearch}
             wallets={dashboardDetails?.wallets || []}
           />
         </motion.div>
-
-        {/* Main Content */}
         <motion.main
-          className="flex-1 flex flex-col overflow-auto pt-[95px] pb-16  md:px-8"
+          className="flex-1 flex flex-col overflow-auto pt-24.75 pb-16 md:px-8"
           animate={{
             marginLeft: !isMobile
               ? sidebarCollapsed
@@ -410,412 +502,428 @@ export default function WingoFull() {
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-
-      <div className="min-h-screen bg-[#1a2c38] p-4 flex flex-col items-center gap-4">
-
-        {/* Durations */}
-        <div className="flex gap-3 bg-[#1c2a38] rounded-2xl shadow p-4">
-          {DUR_LABELS.map((lab,i)=>(
-            <button key={lab} onClick={()=>setDurationIndex(i)} className={`flex flex-col items-center justify-center px-3 py-2 rounded-xl border transition-all ${i===durationIndex? 'bg-orange-500 border-orange-600':'bg-white border-gray-300'}`}>
-              <img src={`/color/${i===durationIndex?'time_active':'time-inactive'}.webp`} alt={lab} className="w-10 h-10 object-contain" />
-              <span className={`text-xs font-semibold mt-1 ${i===durationIndex?'text-white':'text-gray-700'}`}>{lab}</span>
-            </button>
-          ))}
-        </div>
-
-       
-        {/* Main Play Area */}
-      <div className="w-full max-w-3xl rounded-2xl
-      border border-white/10
-      bg-gradient-to-b from-[#0f2a38] to-[#09161f]
-      shadow-[0_0_30px_rgba(0,0,0,0.8)]shadow p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-
-    {/* LEFT SIDE */}
-    <div className="flex-1">
-      {/* Timer */}
-      <div className="flex items-center justify-between mb-3 relative">
-        <div className="text-sm text-gray-400">Time remaining</div>
-        <div className="text-xl font-bold" style={{color: bettingLocked ? 'red' : 'white'}}>{timeLeft}s</div>
-      </div>
-              {/* Confirmed Bet Display */}
-{(confirmedBet.number !== null || confirmedBet.color || confirmedBet.bigSmall) && (
-  <div className="mb-3 p-3 bg-[#1f2a33] rounded-xl flex gap-3 items-center justify-center flex-wrap">
-    <span className="text-green-400 font-semibold">YOUR TRADE</span>
-    {confirmedBet.number !== null && (
-      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
-
-        <img src={`/color/ball_${confirmedBet.number}.webp`} className="w-10 h-10 rounded-full" />
-        <span className="text-white font-semibold">{confirmedBet.number}</span>
-      </div>
-    )}
-    {confirmedBet.color && (
-      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
-        <span className={`w-5 h-5 rounded-full ${
-          confirmedBet.color === 'red' ? 'bg-red-500' :
-          confirmedBet.color === 'green' ? 'bg-green-500' :
-          'bg-indigo-500'
-        }`} />
-        <span className="text-white capitalize font-semibold">{confirmedBet.color}</span>
-      </div>
-    )}
-    {confirmedBet.bigSmall && (
-      <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-xl">
-        <span className="text-white capitalize font-semibold">{confirmedBet.bigSmall}</span>
-      </div>
-    )}
-    <div className="text-white font-bold px-3 py-1 border border-white/20 rounded-xl">
-      ₹{confirmedBet.amount}.00
-    </div>
-  </div>
-)}
-      {/* Ball Display */}
-      <div className="w-full h-44 rounded-xl flex items-center justify-center mb-4 relative overflow-hidden"
-           style={{ backgroundImage:`url('/color/bg.webp')`, backgroundSize:'cover', backgroundPosition:'center' }}>
-        
-        <motion.img src={`/color/ball_${currentDraw?.number }.webp`}
-                    style={{ width:96, height:96, borderRadius:48, objectFit:'cover' }} />
-
-        {/* BIG Countdown Overlay */}
-        {/* <div className="absolute inset-0 flex items-center justify-center text-4xl font-extrabold text-gray-500 drop-shadow-lg">
-          {bettingLocked ? "TRADE CLOSED" : ''}
-        </div> */}
-        
-        {/* Previous Draw Info */}
-        {currentDraw && (
-          <div className="absolute bottom-4 flex flex-col items-center gap-1">
-            <div className="px-3 py-1 rounded-full bg-white/90 text-black font-bold">{currentDraw.number}</div>
-            <div className="text-xs text-gray-200 drop-shadow">{currentDraw.color} • {currentDraw.bigSmall}</div>
-          </div>
-        )}
-        
-      </div>
+    <div className="w-full max-w-md mx-auto bg-gray-50 min-h-screen flex flex-col p-2 rounded-2xl">
+      {/* Time Selection Buttons */}
+      <div className="flex gap-3 bg-white rounded-2xl shadow p-4 m-4">
+        {DURATIONS.map((dur, i) => (
+        <button 
+            key={dur} 
+            onClick={() => {
+              setDurationIndex(i);
+              setTimeRemaining(dur);
+            }}
+            
   
+                className={`flex-1 flex flex-col items-center justify-center px-3 py-2 rounded-xl transition-all ${
+                    i === durationIndex
+                    ? 'bg-gold-gradient text-white'
+                    : 'bg-white text-[#768096]'
+                }`}
+                >
 
 
-      {/* Buttons */}
-      <div className="relative">
+            <img 
+              src={`/color/${i === durationIndex ? 'time_active' : 'time-inactive'}.webp`} 
+              className="w-10 h-10 object-contain mb-1" 
+              alt="clock"
+            />
+            <span
+                className={`flex flex-col text-xs leading-tight ${
+                    i === durationIndex ? 'text-white' : 'text-[#768096]'
+                }`}
+                >
+                WinGo
+                <span>{DURATION_LABELS[i]}</span>
+                </span>
 
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <button disabled={bettingLocked} onClick={()=>onSelectColor('green')} className={`py-2 rounded ${bettingLocked?'bg-gray-600':'bg-green-600'} text-white`}>
+          </button>
+        ))}
+      </div>
+ {/* Game Info Section */}
+      <div 
+        className="mx-4 mb-4 rounded-2xl p-4 "
+        style={{
+          backgroundImage: 'url(/color/bg.webp)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <button 
+            onClick={() => setShowRulesModal(true)}
+            className="bg-white/40 px-4 py-2 rounded-full text-white text-sm flex items-center gap-2 hover:bg-white/50 transition"
+          >
+            <span>📖</span> How to play
+          </button>
+          <div className="text-white font-semibold">Time remaining</div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
+            <div className="text-white text-xs">
+              WinGo {DURATION_LABELS[durationIndex]}
+            </div>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map(n => (
+                <div key={n} className="w-6 h-6 rounded-full bg-linear-to-br  flex items-center justify-center">
+                  <img src={`/color/ball_${n}.webp`} alt={`ball ${n}`} className="w-5 h-5" />
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex gap-1">
+            {digits.mins.map((digit, idx) => (
+              <div key={`m${idx}`} className="w-8 h-10 bg-white rounded flex items-center justify-center">
+                <span className="text-2xl font-bold text-gray-800">{digit}</span>
+              </div>
+            ))}
+            <span className="text-white text-2xl font-bold mx-1">:</span>
+            {digits.secs.map((digit, idx) => (
+              <div key={`s${idx}`} className="w-8 h-10 bg-white rounded flex items-center justify-center">
+                <span className="text-2xl font-bold text-gray-800">{digit}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div className="text-white text-xs text-right mt-1">202512281000052525</div>
+      </div>
+      {/* Color Selection */}
+      <div className="flex gap-3 px-4 mb-4">
+        <button 
+          onClick={() => openBetModal('color', 'Green')}
+          className="flex-1 py-3 rounded-lg text-white font-semibold transition bg-green-500 hover:bg-green-600 active:scale-95"
+        >
           Green
         </button>
-        <button disabled={bettingLocked} onClick={()=>onSelectColor('violet')} className={`py-2 rounded ${bettingLocked?'bg-gray-600':'bg-purple-600'} text-white`}>
+        <button 
+          onClick={() => openBetModal('color', 'Violet')}
+          className="flex-1 py-3 rounded-lg text-white font-semibold transition bg-purple-500 hover:bg-purple-600 active:scale-95"
+        >
           Violet
         </button>
-        <button disabled={bettingLocked} onClick={()=>onSelectColor('red')} className={`py-2 rounded ${bettingLocked?'bg-gray-600':'bg-red-600'} text-white`}>
+        <button 
+          onClick={() => openBetModal('color', 'Red')}
+          className="flex-1 py-3 rounded-lg text-white font-semibold transition bg-red-500 hover:bg-red-600 active:scale-95"
+        >
           Red
         </button>
       </div>
 
-      <div className="grid grid-cols-5 gap-2 mb-3">
-        {NUMBERS.map(n => (
-          <button key={n} disabled={bettingLocked} onClick={()=>onSelectNumber(n)} className={`p-1 rounded-xl border border-transparent ${bettingLocked?'opacity-50 cursor-not-allowed':''}`}>
-            <img src={`/color/ball_${n}.webp`} className="w-12 h-12 rounded-full"/>
-          </button>
-        ))}
+      {/* Number Selection */}
+      <div className="grid grid-cols-5 gap-3 px-4 mb-4 bg-white rounded-2xl shadow p-4">
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => {
+          const bgColor = num === 0 || num === 5 ? 'bg-purple-500' :
+                         [1, 3, 7, 9].includes(num) ? 'bg-green-500' :
+                         'bg-red-500';
+          return (
+            <button
+              key={num}
+              onClick={() => openBetModal('number', num)}
+              className={`${bgColor} w-12 h-12 rounded-full text-white font-bold text-lg hover:scale-110 active:scale-95 transition-transform shadow-md`}
+            >
+              <img
+        src={`/color/ball_${num}.webp`}
+        alt={`ball ${num}`}
+        className={`
+          w-12 h-12 rounded-full transition-all
+          
+        `}
+      />
+            </button>
+          );
+        })}
       </div>
 
-      <div className="flex gap-2 items-center mb-3">
-        <button disabled={bettingLocked} onClick={()=>onSelectBigSmall('big')} className={`flex-1 py-2 rounded ${bettingLocked?'bg-gray-600':'bg-green-500'} text-white`}>
+      {/* Big/Small Selection */}
+      <div className="flex gap-0 px-4 mb-4">
+        <button
+          onClick={() => openBetModal('bigSmall', 'Big')}
+          className="flex-1 py-4 font-semibold text-white rounded-l-full bg-orange-400 hover:bg-orange-500 active:scale-95 transition"
+        >
           Big
         </button>
-        <button disabled={bettingLocked} onClick={()=>onSelectBigSmall('small')} className={`flex-1 py-2 rounded ${bettingLocked?'bg-gray-600':'bg-blue-500'} text-white`}>
+        <button
+          onClick={() => openBetModal('bigSmall', 'Small')}
+          className="flex-1 py-4 font-semibold text-white rounded-r-full bg-blue-400 hover:bg-blue-500 active:scale-95 transition"
+        >
           Small
         </button>
       </div>
-      {timeLeft <= 5 && (
-  <div className="absolute inset-0 z-20
-                  flex items-center justify-center
-                   backdrop-blur-sm
-                  rounded-xl">
 
-    {timeLeft > 0 ? (
-      <div className="text-5xl font-extrabold text-yellow-400 ">
-       0 {timeLeft}
+      {/* Balance Display */}
+     
+
+      {/* Bottom Tabs */}
+      <div className="flex bg-[#F6F6F6] rounded-xl overflow-hidden mx-4 mb-2">
+        <button 
+          onClick={() => setActiveTab('Game history')}
+          className={`flex-1 py-3 text-sm ${activeTab === 'Game history' ? 'text-white bg-[#b8926f] font-semibold rounded-xl' : 'text-gray-500'}`}
+        >
+          Game history
+        </button>
+        <button 
+          onClick={() => setActiveTab('Chart')}
+          className={`flex-1 py-3 text-sm ${activeTab === 'Chart' ? 'text-white bg-[#b8926f] font-semibold rounded-xl' : 'text-gray-500'}`}
+        >
+          Chart
+        </button>
+       
+        <button 
+          onClick={() => setActiveTab('Follow Strategy')}
+          className={`flex-1 py-3 text-sm ${activeTab === 'Follow Strategy' ? 'text-white bg-[#b8926f] font-semibold rounded-xl' : 'text-gray-500'}`}
+        >
+         Follow Strategy
+        </button>
+
+        <button 
+          onClick={() => setActiveTab('My history')}
+          className={`flex-1 py-3 text-sm ${activeTab === 'My history' ? 'text-white bg-[#b8926f] font-semibold rounded-xl' : 'text-gray-500'}`}
+        >
+          My history
+        </button>
       </div>
-    ) : (
-      <div className="text-3xl font-extrabold text-red-500">
-        TRADE CLOSED
-      </div>
-    )}
 
-  </div>
-)}
+      {/* Tab Content */}
+      
+        {activeTab === "Game history" && (
+          <GameHistory
+            gameHistory={gameHistory}
+            getColorClass={getColorClass}
+          />
+        )}
+        
+        {activeTab === "Chart" && <Chart gameHistory={gameHistory} />}
+        
+        {activeTab === "Follow Strategy" && <FollowStrategy />}
+        
+        {activeTab === "My history" && (
+          <MyHistory
+            myHistory={myHistory}
+            selectedHistoryItem={selectedHistoryItem}
+            setSelectedHistoryItem={setSelectedHistoryItem}
+            getColorClass={getColorClass}
+          />
+        )}
+      
 
-    </div>
-    </div>
-     {/* RIGHT SIDE TAB */}
-            <div className="w-full md:w-96">
-              <div className="flex gap-2 mb-4 bg-[#0d1317] p-2 rounded-xl border border-[#1f2a33]">
-                {['Play','Player History','History','How To Play'].map(t=>(
-                  <button key={t} onClick={()=>setTab(t as any)} className={`flex-1 py-2 rounded-lg font-semibold capitalize transition ${tab===t?'bg-[#00c46c] text-black shadow-[0_0_10px_#00c46c]':'bg-[#111b21] text-gray-300 border border-[#1f2a33] hover:bg-[#162229]'}`}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-
-                        {tab === 'Player History' && (
-              <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
-                <table className="w-full text-sm">
-                  <thead className="text-xs text-gray-500">
-                    <tr>
-                      <th>ID</th>
-                      <th>Bet</th>
-                      <th>Amt</th>
-                      <th>Mult</th>
-                      <th>Result</th>
-                      <th>P/L</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {betHistory.map((h, i) => (
-                      <tr key={i} className="border-t text-center text-xs">
-                        <td>{h.betId}</td>
-                        <td>{h.betValue}</td>
-                        <td>{h.betAmount}</td>
-                        <td>{h.multiplier}</td>
-                        <td>{h.resultNumber}</td>
-
-                        {/* Win or Loss display */}
-                        <td className={h.status === "win" ? "text-green-400" : "text-red-400"}>
-                          {h.status === "win"
-                            ? `+${h.winAmount}`
-                            : `-${h.lossAmount}`}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-
-              {tab==='History' && (
-                <div className="bg-[#101b22dd] rounded p-2 shadow max-h-72 overflow-auto">
-                  <table className="w-full text-sm">
-                    <thead className="text-xs text-gray-500"><tr><th>Period</th><th>Num</th><th>BS</th><th>Color</th></tr></thead>
-                    <tbody>
-                      {history.map((h,i)=>(
-                        <tr key={i} className="border-t text-center text-sm">
-                          <td>{new Date(h.period).toLocaleTimeString()}</td>
-                          <td>{h.number}</td>
-                          <td>{h.bigSmall}</td>
-                          <td><span className={`inline-block w-3 h-3 rounded-full ${h.color==='red'? 'bg-red-500' : h.color==='green'? 'bg-green-500' : 'bg-purple-500'}`}></span></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-              {tab === 'How To Play' && (
-                <div className="bg-[#101b22dd] rounded p-4 shadow max-h-72 overflow-auto text-sm text-gray-200 space-y-2">
-                  <ol className="list-decimal list-inside space-y-2">
-                    <li>
-                      <span className="text-green-400 font-semibold">Select green:</span> If the result shows 
-                      <span className="text-green-400 font-semibold"> 1, 3, 7, 9</span> you will get <span className="font-bold">98 * 2 = 196</span>;  
-                      If the result shows <span className="text-green-400 font-semibold">5</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
-                    </li>
-                    <li>
-                      <span className="text-red-500 font-semibold">Select red:</span> If the result shows 
-                      <span className="text-red-500 font-semibold">2, 4, 6, 8</span>, you will get <span className="font-bold">98 * 2 = 196</span>;  
-                      If the result shows <span className="text-red-500 font-semibold">0</span>, you will get <span className="font-bold">98 * 1.5 = 147</span>
-                    </li>
-                    <li>
-                      <span className="text-purple-500 font-semibold">Select violet:</span> If the result shows 
-                      <span className="text-purple-500 font-semibold">0 or 5</span>, you will get <span className="font-bold">98 * 4.5 = 441</span>
-                    </li>
-                    <li>
-                      <span className="text-yellow-400 font-semibold">Select number:</span> If the result is the same as the number you selected, you will get <span className="font-bold">98 * 9 = 882</span>
-                    </li>
-                    <li>
-                      <span className="text-blue-400 font-semibold">Select big:</span> If the result shows 
-                      <span className="text-blue-400 font-semibold">5, 6, 7, 8, 9</span>, you will get <span className="font-bold">98 * 2 = 196</span>
-                    </li>
-                    <li>
-                      <span className="text-pink-400 font-semibold">Select small:</span> If the result shows 
-                      <span className="text-pink-400 font-semibold">0, 1, 2, 3, 4</span>, you will get <span className="font-bold">98 * 2 = 196</span>
-                    </li>
-                  </ol>
-                </div>
-              )}
-             </div>
+      {/* Rules Modal */}
+      {showRulesModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[80vh] overflow-auto">
+            <div className="sticky top-0 bg-linear-to-r from-yellow-500 to-orange-500 border-b p-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">How to Play</h3>
+              <button
+                onClick={() => setShowRulesModal(false)}
+                className="text-3xl text-white hover:text-gray-200"
+              >
+                ×
+              </button>
             </div>
-              <div className= "flex items-center ">
-        <RiseTopBar/>
-        
-        </div>
-          </div>
-        
-
-        {/* Bet Modal */}
-        <AnimatePresence>
-          {showPopup && (
-            <BetModal selectedNumber={selectedNumber} selectedColor={selectedColor} selectedBigSmall={selectedBigSmall} betAmount={betAmount} setBetAmount={setBetAmount} balance={balance} onCancel={handleCancel} onConfirm={handleConfirmBet} />
-          )}
-        </AnimatePresence>
-
-        {/* Result Popup */}
-        <AnimatePresence>
-          {resultPopup && (
-            <motion.div initial={{scale:0.5,opacity:0}} animate={{scale:1,opacity:1}} exit={{scale:0.5,opacity:0}} className="fixed inset-0 z-50 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"/>
-              <div className="relative w-80 overflow-hidden rounded-3xl shadow-xl text-center border border-white/20">
-                <div className="w-full p-6 pb-10 relative" style={{backgroundImage:`url('/color/${resultPopup.type==='win'?'win.webp':'lose.webp'}')`,backgroundSize:'cover',backgroundPosition:'center'}}>
-                  <img src={`/color/${resultPopup.type==='win'?'win.webp':'lose.webp'}`} className="w-28 mx-auto drop-shadow-xl"/>
-                  <h2 className="text-2xl font-bold text-white mt-3 drop-shadow">{resultPopup.type==='win'?'Congratulations!':'Sorry'}</h2>
-                   <div className="bg-[#e6f0ff] p-6 pt-8 rounded-b-3xl">
-                  <div className="flex items-center justify-center gap-2 text-sm">
-                    <span className="px-3 py-1 rounded-full bg-white border text-[#445] shadow">{resultPopup.round.color}</span>
-                    <span className="px-3 py-1 rounded-full bg-white border text-[#445] shadow">{resultPopup.round.number}</span>
-                    <span className="px-3 py-1 rounded-full bg-white border text-[#445] shadow">{resultPopup.round.bigSmall}</span>
-                  </div>
-                  <div className="mt-5 text-xl font-extrabold text-[#3c4c66]">{resultPopup.type==='win'?'WIN':'LOSE'}</div>
-                  <div className="mt-2 text-xs text-gray-600">Period: {resultPopup.round.period}</div>
-                  <p className="text-gray-500 text-xs mt-4">3 seconds auto close</p>
-                </div>
+            <div className="p-6">
+              <div className="bg-gray-100 rounded-lg p-4 text-sm text-black space-y-3">
+                <ol className="list-decimal list-inside space-y-3">
+                  <li>
+                    <span className="text-green-500 font-semibold">Select green:</span> If the result shows 
+                    <span className="text-green-500 font-semibold"> 1, 3, 7, 9</span> you will get <span className="font-bold">₹196</span>;  
+                    If the result shows <span className="text-green-500 font-semibold"> 5</span>, you will get <span className="font-bold">₹147</span>
+                  </li>
+                  <li>
+                    <span className="text-red-500 font-semibold">Select red:</span> If the result shows 
+                    <span className="text-red-500 font-semibold"> 2, 4, 6, 8</span>, you will get <span className="font-bold">₹196</span>;  
+                    If the result shows <span className="text-red-500 font-semibold"> 0</span>, you will get <span className="font-bold">₹147</span>
+                  </li>
+                  <li>
+                    <span className="text-purple-500 font-semibold">Select violet:</span> If the result shows 
+                    <span className="text-purple-500 font-semibold"> 0 or 5</span>, you will get <span className="font-bold">₹441</span>
+                  </li>
+                  <li>
+                    <span className="text-yellow-600 font-semibold">Select number:</span> If the result is the same as the number you selected, you will get <span className="font-bold">₹882</span>
+                  </li>
+                  <li>
+                    <span className="text-orange-500 font-semibold">Select big:</span> If the result shows 
+                    <span className="text-orange-500 font-semibold"> 5, 6, 7, 8, 9</span>, you will get <span className="font-bold">₹196</span>
+                  </li>
+                  <li>
+                    <span className="text-blue-500 font-semibold">Select small:</span> If the result shows 
+                    <span className="text-blue-500 font-semibold"> 0, 1, 2, 3, 4</span>, you will get <span className="font-bold">₹196</span>
+                  </li>
+                </ol>
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                  <p className="font-semibold text-yellow-800">Note:</p>
+                  <p className="text-yellow-700">All winnings are calculated after 2% tax deduction from your bet amount.</p>
                 </div>
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          </div>
         </div>
-        
-        </motion.main>
- </div>
-   {/* Mobile Bottom Bar */}
+      )}
+
+      {/* Bet Confirmation Modal */}
+      {showBetModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end justify-center pb-10 z-50">
+          <div 
+            className="w-full max-w-md rounded-t-3xl shadow-2xl overflow-hidden animate-slide-up"
+            style={{ backgroundColor: getModalColor() }}
+          >
+            {/* Header */}
+            <div className="text-center py-4 px-6 text-white">
+              <h3 className="text-lg font-bold">WinGo 3 Min</h3>
+              <div className="mt-2 bg-white rounded-lg py-2 px-4 text-gray-800 font-semibold">
+                Select {selectedColor || (selectedNumber !== null ? selectedNumber : betType)}
+              </div>
+            </div>
+
+            {/* White content area */}
+            <div className="bg-white rounded-t-3xl p-6">
+              {/* Balance Selection */}
+              <div className="mb-6">
+                <h4 className="text-gray-700 font-semibold mb-3">Balance</h4>
+                <div className="flex gap-2">
+                  {[1, 10, 100, 1000].map(amount => (
+                    <button
+                      key={amount}
+                      onClick={() => setBetAmount(amount)}
+                      className={`flex-1 py-2 rounded-lg font-semibold transition ${
+                        betAmount === amount ? 'text-white shadow-md' : 'bg-gray-100 text-gray-600'
+                      }`}
+                      style={betAmount === amount ? { backgroundColor: getModalColor() } : {}}
+                    >
+                      {amount}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quantity */}
+              <div className="mb-6">
+                <h4 className="text-gray-700 font-semibold mb-3">Quantity</h4>
+                <div className="flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => setBetQuantity(Math.max(1, betQuantity - 1))}
+                    className="w-10 h-10 rounded-lg font-bold text-xl text-gray-700 shadow-md"
+                    style={{ backgroundColor: getModalColor() }}
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={betQuantity}
+                    onChange={(e) => setBetQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-20 text-center text-gray-700 border-2 border-gray-200 rounded-lg py-2 font-semibold"
+                  />
+                  <button
+                    onClick={() => setBetQuantity(betQuantity + 1)}
+                    className="w-10 h-10 rounded-lg font-bold text-xl text-white shadow-md"
+                    style={{ backgroundColor: getModalColor() }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Multiplier Selection */}
+              <div className="mb-6">
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {['X1', 'X5', 'X10', 'X20', 'X50', 'X100'].map(mult => (
+                    <button
+                      key={mult}
+                      onClick={() => setSelectedMultiplier(mult)}
+                      className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition ${
+                        selectedMultiplier === mult ? 'text-white shadow-md' : 'bg-gray-100 text-gray-600'
+                      }`}
+                      style={selectedMultiplier === mult ? { backgroundColor: getModalColor() } : {}}
+                    >
+                      {mult}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Agreement Checkbox */}
+              <div className="mb-6 flex items-center gap-2">
+                <button
+                  onClick={() => setAgreeToRules(!agreeToRules)}
+                  className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                    agreeToRules ? 'border-green-500' : 'border-gray-300'
+                  }`}
+                  style={agreeToRules ? { backgroundColor: getModalColor() } : {}}
+                >
+                  {agreeToRules && (
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </button>
+                <span className="text-sm text-gray-600">
+                  I agree <span className="text-red-500">《Pre-sale rules》</span>
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowBetModal(false)}
+                  className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmBet}
+                  className="flex-1 py-3 rounded-lg font-semibold text-white transition shadow-md"
+                  style={{ backgroundColor: getModalColor() }}
+                >
+                  Total amount ₹{(betAmount * betQuantity).toFixed(2)}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+     
+    </div>
+   
+    </motion.main>
+    </div>
+    
+      {/* Mobile Bottom Bar */}
       {isMobile && (
         <div className="fixed bottom-0 w-full z-50 h-16">
           <MobileBottomBar onBrowseClick={() => setSidebarOpen(true)} />
         </div>
       )}
-   {/* Mobile Sidebar */}
-        <AnimatePresence>
-          {isMobile && sidebarOpen && (
-            <motion.div
-              initial={{ x: -256 }}
-              animate={{ x: 0 }}
-              exit={{ x: -256 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg"
-            >
-              <Sidebar
-                collapsed={false}
-                setCollapsed={() => {}}
-                open={sidebarOpen}
-                setOpen={setSidebarOpen}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-  
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
         {isMobile && sidebarOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.3 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black z-40"
-            onClick={() => setSidebarOpen(false)}
-          />
+            initial={{ x: -256 }}
+            animate={{ x: 0 }}
+            exit={{ x: -256 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg"
+          >
+            <Sidebar
+              collapsed={false}
+              setCollapsed={() => {}}
+              open={sidebarOpen}
+              setOpen={setSidebarOpen}
+            />
+          </motion.div>
         )}
-  </div> 
-    
-    
+      </AnimatePresence>
+  
+      {isMobile && sidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+    </div>
   );
 }
-
-// ------------------- BetModal -------------------
-function BetModal({ selectedNumber, selectedColor, selectedBigSmall, betAmount, setBetAmount, balance, onCancel, onConfirm }:{
-  selectedNumber:number|null, selectedColor:string|null, selectedBigSmall:'big'|'small'|null, betAmount:number, setBetAmount: (v:number)=>void, balance:number, onCancel:()=>void, onConfirm:()=>void
-}){
-  return (
-    <>
-  {/* Backdrop */}
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 0.7 }}
-    exit={{ opacity: 0 }}
-    onClick={onCancel}
-    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40"
-  />
-
-  {/* Popup */}
-  <motion.div
-    initial={{ y: 200, opacity: 0 }}
-    animate={{ y: 0, opacity: 1 }}
-    exit={{ y: 200, opacity: 0 }}
-    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-    className="fixed bottom-10 left-0 w-full md:max-w-xl md:right-1/2 md:translate-x-1/2 
-               bg-[#0A0F12] border-t border-[#1f2a33] shadow-[0_-4px_20px_rgba(0,0,0,0.6)] 
-               rounded-t-3xl p-6 z-50"
-  >
-
-    {/* Header */}
-    <div className="text-center mb-5">
-      <div className="text-xs font-semibold text-gray-400 tracking-wide">WinGo</div>
-      <div className="text-2xl font-bold text-white mt-1">Confirm Bet</div>
-    </div>
-
-    {/* Selected Items */}
-    <div className="flex items-center gap-3 mb-5 justify-center flex-wrap">
-      {selectedNumber !== null && (
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-          <img
-            src={`/color/ball_${selectedNumber}.webp`}
-            className="w-10 h-10 rounded-full shadow-md"
-          />
-          <div className="font-semibold text-white text-lg">{selectedNumber}</div>
-        </div>
-      )}
-      {selectedColor && (
-        <div className="flex items-center gap-2 bg-white/10 border border-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
-          <div className={`w-5 h-5 rounded-full shadow-md ${
-              selectedColor === "red"? "bg-red-500" : selectedColor === "green"? "bg-green-500" : "bg-indigo-500"
-            }`}/>
-          <div className="font-semibold text-white capitalize">{selectedColor}</div>
-        </div>
-      )}
-      {selectedBigSmall && (
-        <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-xl">
-          <div className="font-semibold text-white capitalize">{selectedBigSmall}</div>
-        </div>
-      )}
-    </div>
-
-    {/* Balance & Input */}
-    <div className="bg-[#121A1F] border border-[#1f2a33] p-4 rounded-2xl mb-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-sm text-gray-400">Balance</div>
-        <div className="font-bold text-white">{balance}</div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-400">Bet Amount</div>
-
-        <div className="flex items-center gap-3">
-          <button onClick={()=>setBetAmount(Math.max(1, betAmount-1))} className="w-9 h-9 bg-[#0f181d] border border-[#24333d] text-gray-300 rounded-lg hover:bg-[#162229] transition">-</button>
-          <div className="text-xl font-bold text-white">{betAmount}</div>
-          <button onClick={()=>setBetAmount(betAmount+1)} className="w-9 h-9 bg-[#0f181d] border border-[#24333d] text-gray-300 rounded-lg hover:bg-[#162229] transition">+</button>
-        </div>
-      </div>
-
-      <div className="flex gap-2 mt-4 flex-wrap">
-        {[10,20,50,100,200].map(v=>(
-          <button key={v} onClick={()=>setBetAmount(v)} className="px-4 py-1 bg-[#0f181d] border border-[#24333d] text-gray-300 rounded-lg text-sm hover:bg-[#162229] transition">{v}</button>
-        ))}
-      </div>
-    </div>
-
-    {/* Buttons */}
-    <div className="flex gap-3">
-      <button className="flex-1 py-3 rounded-xl bg-[#1a252c] text-gray-300 border border-[#24333d] hover:bg-[#1f2e36] transition" onClick={onCancel}>Cancel</button>
-      <button className="flex-1 py-3 rounded-xl bg-[#00c46c] text-[#001a10] font-bold shadow-[0_0_12px_#00c46c] hover:bg-[#00d778] transition" onClick={onConfirm}>Total ₹{betAmount}.00</button>
-    </div>
-
-  </motion.div>
-</>
-  );
-}
-
-

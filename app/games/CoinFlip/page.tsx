@@ -363,7 +363,7 @@ const FlipGame: React.FC = () => {
           }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <div className="flex flex-col lg:flex-row gap-4 p-3 min-h-screen">
+          <div className="flex flex-col lg:flex-row gap-4  min-h-screen">
             {/* Left Panel - Betting Controls */}
             <div className="w-full lg:w-80 bg-[#0f1e2e] rounded-xl p-4 space-y-4 order-2 lg:order-1">
               {/* Error Display */}
@@ -483,7 +483,7 @@ const FlipGame: React.FC = () => {
             </div>
 
             {/* Center - Coin Display */}
-            <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-emerald-500/20 bg-gradient-to-b from-[#0f1e2e] to-[#0a1628] py-10 lg:py-0 order-1 lg:order-2">
+            <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-emerald-500/20 flip-header-bg bg-gradient-to-b from-[#0f1e2e] to-[#0a1628] py-10 lg:py-0 order-1 lg:order-2">
               <div className="relative w-64 h-64 perspective">
                 {isFlipping && (
                   <div className="coin-flip animate-coin-flip bg-gradient-to-br from-yellow-400 to-yellow-600"></div>
@@ -568,38 +568,56 @@ const FlipGame: React.FC = () => {
 
       {/* Styles */}
       <style jsx>{`
-        .perspective {
-          perspective: 1000px;
-        }
+  .perspective {
+    perspective: 1200px;
+  }
 
-        .coin-flip {
-          width: 256px;
-          height: 256px;
-          border-radius: 50%;
-          border: 8px solid white;
-          box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
-          transform-style: preserve-3d;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
+  .coin-flip {
+    width: 256px;
+    height: 256px;
+    border-radius: 50%;
+    border: 8px solid white;
+    box-shadow: 
+      0 0 40px rgba(255, 215, 0, 0.6),
+      inset 0 0 20px rgba(255,255,255,0.4);
+    transform-style: preserve-3d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+  }
 
-        @keyframes coinFlip {
-          0% {
-            transform: rotateX(0deg) rotateY(0deg);
-          }
-          50% {
-            transform: rotateX(720deg) rotateY(360deg);
-          }
-          100% {
-            transform: rotateX(1440deg) rotateY(720deg);
-          }
-        }
+  @keyframes realisticCoinFlip {
+    0% {
+      transform: rotateX(0deg) rotateZ(0deg);
+    }
 
-        .animate-coin-flip {
-          animation: coinFlip 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-      `}</style>
+    20% {
+      transform: rotateX(720deg) rotateZ(10deg);
+    }
+
+    50% {
+      transform: rotateX(1440deg) rotateZ(-10deg);
+    }
+
+    75% {
+      transform: rotateX(1800deg) rotateZ(5deg);
+    }
+
+    90% {
+      transform: rotateX(1860deg) rotateZ(-2deg);
+    }
+
+    100% {
+      transform: rotateX(1980deg) rotateZ(0deg);
+    }
+  }
+
+  .animate-coin-flip {
+    animation: realisticCoinFlip 2.2s cubic-bezier(0.15, 0.6, 0.25, 1);
+  }
+`}</style>
+
     </div>
   );
 };

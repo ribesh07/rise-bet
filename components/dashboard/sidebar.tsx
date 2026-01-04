@@ -50,6 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (pathname.includes("/vipsidebar")) setActiveItem("vip");
     if (pathname.includes("/blog")) setActiveItem("blog");
     if (pathname.includes("/responsiblegambling")) setActiveItem("gambling");
+    
   }, [pathname]);
 
   useEffect(() => {
@@ -166,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <SidebarItem
             icon={<MessageSquare size={28} />}
             label="Forum"
-            route="#"
+            route="/forum"
             collapsed={collapsed}
             active={activeItem === "forum"}
             onActive={() => setActiveItem("forum")}

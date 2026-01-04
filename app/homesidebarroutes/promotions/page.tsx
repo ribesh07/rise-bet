@@ -14,32 +14,17 @@ import { apiRequest } from "@/utils/ApiHelper";
 
 // ✅ Type for Promotion
 export type Promotion = {
+  id: number;
   title: string;
   description: string;
-  ends: string;
   image: string;
   group?: string;
+  publishedAt: string;
+  endsAt: string;
 };
 
-// ✅ Sample Data
- const promotions: Promotion[] = [
-  { title: '$500,000 All in or Fold Jackpot', description: 'What’s All in or Fold (AoF) without a Jackpot?', ends: '6:44 PM 12/31/2026', image: '/images/allin.png', group: 'casino' },
-  { title: "Risebet’s Weekly Raffle", description: '$75,000 Weekly Raffle!', ends: '6:44 PM 12/31/2025', image: '/images/raffle.png', group: 'casino' },
-  { title: "Risebet’s Daily Races", description: '$100,000 every 24 hours!', ends: '7:45 PM 11/29/2025', image: '/images/races.png', group: 'casino' },
-  { title: 'Risebet vs Eddie', description: '$50,000 Prize Pool!', ends: '10:45 AM 10/20/2025', image: '/images/eddie.png', group: 'community' },
-  { title: 'Conquer the Casino!', description: '$50,000 Prize Pool!', ends: '10:45 AM 10/24/2025', image: '/images/casino.png', group: 'casino' },
-  { title: 'The Level Up', description: '$40,000 Prize Pool!', ends: '10:45 AM 10/22/2025', image: '/images/levelup.png', group: 'community' },
-  { title: 'Champions League - Bad Beat Insurance', description: 'Refund if your selection leads at 80’ but doesn’t win the match.', ends: '6:44 PM 1/20/2026', image: '/images/ucl.png', group: 'sport' },
-  { title: 'Premier League - 2 Goal Lead Payout', description: 'Paid out if your selection is leading by 2+ goals but doesn’t win.', ends: '7:44 PM 5/31/2026', image: '/images/epl.png', group: 'sport' },
-  { title: 'Everton - Prize Pool', description: 'Receive a share of $25,000 if Everton win by 2+ goals.', ends: '7:44 PM 5/31/2026', image: '/images/everton.png', group: 'sport' },
-  { title: 'NFL - 3rd Quarter Payout', description: 'Lead by 7+ at the end of the 3rd quarter? Get paid out.', ends: '6:44 PM 2/20/2026', image: '/images/nfl.png', group: 'sport' },
-  { title: 'NBA - Half Time Payout', description: 'Lead by 12+ at half time? Get paid out.', ends: '7:44 PM 5/31/2026', image: '/images/nba.png', group: 'sport' },
-  { title: 'Horse Racing - Caulfield Cup', description: 'Refund if your horse runs 2nd to 10th.', ends: '12:15 PM 10/18/2025', image: '/images/horse.png', group: 'sport' },
-  { title: 'Everton - Prize Pool', description: 'Receive a share of $25,000 if Everton win by 2+ goals.', ends: '7:44 PM 5/31/2026', image: '/images/everton.png', group: 'sport' },
-  { title: 'NFL - 3rd Quarter Payout', description: 'Lead by 7+ at the end of the 3rd quarter? Get paid out.', ends: '6:44 PM 2/20/2026', image: '/images/nfl.png', group: 'sport' },
-  { title: 'NBA - Half Time Payout', description: 'Lead by 12+ at half time? Get paid out.', ends: '7:44 PM 5/31/2026', image: '/images/nba.png', group: 'sport' },
-  { title: 'Horse Racing - Caulfield Cup', description: 'Refund if your horse runs 2nd to 10th.', ends: '12:15 PM 10/18/2025', image: '/images/horse.png', group: 'sport' },
-];
+
+
 
 const categories = ['All Promotions', 'Casino', 'Sport', 'Community', 'Poker'];
 
@@ -53,6 +38,31 @@ export default function PromotionsPage() {
    const [dashboardDetails, setDashboardDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
   const mainRef = useRef<HTMLDivElement | null>(null);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+const [promoLoading, setPromoLoading] = useState(true);
+useEffect(() => {
+  const fetchPromotions = async () => {
+    try {
+      const res = await apiRequest(
+        "/admin/control/promotions",
+        false,
+        {
+          method: "GET",
+        }
+      );
+
+      if (res?.success) {
+        setPromotions(res.data || []);
+      }
+    } catch (error) {
+      console.error("PROMOTIONS API ERROR:", error);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  fetchPromotions();
+}, []);
 
   // ✅ Detect screen size
   useEffect(() => {

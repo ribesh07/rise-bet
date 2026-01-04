@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <SidebarItem
             icon={<MessageSquare size={28} />}
             label="Forum"
-            route="#"
+            route="/forum"
             collapsed={collapsed}
             active={activeItem === "forum"}
             onActive={() => setActiveItem("forum")}

@@ -1,0 +1,21 @@
+:root {
+  --gold-gradient: linear-gradient(90deg, #D9AD82 0%, #B1835A 100%);
+}
+
+.bg-gold-gradient {
+  background: var(--gold-gradient);
+}
+
+.rounded-bet {
+  border-radius: 0.53333rem;
+}
+
+.rounded-right-only {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.rounded-left-only {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

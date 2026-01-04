@@ -218,3 +218,36 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiO
 GET https://api.playrise.vip/api/v1/game/coinflip/result
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NjkzNDY4MiwiZXhwIjoxNzY5NTI2NjgyfQ.H2m43byxqC6F3YBGY4Uu9w636JXnRvpc1blW75jjbG0
+
+### rps round bet
+POST https://api.playrise.vip/api/v1/game/rps/play
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NjkzNDY4MiwiZXhwIjoxNzY5NTI2NjgyfQ.H2m43byxqC6F3YBGY4Uu9w636JXnRvpc1blW75jjbG0
+
+{
+  "choice": "rock",
+  "amount": 100,
+  "currency": "INR"
+}
+
+### rps round cashout
+POST https://api.playrise.vip/api/v1/game/rps/cashout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "matchId":1636
+}
+
+### rps round result
+GET https://api.playrise.vip/api/v1/game/rps/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+### promotion result
+GET https://api.playrise.vip/api/v1/admin/control/blogs
+Content-Type: application/json
+
+### promotion result
+GET https://api.playrise.vip/api/v1/admin/control/promotions
+Content-Type: application/json
