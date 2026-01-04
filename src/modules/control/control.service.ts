@@ -119,20 +119,36 @@ export class ControlService {
     }
   }
 
-  findAllPromotion(group?: string) {
-    return this.prisma.promotion.findMany({
+  async findAllPromotion(baseUrl : string,group?: string) {
+    const data = await this.prisma.promotion.findMany({
       where: {
         isActive: true,
         ...(group && { group: group as any }),
       },
       orderBy: { createdAt: 'desc' },
     });
+    return {
+      success : true ,
+      data : data.map( d => ({
+        ...d ,
+        image : d.image ?  `https://api.playrise.vip${d.image}`: null
+        // image : `${baseUrl}${d.image}`
+      }))
+    }
   }
 
-  findOnePromotion(id: number) {
-    return this.prisma.promotion.findUnique({
+ async findOnePromotion(id: number , baseUrl : string) {
+   const data =  await this.prisma.promotion.findUnique({
       where: { id },
     });
+
+    return {
+      success : true ,
+      data : {
+        ...data ,
+        image :data?.image ? `https://api.playrise.vip${data?.image}`: null
+      }
+    }
   }
 
   async updatePromotion(
@@ -195,20 +211,36 @@ export class ControlService {
     }
   }
 
-  findAllBlogs(group?: string) {
-    return this.prisma.blog.findMany({
+ async findAllBlogs(group?: string) {
+    const data = await this.prisma.blog.findMany({
       where: {
         isActive: true,
         ...(group && { group: group as any }),
       },
       orderBy: { createdAt: 'desc' },
     });
+
+       return {
+      success : true ,
+      data : data.map( d => ({
+        ...d ,
+        image : d.image ? `https://api.playrise.vip${d.image}` : null
+        // image : `${baseUrl}${d.image}`
+      }))
+    }
   }
 
-  findOneBlogs(id: number) {
-    return this.prisma.blog.findUnique({
+async findOneBlogs(id: number) {
+   const data = await this.prisma.blog.findUnique({
       where: { id },
     });
+    return {
+      success : true ,
+      data : {
+        ...data ,
+        image : data?.image ?  `https://api.playrise.vip${data.image}` : null
+      }
+    }
   }
 
   async updateBlogs(

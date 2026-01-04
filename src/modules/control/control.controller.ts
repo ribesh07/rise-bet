@@ -103,13 +103,16 @@ async createPromotion(
 
 
   @Get("promotions")
-  findAllPromotion(@Query('group') group?: string) {
-    return this.controlService.findAllPromotion(group);
+  findAllPromotion( @Req() req:any,@Query('group') group?: string) {
+
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    return this.controlService.findAllPromotion(baseUrl , group);
   }
 
   @Get('promotions/:id')
-  findOnePromotion(@Param('id') id: string) {
-    return this.controlService.findOnePromotion(+id);
+  findOnePromotion(@Param('id') id: string , @Req() req:any) {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    return this.controlService.findOnePromotion(+id , baseUrl);
   }
 
 @UseGuards(JwtAuthGuard, AdminGuard)

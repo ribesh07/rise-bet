@@ -74,6 +74,10 @@ Content-Type: application/json
 GET http://[::1]:3084/api/v1/admin/control/promotions HTTP/1.1
 Content-Type: application/json
 
+### get blogs
+GET http://[::1]:3084/api/v1/admin/control/blogs HTTP/1.1
+Content-Type: application/json
+
 ### get categories
 DELETE  http://[::1]:3084/api/v1/admin/control/categories/?name=Other HTTP/1.1
 Content-Type: application/json
