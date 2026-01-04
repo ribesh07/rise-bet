@@ -10,159 +10,20 @@ import MobileBottomBar from '@/components/mobilebuttombar';
 import HeroBanner from '@/components/blog/herobanner';
 import CategoryTabs from '@/components/blog/categorytabs';
 import BlogList from '@/components/blog/bloglisthome';
+import { apiRequest } from '@/utils/ApiHelper';
 
 // ✅ Type for Blog
 export type Blog = {
+  id: number;
   title: string;
   description: string;
-  date: string;
   image: string;
   group?: string;
+  publishedAt: string; // from API
 };
 
 // ✅ Sample Data
-const Blogs: Blog[] = [
-   {
-    title: "Thanksgiving Slots & Black Friday Promos",
-    description: "Celebrate Thanksgiving on rise.com! Play our best thanksgiving-themed slot...",
-    date: "October 20, 2025",
-    group: "rise News",
-    image: "/images/blog1.png",
-  },
-  {
-    title: "New Slot Games & Bet Bonuses at rise.com - Oct 17th 2025",
-    description: "Discover new games, promos & Esport updates from October 17th 2025!",
-    date: "October 17, 2025",
-    group: "Casino",
-    image: "/images/blog2.png",
-  },
-  {
-    title: "How to Play Casino Card Games",
-    description: "Discover the best casino card games & learn to play them online at rise!",
-    date: "October 17, 2025",
-    group: "How to Guides",
-    image: "/images/blog3.png",
-  },
-  {
-    title: "Latest Horse Racing News - Free Tips & Today's Picks",
-    description: "Get the latest horse racing news & expert picks for races worldwide!",
-    date: "October 17, 2025",
-    group: "Sport",
-    image: "/images/blog4.png",
-  },
-  {
-    title: "Frankie Dettori Interview: October Horse Racing News",
-    description: "World’s greatest jockey Frankie Dettori shares his horse racing expertise...",
-    date: "October 16, 2025",
-    group: "Sport",
-    image: "/images/blog5.png",
-  },
-  {
-    title: "Sergio Agüero: October 2025 Football Insights & Predictions",
-    description: "Ambassador Sergio Agüero talks EPL, Champions League, La Liga...",
-    date: "October 15, 2025",
-    group: "Sport",
-    image: "/images/blog6.png",
-  },
-  {
-    title: "UFC Picks & Expert UFC Fight Card Predictions",
-    description: "Expert picks for the UFC 321 hosted in Abu Dhabi Etihad Arena!",
-    date: "October 15, 2025",
-    group: "Sport",
-    image: "/images/blog7.png",
-  },
-  {
-    title: "How to Play Tarot on rise",
-    description: "Learn how to play Tarot by rise Originals & reveal wins up to 5,000€!",
-    date: "October 15, 2025",
-    group: "How to Guides",
-    image: "/images/blog8.png",
-  },
-  {
-    title: "How to Play Slots for Free",
-    description: "Test new casino online games & enjoy unique slot features at rise for free!",
-    date: "October 13, 2025",
-    group: "Casino",
-    image: "/images/blog9.png",
-  },
-  {
-    title: "Dota 2 DreamLeague Predictions - MOBA Betting Picks on rise",
-    description: "Get the latest picks & news for Dota 2’s DreamLeague tournament!",
-    date: "October 9, 2025",
-    group: "Esports",
-    image: "/images/blog10.png",
-  },
-  {
-    title: "Thanksgiving Slots & Black Friday Promos",
-    description: "Celebrate Thanksgiving on rise.com! Play our best thanksgiving-themed slot...",
-    date: "October 20, 2025",
-    group: "rise News",
-    image: "/images/blog1.png",
-  },
-  {
-    title: "New Slot Games & Bet Bonuses at rise.com - Oct 17th 2025",
-    description: "Discover new games, promos & Esport updates from October 17th 2025!",
-    date: "October 17, 2025",
-    group: "Casino",
-    image: "/images/blog2.png",
-  },
-  {
-    title: "How to Play Casino Card Games",
-    description: "Discover the best casino card games & learn to play them online at rise!",
-    date: "October 17, 2025",
-    group: "How to Guides",
-    image: "/images/blog3.png",
-  },
-  {
-    title: "Latest Horse Racing News - Free Tips & Today's Picks",
-    description: "Get the latest horse racing news & expert picks for races worldwide!",
-    date: "October 17, 2025",
-    group: "Sport",
-    image: "/images/blog4.png",
-  },
-  {
-    title: "Frankie Dettori Interview: October Horse Racing News",
-    description: "World’s greatest jockey Frankie Dettori shares his horse racing expertise...",
-    date: "October 16, 2025",
-    group: "Sport",
-    image: "/images/blog5.png",
-  },
-  {
-    title: "Sergio Agüero: October 2025 Football Insights & Predictions",
-    description: "Ambassador Sergio Agüero talks EPL, Champions League, La Liga...",
-    date: "October 15, 2025",
-    group: "Sport",
-    image: "/images/blog6.png",
-  },
-  {
-    title: "UFC Picks & Expert UFC Fight Card Predictions",
-    description: "Expert picks for the UFC 321 hosted in Abu Dhabi Etihad Arena!",
-    date: "October 15, 2025",
-    group: "Sport",
-    image: "/images/blog7.png",
-  },
-  {
-    title: "How to Play Tarot on rise",
-    description: "Learn how to play Tarot by rise Originals & reveal wins up to 5,000€!",
-    date: "October 15, 2025",
-    group: "How to Guides",
-    image: "/images/blog8.png",
-  },
-  {
-    title: "How to Play Slots for Free",
-    description: "Test new casino online games & enjoy unique slot features at rise for free!",
-    date: "October 13, 2025",
-    group: "Casino",
-    image: "/images/blog9.png",
-  },
-  {
-    title: "Dota 2 DreamLeague Predictions - MOBA Betting Picks on rise",
-    description: "Get the latest picks & news for Dota 2’s DreamLeague tournament!",
-    date: "October 9, 2025",
-    group: "Esports",
-    image: "/images/blog10.png",
-  },
-];
+
 
 const categories = [ 
   "All Blogs",
@@ -180,8 +41,33 @@ export default function BlogsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+const [blogsLoading, setBlogsLoading] = useState(true);
 
   const mainRef = useRef<HTMLDivElement | null>(null);
+useEffect(() => {
+  const fetchBlogs = async () => {
+    try {
+      const res = await apiRequest(
+        "/admin/control/blogs",
+        false,
+        {
+          method: "GET",
+        }
+      );
+
+      if (res?.success) {
+        setBlogs(res.data || []);
+      }
+    } catch (error) {
+      console.error("BLOGS API ERROR:", error);
+    } finally {
+      setBlogsLoading(false);
+    }
+  };
+
+  fetchBlogs();
+}, []);
 
   // ✅ Detect screen size
   useEffect(() => {
@@ -204,10 +90,13 @@ export default function BlogsPage() {
   }, [currentPage, activeTab]);
 
   // ✅ Filtered data
-  const filteredBlogs =
-    activeTab === 'All Blogs'
-      ? Blogs
-      : Blogs.filter((p) => p.group?.toLowerCase() === activeTab.toLowerCase());
+ const filteredBlogs =
+  activeTab === 'All Blogs'
+    ? blogs
+    : blogs.filter(
+        (b) => b.group?.toLowerCase() === activeTab.toLowerCase()
+      );
+
 
   // ✅ Pagination setup
   const itemsPerPage = isMobile ? 6 : 12;
