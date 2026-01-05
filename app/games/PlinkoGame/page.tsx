@@ -14,17 +14,25 @@ interface SlotDef {
 
 // --- Default exportable component
 export default function PlinkoGame() {
-  // Dimensions for the board canvas
-  const BOARD_W = 420;
-  const BOARD_H = 680;
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const BOARD_W = isMobile ? 350 : 420;
+  const BOARD_H = isMobile ? 510 : 620;
 
   // Peg layout
-  const ROWS = 12; // number of rows of pegs
-  const PEG_R = 4.5;
-  const ROW_SPACING = 48;
-  const COL_SPACING = 32;
-  const TOP_OFFSET = 80; // space at top for ball spawn
-  const SIDE_PADDING = 28; // left/right padding to walls
+  const ROWS = isMobile ? 11 : 11;
+  const PEG_R = isMobile ? 4 : 4.5;
+  const ROW_SPACING = isMobile ? 41 : 46;
+  const COL_SPACING = isMobile ? 26 : 32;
+  const TOP_OFFSET = isMobile ? 60 : 80;
+  const SIDE_PADDING = isMobile ? 24 : 28;
 
   // Slots (bins) setup — symmetric multipliers
   const multipliers = React.useMemo(() => [0.5, 1, 1.5, 2, 5, 2.5, 2, 1.5, 1, 0.5], []);
@@ -44,6 +52,7 @@ export default function PlinkoGame() {
   const ballRef = useRef<Matter.Body | null>(null);
   const worldRef = useRef<Matter.World | null>(null);
   const PEG_SHIFT_X = 20;
+
   // Build the physics world once
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -66,7 +75,7 @@ export default function PlinkoGame() {
     });
 
     // Add walls
-    const thickness = 40;
+    const thickness = 35;
     const leftWall = Bodies.rectangle(SIDE_PADDING - thickness / 2, BOARD_H / 2, thickness, BOARD_H, {
       isStatic: true,
       render: { fillStyle: "#0f172a" },
@@ -92,11 +101,11 @@ export default function PlinkoGame() {
       const isOffset = row % 2 === 1;
       const cols = colsMax - (isOffset ? 1 : 0);
       for (let c = 0; c < cols; c++) {
-       const x =
-  SIDE_PADDING +
-  (isOffset ? COL_SPACING / 2 : 0) +
-  c * COL_SPACING +
-  PEG_SHIFT_X;
+        const x =
+          SIDE_PADDING +
+          (isOffset ? COL_SPACING / 2 : 0) +
+          c * COL_SPACING +
+          PEG_SHIFT_X;
         const peg = Bodies.circle(x, y, PEG_R, {
           isStatic: true,
           restitution: 0.5,
@@ -181,9 +190,7 @@ export default function PlinkoGame() {
       Events.off(engine, "afterUpdate", onAfterUpdate);
       if (renderRef.current) {
         Render.stop(renderRef.current);
-   
         renderRef.current.canvas.remove();
-        
         renderRef.current.textures = {};
       }
       if (runnerRef.current) Runner.stop(runnerRef.current);
@@ -194,7 +201,7 @@ export default function PlinkoGame() {
       worldRef.current = null;
       ballRef.current = null;
     };
-  }, []);
+  }, [isMobile, BOARD_W, BOARD_H, ROWS, ROW_SPACING, COL_SPACING, TOP_OFFSET, SIDE_PADDING, PEG_R, SLOT_COUNT, multipliers, bet]);
 
   // Drop a ball
   const drop = () => {
@@ -252,99 +259,78 @@ export default function PlinkoGame() {
   const chipValues = [1, 5, 10, 25, 50, 100, 250];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black text-slate-100 flex items-center justify-center py-10">
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black text-slate-100 flex items-center justify-center py-4 lg:py-10 px-2 lg:px-4">
       {/* Background pattern */}
-      <div className="fixed inset-0 opacity-5">
+      {/* <div className="fixed inset-0 opacity-5">
         <div className="absolute inset-0" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
-      </div>
+      </div> */}
       
-      <div className="grid lg:grid-cols-[auto_400px] gap-8 w-full max-w-7xl px-4 relative z-10">
+      <div className="grid lg:grid-cols-[auto_400px] gap-4 lg:gap-8 w-full max-w-6xl relative z-10">
         {/* Game Card */}
-        <div className="bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-slate-700/50 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-3 lg:p-6 shadow-2xl border border-slate-700/50 relative overflow-hidden">
           {/* Card background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5" />
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between px-2 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                  <div className="w-4 h-4 bg-white rounded-full" />
+            <div className="flex items-center justify-between px-1 lg:px-2 pb-3 lg:pb-4">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-6 h-6 lg:w-8 lg:h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg lg:rounded-xl flex items-center justify-center">
+                  <div className="w-3 h-3 lg:w-4 lg:h-4 bg-white rounded-full" />
                 </div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Plinko</h1>
+                <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Plinko</h1>
               </div>
-              <div className="flex items-center gap-3 bg-slate-900/50 rounded-xl px-4 py-2">
-                <Coins className="w-5 h-5 text-yellow-400" />
-                <span className="text-slate-300">Balance:</span>
-                <span className="font-bold text-yellow-400">${balance.toLocaleString()}</span>
+              <div className="flex items-center gap-2 lg:gap-3 bg-slate-900/50 rounded-lg lg:rounded-xl px-2 lg:px-4 py-1.5 lg:py-2">
+                <Coins className="w-4 h-4 lg:w-5 lg:h-5 text-yellow-400" />
+                <span className="text-xs lg:text-sm text-slate-300">Balance:</span>
+                <span className="text-sm lg:text-base font-bold text-yellow-400">${balance.toLocaleString()}</span>
               </div>
             </div>
 
             {/* Board wrapper */}
-            <div className="relative mx-auto rounded-3xl bg-gradient-to-b from-slate-900 via-slate-950 to-black border-2 border-slate-700/50 w-[460px] h-[720px] overflow-hidden shadow-2xl">
+            <div 
+              className="relative mx-auto rounded-2xl lg:rounded-3xl bg-gradient-to-b from-slate-900 via-slate-950 to-black border-2 border-slate-700/50 overflow-hidden shadow-2xl"
+              style={{ width: `${BOARD_W}px`, height: `${BOARD_H}px` }}
+            >
               {/* Board background effects */}
               <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-purple-500/3 to-pink-500/5" />
               <div className="absolute inset-0" style={{
                 backgroundImage: `radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.1) 0%, transparent 50%), radial-gradient(circle at 75% 75%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)`,
               }} />
 
-            {/* Canvas mount */}
-            <div ref={sceneRef} className="relative inset-0 pl-6" />
+              {/* Canvas mount */}
+              <div ref={sceneRef} className="relative inset-0" />
 
-            {/* Slot labels */}
-            <SlotLabels
-              width={BOARD_W}
-              sidePadding={SIDE_PADDING}
-              slotCount={SLOT_COUNT}
-              multipliers={multipliers}
-              top={TOP_OFFSET + ROWS * ROW_SPACING + 40}
-            />
+              {/* Slot labels */}
+              <SlotLabels
+                width={BOARD_W}
+                sidePadding={SIDE_PADDING}
+                slotCount={SLOT_COUNT}
+                multipliers={multipliers}
+                top={TOP_OFFSET + ROWS * ROW_SPACING + 30}
+              />
 
-            {/* Entry indicator */}
-            <div
-              className="absolute top-2 -translate-x-1/2 z-20"
-              style={{ left: `${entryX + 20}px` }}
-            >
-              <motion.div
-                className="flex flex-col items-center"
-                animate={{ y: [0, 3, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
+              {/* Entry indicator */}
+              <div
+                className="absolute top-1 -translate-x-1/2 z-20 pl-4 pr-4"
+                style={{ left: `${entryX}px` }}
               >
-                <div className="w-3 h-3 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full shadow-lg" />
-                <div className="w-0.5 h-4 bg-gradient-to-b from-cyan-400 to-transparent mt-0.5" />
-              </motion.div>
-            </div>
-          </div>
-          </div>
-
-          {/* Multipliers display */}
-          {/* <div className="mt-4 px-2">
-            <div className="text-xs text-slate-400 mb-2 text-center">Multipliers</div>
-            <div className="flex justify-between">
-              {multipliers.map((mult, i) => (
-                <div
-                  key={i}
-                  className={
-                    "px-1.5 py-0.5 rounded text-xs font-bold " +
-                    (mult >= 5
-                      ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
-                      : mult >= 2
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                      : mult >= 1
-                      ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                      : "bg-red-500/20 text-red-300 border border-red-500/30")
-                  }
+                <motion.div
+                  className="flex flex-col items-center"
+                  animate={{ y: [0, 3, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
                 >
-                  {mult}x
-                </div>
-              ))}
+                  <div className="w-3 h-3 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full shadow-lg" />
+                  <div className="w-0.5 h-4 bg-gradient-to-b from-cyan-400 to-transparent mt-0.5" />
+                </motion.div>
+              </div>
             </div>
-          </div> */}
+          </div>
 
           {/* Entry slider */}
-          <div className="mt-4">
+          <div className="mt-1 lg:mt-4">
             <label className="text-xs uppercase tracking-wide text-slate-400 mb-2 block">Entry Position: {Math.round(((entryX - SIDE_PADDING) / (BOARD_W - SIDE_PADDING * 2)) * 100)}%</label>
             <div className="relative">
               <input
@@ -372,24 +358,24 @@ export default function PlinkoGame() {
         </div>
 
         {/* Controls */}
-        <div className="bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-slate-700/50 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl rounded-2xl lg:rounded-3xl p-4 lg:p-6 shadow-2xl border border-slate-700/50 relative overflow-hidden">
           {/* Card background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-blue-500/5 to-purple-500/5" />
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500" />
           
           <div className="relative z-10">
-            <h2 className="text-xl font-bold mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">Bet Controls</h2>
+            <h2 className="text-lg lg:text-xl font-bold mb-4 lg:mb-6 bg-gradient-to-r from-green-400 to-blue-400 bg-clip-text text-transparent">Bet Controls</h2>
 
             {/* Quick bet buttons */}
-            <div className="mb-6">
-              <label className="text-sm font-medium text-slate-300 mb-3 block">Quick Bet</label>
-              <div className="grid grid-cols-4 gap-2">
+            <div className="mb-4 lg:mb-6">
+              <label className="text-sm font-medium text-slate-300 mb-2 lg:mb-3 block">Quick Bet</label>
+              <div className="grid grid-cols-4 gap-1.5 lg:gap-2">
                 {chipValues.map((v) => (
                   <button
                     key={v}
                     onClick={() => setBet(v)}
                     className={
-                      "px-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 " +
+                      "px-2 lg:px-3 py-2 lg:py-2.5 rounded-lg lg:rounded-xl text-xs lg:text-sm font-semibold transition-all duration-200 " +
                       (bet === v
                         ? "bg-gradient-to-r from-green-500 to-blue-500 text-white shadow-lg scale-105"
                         : "bg-slate-900/60 border border-slate-700 text-slate-200 hover:border-slate-600 hover:bg-slate-800/80")
@@ -402,28 +388,28 @@ export default function PlinkoGame() {
             </div>
 
             {/* Bet amount input */}
-            <div className="mb-6">
-              <label className="text-sm font-medium text-slate-300 mb-3 block">Bet Amount</label>
-              <div className="bg-slate-900/50 rounded-xl border border-slate-700 p-1 flex">
-                <div className="flex-1 flex items-center px-3">
-                  <span className="text-slate-400 mr-2">$</span>
+            <div className="mb-4 lg:mb-6">
+              <label className="text-sm font-medium text-slate-300 mb-2 lg:mb-3 block">Bet Amount</label>
+              <div className="bg-slate-900/50 rounded-lg lg:rounded-xl border border-slate-700 p-1 flex">
+                <div className="flex-1 flex items-center px-2 lg:px-3">
+                  <span className="text-slate-400 mr-1 lg:mr-2 text-sm lg:text-base">$</span>
                   <input
                     type="number"
                     value={bet}
                     onChange={(e) => setBet(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
-                    className="bg-transparent text-slate-100 font-medium text-lg w-full outline-none"
+                    className="bg-transparent text-slate-100 font-medium text-base lg:text-lg w-full outline-none"
                     min={1}
                   />
                 </div>
                 <div className="flex gap-1">
                   <button
-                    className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors"
+                    className="px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs lg:text-sm font-medium transition-colors"
                     onClick={() => setBet((b) => Math.max(1, Math.floor(b / 2)))}
                   >
                     1/2
                   </button>
                   <button
-                    className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-medium transition-colors"
+                    className="px-2 lg:px-3 py-1.5 lg:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs lg:text-sm font-medium transition-colors"
                     onClick={() => setBet((b) => Math.max(1, Math.floor(b * 2)))}
                   >
                     2x
@@ -433,40 +419,41 @@ export default function PlinkoGame() {
             </div>
 
             {/* Action buttons */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="grid grid-cols-2 gap-2 lg:gap-4 mb-4 lg:mb-6">
               <button
                 onClick={drop}
                 disabled={dropping || bet <= 0 || bet > balance}
                 className={
-                  "flex items-center justify-center gap-3 rounded-2xl px-6 py-4 font-bold text-lg shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed " +
+                  "flex items-center justify-center gap-2 lg:gap-3 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 font-bold text-sm lg:text-lg shadow-lg transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed " +
                   (dropping || bet > balance
                     ? "bg-slate-700 text-slate-400"
                     : "bg-gradient-to-r from-green-500 to-blue-500 text-white hover:from-green-600 hover:to-blue-600 hover:shadow-xl hover:scale-105")
                 }
               >
-                <Play className="w-5 h-5" />
-                {dropping ? "Dropping..." : "Drop Ball"}
+                <Play className="w-4 h-4 lg:w-5 lg:h-5" />
+                <span className="hidden sm:inline">{dropping ? "Dropping..." : "Drop Ball"}</span>
+                <span className="sm:hidden">{dropping ? "Drop..." : "Drop"}</span>
               </button>
               <button
                 onClick={reset}
-                className="flex items-center justify-center gap-3 rounded-2xl px-6 py-4 font-bold text-lg bg-slate-900/60 border-2 border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-800/80 transition-all duration-200"
+                className="flex items-center justify-center gap-2 lg:gap-3 rounded-xl lg:rounded-2xl px-4 lg:px-6 py-3 lg:py-4 font-bold text-sm lg:text-lg bg-slate-900/60 border-2 border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-800/80 transition-all duration-200"
               >
-                <RotateCcw className="w-5 h-5" />
+                <RotateCcw className="w-4 h-4 lg:w-5 lg:h-5" />
                 Reset
               </button>
             </div>
 
             {/* Result panel */}
-            <div className="bg-gradient-to-br from-slate-900/80 to-slate-950/80 rounded-2xl border border-slate-700/50 p-6 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-slate-300">Last Result</h3>
+            <div className="bg-gradient-to-br from-slate-900/80 to-slate-950/80 rounded-xl lg:rounded-2xl border border-slate-700/50 p-4 lg:p-6 mb-4 lg:mb-6">
+              <div className="flex items-center justify-between mb-2 lg:mb-3">
+                <h3 className="text-xs lg:text-sm font-medium text-slate-300">Last Result</h3>
                 {lastWin !== null && (
                   <div className="text-xs px-2 py-1 rounded-full bg-slate-800 text-slate-400">
                     ${Math.round(bet * lastWin)}
                   </div>
                 )}
               </div>
-              <div className="text-3xl font-bold tracking-tight">
+              <div className="text-2xl lg:text-3xl font-bold tracking-tight">
                 {dropping && (
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" />
@@ -478,13 +465,13 @@ export default function PlinkoGame() {
                   <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-2 lg:gap-3"
                   >
                     <span className={lastWin >= 2 ? "text-emerald-400" : lastWin >= 1 ? "text-blue-400" : "text-red-400"}>
                       {lastWin}x
                     </span>
                     <div className={
-                      "px-3 py-1 rounded-lg text-sm font-medium " +
+                      "px-2 lg:px-3 py-0.5 lg:py-1 rounded-lg text-xs lg:text-sm font-medium " +
                       (lastWin >= 2 ? "bg-emerald-500/20 text-emerald-300" : lastWin >= 1 ? "bg-blue-500/20 text-blue-300" : "bg-red-500/20 text-red-300")
                     }>
                       {lastWin >= 1 ? "WIN" : "LOSS"}
@@ -495,7 +482,7 @@ export default function PlinkoGame() {
             </div>
 
             {/* Info */}
-            <div className="text-xs text-slate-500 space-y-1">
+            <div className="text-xs text-slate-500 space-y-1 hidden lg:block">
               <p>• Adjust entry position with the slider above</p>
               <p>• Higher multipliers are harder to hit</p>
               <p>• Physics simulation creates realistic ball movement</p>
@@ -528,7 +515,7 @@ function SlotLabels({
             {/* Multiplier display */}
             <div
               className={
-                "px-2 py-1 rounded-lg text-xs font-bold border-2 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 " +
+                "px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-md lg:rounded-lg text-[10px] lg:text-xs font-bold border-2 shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 " +
                 (multipliers[i] >= 5
                   ? "bg-gradient-to-br from-yellow-500/30 to-orange-500/20 text-yellow-200 border-yellow-400/70 shadow-yellow-500/25"
                   : multipliers[i] >= 2
@@ -537,12 +524,12 @@ function SlotLabels({
                   ? "bg-gradient-to-br from-blue-500/30 to-indigo-500/20 text-blue-200 border-blue-400/70 shadow-blue-500/25"
                   : "bg-gradient-to-br from-red-500/30 to-rose-500/20 text-red-200 border-red-400/70 shadow-red-500/25")
               }
-              style={{ minWidth: 36, textAlign: "center" }}
+              style={{ minWidth: 28, textAlign: "center" }}
             >
               {multipliers[i]}x
             </div>
             {/* Slot indicator dot */}
-            <div className="mt-1 w-1.5 h-1.5 bg-slate-400 rounded-full opacity-60"></div>
+            {/* <div className="mt-1 w-1.5 h-1.5 bg-slate-400 rounded-full opacity-60"></div> */}
           </div>
         ))}
       </div>
