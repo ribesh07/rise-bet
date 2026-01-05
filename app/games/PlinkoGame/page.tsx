@@ -43,7 +43,7 @@ export default function PlinkoGame() {
   const runnerRef = useRef<Matter.Runner | null>(null);
   const ballRef = useRef<Matter.Body | null>(null);
   const worldRef = useRef<Matter.World | null>(null);
-
+  const PEG_SHIFT_X = 20;
   // Build the physics world once
   useEffect(() => {
     if (!sceneRef.current) return;
@@ -92,7 +92,11 @@ export default function PlinkoGame() {
       const isOffset = row % 2 === 1;
       const cols = colsMax - (isOffset ? 1 : 0);
       for (let c = 0; c < cols; c++) {
-        const x = SIDE_PADDING + (isOffset ? COL_SPACING / 2 : 0) + c * COL_SPACING;
+       const x =
+  SIDE_PADDING +
+  (isOffset ? COL_SPACING / 2 : 0) +
+  c * COL_SPACING +
+  PEG_SHIFT_X;
         const peg = Bodies.circle(x, y, PEG_R, {
           isStatic: true,
           restitution: 0.5,
@@ -287,7 +291,7 @@ export default function PlinkoGame() {
               }} />
 
             {/* Canvas mount */}
-            <div ref={sceneRef} className="absolute inset-0" />
+            <div ref={sceneRef} className="relative inset-0 pl-6" />
 
             {/* Slot labels */}
             <SlotLabels
@@ -316,7 +320,7 @@ export default function PlinkoGame() {
           </div>
 
           {/* Multipliers display */}
-          <div className="mt-4 px-2">
+          {/* <div className="mt-4 px-2">
             <div className="text-xs text-slate-400 mb-2 text-center">Multipliers</div>
             <div className="flex justify-between">
               {multipliers.map((mult, i) => (
@@ -337,7 +341,7 @@ export default function PlinkoGame() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* Entry slider */}
           <div className="mt-4">
