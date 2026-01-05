@@ -243,11 +243,19 @@ async settleBet(bet: any, result: number) {
 
 //limbo
   // 🎲 Generate Limbo roll (provably replaceable later)
-  generateRoll(): number {
-    const r = randomInt(1, 100_000_001); // 1 → 100,000,000
-    const roll = (99_000_000 / (100_000_000 - r)) / 1_000_000;
-    return Number(Math.min(roll, 100).toFixed(2));
-  }
+generateRoll(): number {
+  const r = randomInt(1, 100_000_000); // 1 → 100M
+  const houseEdge = 0.01; // 1%
+
+  // core limbo formula
+  const multiplier = (1 - houseEdge) / (r / 100_000_000);
+
+  // clamp & format
+  return Number(
+    Math.min(multiplier, 100).toFixed(2)
+  );
+}
+
 
   async placeBetLimbo(userId: number, dto: PlaceLimboBetDto) {
     // 1️⃣ Wallet
@@ -299,7 +307,7 @@ async settleBet(bet: any, result: number) {
         payload: {
           targetMultiplier: dto.targetMultiplier,
           roll,
-          winChance: Number((99 / dto.targetMultiplier).toFixed(2)),
+          winChance: Number((99 / dto.targetMultiplier).toFixed(4)),
         },
       },
     });
@@ -347,7 +355,7 @@ async settleBet(bet: any, result: number) {
       success : true,
       data : {
         result: win ? 'WIN' : 'LOSE',
-        roll,
+        multiplier : roll,
         targetMultiplier: dto.targetMultiplier,
         payout,
         profit: payout - dto.amount,
