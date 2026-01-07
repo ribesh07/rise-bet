@@ -30,8 +30,17 @@ const VEHICLES = [
   { src: "/games/chicken/police.svg", speed: 4.1 },
 ];
 
+// Fire particle class
 class FireParticle {
-  constructor(baseX, baseY) {
+  baseX: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  maxLife: number;
+  size: number;
+  life: number;
+  constructor(baseX: number, baseY: number) {
     this.baseX = baseX;
     this.x = baseX + (Math.random() - 0.5) * 15;
     this.y = baseY;
@@ -51,7 +60,7 @@ class FireParticle {
     this.size *= 0.97;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     const alpha = this.life / this.maxLife;
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
     
@@ -81,13 +90,25 @@ class FireParticle {
     return this.life >= this.maxLife;
   }
 }
+type Manhole = {
+  lane: number;
+  hasFire: boolean;
+  isActive: boolean;
+};
 
-const ManholeCanvas = ({ manholes, chickenPos, gameState, onManholeClick, visibleStart }) => {
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  const animationRef = useRef(null);
+type ManholeCanvasProps = {
+  manholes: Manhole[];
+  chickenPos: number;
+  gameState: string;
+  onManholeClick: (lane: number) => void;
+};
 
-  const drawManhole = (ctx, cx, cy, withFire) => {
+const ManholeCanvas: React.FC<ManholeCanvasProps> = ({ manholes, chickenPos, gameState, onManholeClick }) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const particlesRef = useRef<FireParticle[]>([]);
+  const animationRef = useRef<number | null>(null);
+
+  const drawManhole = (ctx: CanvasRenderingContext2D, cx: number, cy: number, withFire: boolean) => {
     ctx.fillStyle = withFire ? 'rgba(255, 100, 50, 0.2)' : 'rgba(0, 0, 0, 0.4)';
     ctx.beginPath();
     ctx.ellipse(cx, cy + 2, 50, 35, 0, 0, Math.PI * 2);
@@ -177,7 +198,7 @@ const ManholeCanvas = ({ manholes, chickenPos, gameState, onManholeClick, visibl
     };
   }, [manholes]);
 
-  const handleCanvasClick = (e) => {
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -214,17 +235,25 @@ const ManholeCanvas = ({ manholes, chickenPos, gameState, onManholeClick, visibl
 const ChickenRoadGame = () => {
   const [betAmount, setBetAmount] = useState('0.00');
   const [risk, setRisk] = useState('Medium');
-  const [gameState, setGameState] = useState('idle');
-  const [chickenPos, setChickenPos] = useState(0);
-  const [vehicles, setVehicles] = useState([]);
-  const [manholes, setManholes] = useState([]);
+   const [gameState, setGameState] = useState('idle');
+    const [chickenPos, setChickenPos] = useState(0);
+  type Vehicle = {
+    id: number;
+    lane: number;
+    y: number;
+    speed: number;
+    src: string;
+  };
+  
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [manholes, setManholes] = useState<Manhole[]>([]);
   const [profit, setProfit] = useState('0.00');
   const [currentMultiplier, setCurrentMultiplier] = useState('1.00');
   const [isManual, setIsManual] = useState(true);
   const [burningChicken, setBurningChicken] = useState(false);
   const [visibleLaneStart, setVisibleLaneStart] = useState(0);
-  const gameLoopRef = useRef(null);
-  const fireTimerRef = useRef(null);
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+  const fireTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const LANE_START = 170;
   const LANE_WIDTH = 120;
@@ -232,7 +261,7 @@ const ChickenRoadGame = () => {
   const VISIBLE_LANES = 6;
 
   // Calculate multiplier based on risk and position
-  const calculateMultiplier = (position, riskLevel) => {
+  const calculateMultiplier = (position: number, riskLevel: string) => {
     if (position === 0) return 1.00;
     
     let baseRate;
@@ -248,7 +277,7 @@ const ChickenRoadGame = () => {
   };
 
   // Calculate bone probability based on risk
-  const getBoneProbability = (riskLevel) => {
+  const getBoneProbability = (riskLevel: string) => {
     if (riskLevel === 'Easy') return 0.2; // 20% chance
     if (riskLevel === 'Medium') return 0.33; // 33% chance
     return 0.5; // 50% chance for Hard
@@ -261,7 +290,7 @@ const ChickenRoadGame = () => {
     };
   }, []);
 
-  const generateManholes = (startLane, count) => {
+  const generateManholes = (startLane: number, count: number) => {
     const boneProbability = getBoneProbability(risk);
     const holes = Array.from({ length: count }).map((_, i) => {
       const laneNumber = startLane + i + 1;
@@ -277,7 +306,7 @@ const ChickenRoadGame = () => {
     return holes;
   };
 
-  const updateVisibleManholes = (currentPos) => {
+  const updateVisibleManholes = (currentPos: number) => {
     const startLane = Math.max(0, currentPos);
     setVisibleLaneStart(startLane);
     
@@ -358,7 +387,7 @@ const ChickenRoadGame = () => {
     }
   }, [vehicles, chickenPos, gameState, burningChicken, visibleLaneStart]);
 
-  const jumpToManhole = (laneIndex) => {
+  const jumpToManhole = (laneIndex: number) => {
     if (gameState !== 'playing') return;
     if (laneIndex <= chickenPos) return;
     
@@ -581,7 +610,6 @@ const ChickenRoadGame = () => {
                   chickenPos={chickenPos}
                   gameState={gameState}
                   onManholeClick={jumpToManhole}
-                  visibleStart={visibleLaneStart}
                 />
               )}
             </div>

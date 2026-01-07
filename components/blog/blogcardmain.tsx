@@ -11,7 +11,7 @@ export default function BlogCard({ promo }: { promo: Blog }) {
         <h2 className="text-base font-semibold">{promo.title}</h2>
         <p className="text-gray-300 text-sm mt-2 line-clamp-2">{promo.description}</p>
         <p className="text-xs text-gray-400 mt-3">
-          Date <span className="font-medium text-gray-200">{promo.date}</span>
+          Date <span className="font-medium text-gray-200">{promo.publishedAt}</span>
         </p>
       </div>
     </div>
