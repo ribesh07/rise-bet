@@ -33,7 +33,15 @@ const VEHICLES = [
 
 // Fire particle class
 class FireParticle {
-  constructor(baseX, baseY) {
+  baseX: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  maxLife: number;
+  size: number;
+  life: number;
+  constructor(baseX: number, baseY: number) {
     this.baseX = baseX;
     this.x = baseX + (Math.random() - 0.5) * 15;
     this.y = baseY;
@@ -53,7 +61,7 @@ class FireParticle {
     this.size *= 0.97;
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     const alpha = this.life / this.maxLife;
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2);
     
@@ -84,12 +92,25 @@ class FireParticle {
   }
 }
 
-const ManholeCanvas = ({ manholes, chickenPos, gameState, onManholeClick }) => {
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  const animationRef = useRef(null);
+type Manhole = {
+  lane: number;
+  hasFire: boolean;
+  isActive: boolean;
+};
 
-  const drawManhole = (ctx, cx, cy, withFire) => {
+type ManholeCanvasProps = {
+  manholes: Manhole[];
+  chickenPos: number;
+  gameState: string;
+  onManholeClick: (lane: number) => void;
+};
+
+const ManholeCanvas: React.FC<ManholeCanvasProps> = ({ manholes, chickenPos, gameState, onManholeClick }) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const particlesRef = useRef<FireParticle[]>([]);
+  const animationRef = useRef<number | null>(null);
+
+  const drawManhole = (ctx: CanvasRenderingContext2D, cx: number, cy: number, withFire: boolean) => {
     // Outer shadow/glow
     ctx.fillStyle = withFire ? 'rgba(255, 100, 50, 0.2)' : 'rgba(0, 0, 0, 0.4)';
     ctx.beginPath();
@@ -186,7 +207,7 @@ const ManholeCanvas = ({ manholes, chickenPos, gameState, onManholeClick }) => {
     };
   }, [manholes]);
 
-  const handleCanvasClick = (e) => {
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -225,14 +246,21 @@ const ChickenRoadGame = () => {
   const [difficulty, setDifficulty] = useState('Medium');
   const [gameState, setGameState] = useState('idle');
   const [chickenPos, setChickenPos] = useState(0);
-  const [vehicles, setVehicles] = useState([]);
-  const [manholes, setManholes] = useState([]);
+  type Vehicle = {
+    id: number;
+    lane: number;
+    y: number;
+    speed: number;
+    src: string;
+  };
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [manholes, setManholes] = useState<Manhole[]>([]);
   const [profit, setProfit] = useState('0.00');
   const [currentMultiplier, setCurrentMultiplier] = useState('0.00');
   const [isManual, setIsManual] = useState(true);
   const [burningChicken, setBurningChicken] = useState(false);
-  const gameLoopRef = useRef(null);
-  const fireTimerRef = useRef(null);
+  const gameLoopRef = useRef<NodeJS.Timeout | null>(null);
+  const fireTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const multipliers = [1.15, 1.37, 1.64, 2.00, 2.46, 3.00];
   const lanes = 6;
@@ -341,7 +369,7 @@ const ChickenRoadGame = () => {
     }
   }, [vehicles, chickenPos, gameState, burningChicken]);
 
-  const jumpToManhole = (laneIndex) => {
+  const jumpToManhole = (laneIndex: number) => {
     if (gameState !== 'playing') return;
     if (laneIndex <= chickenPos) return;
     
