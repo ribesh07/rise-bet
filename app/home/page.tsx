@@ -302,14 +302,42 @@
 // };
 
 // export default Dashboard;
+// import React from "react";
+
+// const App: React.FC = () => {
+//   return (
+//     <div>
+//       <h1>Hello World</h1>
+//     </div>
+//   );
+// };
+
+// export default App;
 import React from "react";
 
-const App: React.FC = () => {
+const ImageOnlyPage: React.FC = () => {
   return (
-    <div>
-      <h1>Hello World</h1>
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#000",
+      }}
+    >
+      <img
+        src="/fuck2.png"
+        alt="Photo"
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          objectFit: "contain",
+        }}
+      />
     </div>
   );
 };
 
-export default App;
+export default ImageOnlyPage;
