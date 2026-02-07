@@ -308,7 +308,12 @@ const FlipGame: React.FC = () => {
       console.log("✅ Currency changed, new balance:", bal);
     }
   };
-
+useEffect(() => {
+  const checkMobile = () => setIsMobile(window.innerWidth < 768);
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
   return (
     <div className="flex min-h-screen bg-[#0a1628] text-white overflow-x-hidden relative flex-col">
       {/* {showConfetti && <Confetti numberOfPieces={200} recycle={false} />} */}

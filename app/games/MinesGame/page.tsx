@@ -12,6 +12,13 @@ import {
   TrendingUp,
   Sparkles
 } from "lucide-react";
+import { useCurrency } from "@/context/CurrencyContext";
+import TopNavbar from "@/components/topnavbar";
+
+import Sidebar from "@/components/sidebar";
+import MobileBottomBar from "@/components/mainmobilebuttombar";
+import RiseTopBar from "@/components/game/gamebottombar";
+import { apiRequest } from "@/utils/ApiHelper";
 
 interface Cell {
   id: number;
@@ -35,7 +42,7 @@ export default function MinesGame() {
   const GRID_SIZE = 25; // 5x5 grid
   
   // Game state
-  const [balance, setBalance] = useState(1000);
+  
   const [bet, setBet] = useState(10);
   const [minesCount, setMinesCount] = useState(3);
   const [gameState, setGameState] = useState<GameState>({
@@ -53,7 +60,124 @@ export default function MinesGame() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [previousMultiplier, setPreviousMultiplier] = useState(1);
   const [multiplierChanged, setMultiplierChanged] = useState(false);
-
+   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+      const { currency, setCurrency } = useCurrency();
+      const [balance, setBalance] = useState<number>(0);
+      const [loading, setLoading] = useState(true);
+       const [message, setMessage] = useState<string>("");
+        const [search, setSearch] = useState("");
+        const [dashboardDetails, setDashboardDetails] = useState<any>(null);
+        const [currentMultiplier, setCurrentMultiplier] = useState<number>(2);
+    const sidebarWidth = 64;
+    const collapsedWidth = 20;
+  const parseWalletBalance = (b: any) => {
+      console.log("🔍 Parsing wallet balance:", b);
+      if (b === null || b === undefined) return 0;
+      if (typeof b === "number") return b;
+      const n = parseFloat(String(b));
+      return isNaN(n) ? 0 : n;
+    };
+  
+    const conversionRates: Record<string, number> = {
+      INR: 83.0,
+      USD: 1,
+      USDT: 1,
+      BTC: 1 / 60000,
+      ETH: 1 / 1800,
+      LTC: 1 / 90,
+      SOL: 1 / 100,
+      XRP: 1 / 0.5,
+      TRX: 1 / 0.07,
+      BNB: 1 / 300,
+      USDC: 1,
+    };
+  
+    const currencySymbols: Record<string, { sym: string; decimals: number }> = {
+      INR: { sym: "₹", decimals: 2 },
+      USD: { sym: "$", decimals: 2 },
+      USDT: { sym: "$", decimals: 2 },
+      USDC: { sym: "$", decimals: 2 },
+      BTC: { sym: "₿", decimals: 8 },
+      ETH: { sym: "Ξ", decimals: 8 },
+      LTC: { sym: "Ł", decimals: 8 },
+      SOL: { sym: "◎", decimals: 8 },
+      XRP: { sym: "✕", decimals: 6 },
+      TRX: { sym: "T", decimals: 6 },
+      BNB: { sym: "🟡", decimals: 6 },
+    };
+  
+    const formatCurrency = (value: number, cur = currency) => {
+      if (cur && currencySymbols[cur]) {
+        const { sym, decimals } = currencySymbols[cur];
+        return `${sym}${Number(value).toLocaleString(undefined, {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        })}`;
+      }
+      return `${value.toLocaleString()}`;
+    };
+  
+    // Fetch Dashboard Details
+    const fetchDashboardDetails = async () => {
+      console.log("📊 Fetching dashboard details...");
+      try {
+        const token = localStorage.getItem("token");
+        const id = localStorage.getItem("userId");
+        console.log("🔑 Token:", token ? "exists" : "missing");
+        console.log("👤 User ID:", id);
+  
+        const res = await apiRequest(`/users/${id}/details`, true, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        console.log("📥 Dashboard API Response:", res);
+  
+        if (res.success) {
+          setDashboardDetails(res.data);
+          const wallets = res.data.wallets || [];
+          let initialWallet = null;
+          if (wallets.length > 0) {
+            initialWallet =
+              wallets.find(
+                (w: any) =>
+                  String(w.currency || w.symbol).toUpperCase() ===
+                  String(currency || "").toUpperCase()
+              ) || wallets[0];
+          }
+  
+          if (initialWallet) {
+            const bal = parseWalletBalance(
+              initialWallet.balance ?? initialWallet.amount ?? 0
+            );
+            setBalance(bal);
+            const curSymbol = (
+              initialWallet.currency ||
+              initialWallet.symbol ||
+              initialWallet.asset ||
+              ""
+            )
+              .toString()
+              .toUpperCase();
+            if (curSymbol) {
+              setCurrency(curSymbol);
+            }
+          } else {
+            setBalance(0);
+          }
+        }
+      } catch (err) {
+        console.error("💥 Dashboard API Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+      useEffect(() => {
+        fetchDashboardDetails();
+        // fetchBetHistory();
+      }, []);
   // Modified multiplier calculation with mines and Rise consideration
   const calculateMultiplier = useCallback((workingGems: number, totalMines: number, RiseAmount: number) => {
     console.log(`calculateMultiplier called: workingGems=${workingGems}, totalMines=${totalMines}, RiseAmount=${RiseAmount}`);
@@ -279,8 +403,66 @@ export default function MinesGame() {
   const potentialPayout = useMemo(() => {
     return parseFloat((bet * gameState.currentMultiplier).toFixed(2));
   }, [bet, gameState.currentMultiplier]);
-
+useEffect(() => {
+  const checkMobile = () => setIsMobile(window.innerWidth < 768);
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
   return (
+    <div className="flex min-h-screen bg-[#0a1628] text-white overflow-x-hidden relative flex-col">
+      {/* {showConfetti && <Confetti numberOfPieces={200} recycle={false} />} */}
+
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        {!isMobile && (
+          <motion.div
+            animate={{
+              width: sidebarCollapsed ? collapsedWidth * 4 : sidebarWidth * 4,
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="h-screen bg-[#0f172a] shadow-lg overflow-hidden fixed left-0 top-0 z-50"
+          >
+            <Sidebar
+              collapsed={sidebarCollapsed}
+              setCollapsed={setSidebarCollapsed}
+              open={true}
+              setOpen={() => {}}
+            />
+          </motion.div>
+        )}
+
+        {/* Navbar */}
+        <motion.div
+          className="fixed top-0 left-0 right-0 z-40"
+          animate={{
+            marginLeft: !isMobile
+              ? sidebarCollapsed
+                ? collapsedWidth * 4
+                : sidebarWidth * 4
+              : 0,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
+          <TopNavbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            wallets={dashboardDetails?.wallets || []}
+          />
+        </motion.div>
+
+        {/* Main Content */}
+        <motion.main
+          className="flex-1 flex flex-col overflow-auto pt-[95px] pb-16 md:px-8"
+          animate={{
+            marginLeft: !isMobile
+              ? sidebarCollapsed
+                ? collapsedWidth * 4
+                : sidebarWidth * 4
+              : 0,
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        >
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-black text-slate-100 flex items-center justify-center py-10">
       {/* Background pattern */}
       <div className="fixed inset-0 opacity-5">
@@ -305,11 +487,7 @@ export default function MinesGame() {
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Mines</h1>
               </div>
-              <div className="flex items-center gap-3 bg-slate-900/50 rounded-xl px-4 py-2">
-                <Coins className="w-5 h-5 text-yellow-400" />
-                <span className="text-slate-300">Balance:</span>
-                <span className="font-bold text-yellow-400">${balance.toLocaleString()}</span>
-              </div>
+            
             </div>
 
             {/* Game Stats */}
@@ -659,6 +837,51 @@ export default function MinesGame() {
           </div>
         </div>
       </div>
+    </div>
+     {/* Bottom Stats Bar */}
+          <div className="flex items-center ">
+            <RiseTopBar />
+          </div>
+        </motion.main>
+      </div>
+
+      {/* Mobile Bottom Bar */}
+      {isMobile && (
+        <div className="fixed bottom-0 w-full z-50 h-16">
+          <MobileBottomBar onBrowseClick={() => setSidebarOpen(true)} />
+        </div>
+      )}
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isMobile && sidebarOpen && (
+          <motion.div
+            initial={{ x: -256 }}
+            animate={{ x: 0 }}
+            exit={{ x: -256 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-y-0 left-0 z-50 w-64 bg-[#0f172a] shadow-lg"
+          >
+            <Sidebar
+              collapsed={false}
+              setCollapsed={() => {}}
+              open={sidebarOpen}
+              setOpen={setSidebarOpen}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {isMobile && sidebarOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.3 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black z-40"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 }
