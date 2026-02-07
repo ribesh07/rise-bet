@@ -44,6 +44,9 @@ const GamingGrid = forwardRef<GameGridHandles, GameGridProps>(
       { name: "Rock Paper", image: "/games/rockpaper/avove.jpeg", playing: 0, route: "/games/Rock_paper" },
       { name: "Chicken", image: "/games/chicken/avove.png", playing: 0, route: "/games/Chicken" },
       { name: "Limbo", image: "/images/limbo.png", playing: 436, route: "/games/LimboGame" },
+      { name: "Diamond", image: "/games/diamond/avove.jpeg", playing: 436, route: "/games/DiamondGame" },
+      { name: "Slide", image: "/games/slide/avove.jpeg", playing: 436, route: "/games/SlideGame" },
+
       
     ];
 
