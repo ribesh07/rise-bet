@@ -316,7 +316,7 @@ const CrashGame: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0f212e] text-white font-sans selection:bg-[#00e701] selection:text-black">
-      <div className="max-w-[1400px] mx-auto p-4 md:p-6">
+      <div className="max-w-[1400px]  p-4 md:p-6">
         {/* Responsive Grid: On Mobile, Game Canvas (col-2) comes before Controls (col-1) */}
         <div className="flex flex-col-reverse lg:grid lg:grid-cols-[350px_1fr] gap-4">
           
