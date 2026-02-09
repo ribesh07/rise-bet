@@ -8,24 +8,7 @@ export default function ChocolateDay() {
     setMounted(true);
   }, []);
 
-  const quotes = [
-    {
-      text: "Life is like a box of chocolates, but with you, every piece is the sweetest.",
-      author: "For My Love"
-    },
-    {
-      text: "All you need is love... but a little chocolate now and then doesn't hurt.",
-      author: "Charles M. Schulz"
-    },
-    {
-      text: "You're sweeter than the finest chocolate, and just as irresistible.",
-      author: "My Heart"
-    },
-    {
-      text: "Chocolate is nature's way of making up for Mondays, and you're my way of making every day feel like Sunday.",
-      author: "Anonymous"
-    }
-  ];
+ 
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-amber-50 via-rose-50 to-pink-100">
@@ -78,7 +61,7 @@ export default function ChocolateDay() {
             Happy Chocolate Day
           </h1>
           <p className="text-2xl md:text-3xl text-rose-800 font-light italic">
-            To My Sweetest Love
+            To My Sweetest Love smriti lati ❤️
           </p>
         </div>
 
