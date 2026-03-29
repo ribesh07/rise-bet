@@ -2,12 +2,288 @@
 GET http://[::1]:3001/api/v1/users 
 Content-Type: application/json
 
-### POST users
-POST http://[::1]:3001/api/v1/users HTTP/1.1
+### signup
+POST https://api.playrise.vip/api/v1/auth/signup
 Content-Type: application/json
 
 {
-  "name": "Ganndu",
-  "email": "as@gmail.com"
+  "email": "gandu@gmail.com",
+  "password": "12345678",
+  "username": "gandu",
+  "phone": "9876543212",
+  "dob": "2000-01-01"
 }
+
+### me
+GET http://[::1]:3084/api/v1/auth/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTQzNjM3NSwiZXhwIjoxNzY4MDI4Mzc1fQ.LxfrTNZrSVaCkmfgPVuUtGPVVOVPEtk5Qpm5bsgDKZ4
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6sIkpXVCJ9.eyJzdWIiOjIyLCJlbWFpbCI6ImdhbmR1MUBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUiLCJpYXQiOjE3NjMwMzI3NTQsImV4cCI6MTc2MzAzNjM1NH0.pRoHUmjkju0EFkL8FEr3b-vj-nlSuMmgv1QsiAvhZ1A
+
+
+### login
+POST http://[::1]:3084/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "gandu@gmail.com",
+  "password": "12345678"
+}
+
+###get details
+GET http://[::1]:3084/api/v1/users/29/details
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzNDYyOTE1LCJleHAiOjE3NjYwNTQ5MTV9.Yfss4h1HuHkiGBCgb_RcHUQ2fhbzW4RWqGlD25rFTlE
+
+### login
+POST https://api.playrise.vip/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "gandu@gmail.com",
+  "password": "12345678"
+
+}
+
+
+### send-otp
+POST https://api.omsnepal.com/api/v1/auth/send-otp
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+### send-otp
+POST http://[::1]:3084/api/v1/auth/send-otp
+Content-Type: application/json
+
+{
+  "email": "sahr8074@gmail.com"
+}
+
+### get logs
+GET http://[::1]:3084/api/v1/admin/control/logs HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI4MDg4OCwiZXhwIjoxNzY1ODcyODg4fQ.jV1p_xbbTrFKJ23iinM25IO5dCNnz4UbaoTy-Rn_Akc
+
+### get categories
+GET http://[::1]:3084/api/v1/admin/control/categories HTTP/1.1
+Content-Type: application/json
+
+### get promotions
+GET http://[::1]:3084/api/v1/admin/control/promotions HTTP/1.1
+Content-Type: application/json
+
+### get blogs
+GET http://[::1]:3084/api/v1/admin/control/blogs HTTP/1.1
+Content-Type: application/json
+
+### get categories
+DELETE  http://[::1]:3084/api/v1/admin/control/categories/?name=Other HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJBRE1JTiIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NjczNTAxMjIsImV4cCI6MTc2OTk0MjEyMn0.gMcSgUHgJC6CjnW4OrGp-dgOkb-_z627kkbXteAD3MU
+
+###post login
+POST http://[::1]:3084/api/v1/auth/admin-login
+Content-Type: application/json
+
+{
+  "email": "admin@admin.com",
+  "password": "ChangeMe123!"
+}
+
+
+###control 
+POST http://[::1]:3084/api/v1/admin/control/create-promo HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI2ODc1NCwiZXhwIjoxNzYzMjcyMzU0fQ.ReafWYy9ztHFhkETiGyLy_Yl6TU4IYUFjmRVYhsJEh4
+
+{
+  "code":"FORCE","amount":100,"maxClaims":100
+}
+
+###create promo 
+POST http://[::1]:3084/api/v1/admin/control/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2MzI2ODc1NCwiZXhwIjoxNzYzMjcyMzU0fQ.ReafWYy9ztHFhkETiGyLy_Yl6TU4IYUFjmRVYhsJEh4
+
+{
+  "mode":"FORCE","forcedResult":"WIN","winRatio":0.8
+}
+
+
+###transactions 
+POST http://[::1]:3084/api/v1/users/28/transaction HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpbCI6ImdhbmR1MDFAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJ1c2VybmFtZSI6ImdhbmR1MDEiLCJpYXQiOjE3NjMxMDczNzQsImV4cCI6MTc2MzExMDk3NH0.J2FYCMZMOU3b8Fb9BQ-KKSKQh0eFdyNj6tdTMuzumh8
+
+{
+  "type":"WIN","amount":109,"currency":"INR"
+}
+
+###upload image
+POST http://[::1]:3084/api/v1/users/upload-image/2 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI4LCJlbWFpbCI6ImdhbmR1MDFAZ21haWwuY29tIiwicm9sZSI6IlVTRVIiLCJ1c2VybmFtZSI6ImdhbmR1MDEiLCJpYXQiOjE3NjMxMDczNzQsImV4cCI6MTc2MzExMDk3NH0.J2FYCMZMOU3b8Fb9BQ-KKSKQh0eFdyNj6tdTMuzumh8  
+
+{
+  "image": "file"
+}
+
+
+###roulette
+POST https://api.playrise.vip/api/v1/admin/control/force-spin/roulette_1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYWRtaW5AYWRtaW4uY29tIiwicm9sZSI6IkFETUlOIiwidXNlcm5hbWUiOiJhZG1pbiIsImlhdCI6MTc2NTM1MTMxNSwiZXhwIjoxNzY3OTQzMzE1fQ.qJNPK7diXGP2-PABcjeXizxzXOEK89lAAgqM50A5Zx8
+
+### update password
+POST http://localhost:3084/api/v1/users/update-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzNDYyOTE1LCJleHAiOjE3NjYwNTQ5MTV9.Yfss4h1HuHkiGBCgb_RcHUQ2fhbzW4RWqGlD25rFTlE
+
+{
+     "oldPassword": "12345678",
+    "newPassword": "123456789"
+}
+
+### redeem
+POST http://localhost:3084/api/v1/users/redeem-promo HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjI5LCJlbWFpbCI6ImdhbmR1MkBnbWFpbC5jb20iLCJyb2xlIjoiVVNFUiIsInVzZXJuYW1lIjoiZ2FuZHUyIiwiaWF0IjoxNzYzNDYyOTE1LCJleHAiOjE3NjYwNTQ5MTV9.Yfss4h1HuHkiGBCgb_RcHUQ2fhbzW4RWqGlD25rFTlE
+
+{
+   "code": "FORCE"
+}
+
+### users wallets
+GET http://localhost:3084/api/v1/users/wallets HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg
+
+### users transactions
+GET http://localhost:3084/api/v1/users/transactions HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg
+
+### users bets
+GET https://api.playrise.vip/api/v1//users/bets?game=PUMP HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2NTUxNTgwNiwiZXhwIjoxNzY4MTA3ODA2fQ.fwuY4OJN_bLyFn1XrFZ8kBmxxnXAH8nEvlKYFb_4fIg
+
+
+### wingo round result
+GET http://localhost:3084/api/v1.game/wingo/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+### wingo round bet
+POST http://localhost:3084/api/v1/game/wingo/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "betType": "NUMBER",
+  "currency": "INR",
+  "value": "7",
+  "amount": 100,
+  "duration":"S30"
+}
+
+
+
+### limbo round bet
+POST http://localhost:3084/api/v1/game/limbo/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "targetMultiplier": 2.5,
+  "currency": "INR",
+  "amount": 100
+}
+
+
+### limbo round result
+GET http://localhost:3084/api/v1/game/limbo/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+
+### coinflip round bet
+POST http://localhost:3084/api/v1/game/coinflip/bet
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "choice":"TAIL",
+  "currency": "INR",
+  "amount": 100
+}
+
+
+### coinflip round result
+GET http://localhost:3084/api/v1/game/coinflip/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+### rps round bet
+POST http://localhost:3084/api/v1/game/rps/play
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "choice": "rock",
+  "amount": 100,
+  "currency": "INR"
+}
+
+### rps round cashout
+POST http://localhost:3084/api/v1/game/rps/cashout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "matchId":1531
+}
+
+### rps round result
+GET http://localhost:3084/api/v1/game/rps/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+
+
+### pump bet
+POST  http://localhost:3084/api/v1/game/pump/start
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+{
+  "amount": 100,
+  "currency": "INR",
+  "difficulty": "Hard"
+}
+
+### pump bet pump
+GET http://localhost:3084/api/v1/game/pump/1539/pump
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+### pump bet cashout
+GET http://localhost:3084/api/v1/game/pump/1539/cashout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+### pump round result
+GET http://localhost:3084/api/v1/game/pump/result
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
+
+### bets
+GET http://localhost:3084/api/v1/users/bets?game=WINGO
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsInJvbGUiOiJVU0VSIiwidXNlcm5hbWUiOiJnYW5kdSIsImlhdCI6MTc2Njg1NjkxNSwiZXhwIjoxNzY5NDQ4OTE1fQ.K3_jqFnextcaVtSdRUBDK-DtLtuJaSCgNcNgNYM8Ado
 

@@ -1,0 +1,179 @@
+import { Controller, Put, Body, UseGuards, Request, Post , Get, Param, Req, UploadedFile, UseInterceptors, BadRequestException, UploadedFiles, Query} from '@nestjs/common';
+import { UserService } from './user.service';
+import { JwtAuthGuard } from '../..//auth/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { TransactionDto } from './dto/transaction.dto';
+import { BetDto } from './dto/bet.dto';
+import { ResolveBetDto } from './dto/resolve-bet.dto';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { CreatePromoDto } from './dto/create-promo.dto';
+import { RedeemPromoDto } from './dto/redeem-promo.dto';
+import { mkdirSync } from 'fs';
+import { AuthRequest } from 'src/types/auth-request';
+import * as fs from 'fs';
+import * as path from 'path';
+import { UPLOAD_BASE_PATH } from 'src/main';
+
+
+
+@Controller('api/v1/users')
+export class UserController {
+  constructor(private userService: UserService) {}
+
+  @UseGuards(JwtAuthGuard) // protect this route
+  @Post('update')
+  async updateUser(@Request() req : any, @Body() body: UpdateUserDto) {
+    // req.user comes from JwtStrategy.validate()
+    const userId = req.user.id;
+
+    return this.userService.update(userId, body);
+  }
+
+@UseGuards(JwtAuthGuard)
+@Post('update-password')
+async updatePassword(
+  @Request() req: any,
+  @Body() body: { oldPassword: string; newPassword: string }
+) {
+  const userId = req.user.id;
+  return this.userService.updatePassword(userId, body.oldPassword, body.newPassword);
+}
+
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/details')
+  async getUserDetails(@Param('id') id: string) {
+    return this.userService.getUserWithDetails(Number(id));
+  }
+
+  // Users redeem promo
+  @UseGuards(JwtAuthGuard)
+  @Post('redeem-promo')
+  async redeem(@Req() req, @Body() dto: RedeemPromoDto) {
+    return this.userService.redeemPromo(req.user.id, dto);
+  }
+
+
+  @UseGuards(JwtAuthGuard)
+  @Get('wallets')
+  async getUserWallets(@Request() req: any) {
+    const userId = req.user.id;
+    return this.userService.getUserWallets(Number(userId));
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('transactions')
+  async getUserTransactions(@Request() req: any) {
+    const userId = req.user.id;
+    return this.userService.getUserTransactions(Number(userId));
+  }
+  @UseGuards(JwtAuthGuard)
+  @Get('bets')
+  async getUserBets(@Request() req: any , 
+  @Query('game') game?: string
+  ) {
+    const userId = req.user.id;
+    return this.userService.getUserBets(Number(userId) , game);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/transaction')
+  async addTransaction(
+    @Param('id') id: string,
+    @Body() dto: TransactionDto,
+  ) {
+    return this.userService.addTransaction(Number(id), dto);
+  }
+
+  //image upload
+   @Post('upload-image/:id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+        const uploadPath = `${UPLOAD_BASE_PATH}/users`;
+        cb(null, uploadPath);
+      },
+        filename: (req, file, cb) => {
+          const name = file.originalname.replace(/\.[^/.]+$/, "");
+          const safeName = name.replace(/[^a-zA-Z0-9_-]/g, '').toLowerCase();
+          const timestamp = Date.now();
+          const ext = extname(file.originalname);
+
+          cb(null, `${safeName}-${timestamp}${ext}`);
+        },
+      }),
+    }),
+  )
+  async uploadImage(@UploadedFile() file, @Req() req ,@Param('id') id: string) {
+    const userId = Number(id);
+      // delete old image FIRST
+    await this.userService.deleteUserImage(userId);
+
+    // update with new image path
+    return this.userService.updateUserImage(userId, file.filename);
+  }
+
+   //documets upload
+  @UseGuards(JwtAuthGuard)
+@Post("upload-user-files")
+@UseInterceptors(
+  FileFieldsInterceptor(
+    [
+      { name: "profileImage", maxCount: 1 },
+      { name: "documents", maxCount: 10 },
+    ],
+    {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const userId = ( req as AuthRequest).user.id;
+
+          let folder = 
+           file.fieldname === "profileImage"
+              ? `${UPLOAD_BASE_PATH}/users/${userId}`
+              : `${UPLOAD_BASE_PATH}/documents/${userId}`;
+
+          mkdirSync(folder, { recursive: true });
+          cb(null, folder);
+        },
+        filename: (req, file, cb) => {
+          const ext = extname(file.originalname);
+          const base = file.originalname.replace(ext, "").replace(/[^a-zA-Z0-9_-]/g, "");
+          const timestamp = Date.now();
+
+          cb(null, `${base}-${timestamp}${ext}`);
+        },
+      }),
+    }
+  )
+)
+async uploadUserFiles(
+  @UploadedFiles() files: {
+    profileImage?: Express.Multer.File[];
+    documents?: Express.Multer.File[];
+  },
+  @Request() req
+) {
+  const userId = req.user.id;
+
+    const result = await this.userService.updateUserFiles(userId, files);
+
+  // 🔥 DELETE OLD PROFILE IMAGE SAFELY
+  if (result.oldProfile) {
+    const oldPath = path.join(process.cwd(), result.oldProfile);
+    if (fs.existsSync(oldPath)) {
+      fs.unlinkSync(oldPath);
+      console.log("Deleted old profile image:", oldPath);
+    }
+  }
+
+  return result;
+}
+
+
+
+//eol
+}
+

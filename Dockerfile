@@ -1,27 +1,47 @@
-# Use official Node.js image
-# FROM node:18-alpine
-FROM node:20.12.2-alpine
+# -----------------------------
+# 1️⃣ BUILD STAGE
+# -----------------------------
+FROM node:20.12.2-alpine AS builder
 
-# Set working directory
-WORKDIR /src
+WORKDIR /app
 
-# Copy package files first (for caching)
+# Install dependencies (including devDependencies)
 COPY package*.json ./
+ENV NODE_ENV=development
+RUN npm ci --legacy-peer-deps
 
-# Ensure clean install
-RUN rm -rf node_modules && npm install --legacy-peer-deps
-
-# Copy the rest of the project
+# Copy full source
 COPY . .
+
 # Generate Prisma client
 RUN npx prisma generate
 
-# Run Prisma migrations (optional: only in production or at build time)
-RUN npx prisma migrate deploy
-
+# Build NestJS project
 RUN npm run build
 
-# Expose port if needed
+
+# -----------------------------
+# 2️⃣ RUN STAGE (SMALL FINAL IMAGE)
+# -----------------------------
+FROM node:20.12.2-alpine AS runner
+
+WORKDIR /app
+
+# Only copy necessary files
+COPY package*.json ./
+ENV NODE_ENV=production
+
+# Install only production deps
+RUN npm ci --omit=dev --legacy-peer-deps
+
+# Copy built app + Prisma client
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/prisma ./prisma
+
+# Expose API port
 EXPOSE 3084
 
-CMD ["node", "dist/main.js"]
+# Run migrations and start app
+CMD npx prisma migrate deploy && node dist/main.js

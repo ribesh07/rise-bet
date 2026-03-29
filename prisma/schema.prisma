@@ -7,11 +7,361 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  BET
+  WIN
+  LOST
+  BONUS
+  REFUND
+}
+
+enum BetStatus {
+  PENDING
+  ACTIVE
+  SPINNING
+  FINISHED
+  WON
+  LOST
+  CANCELLED
+  REFUNDED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+  MODERATOR
+}
+
+enum Currency {
+  INR
+  TRX
+  XRP
+  USDT
+  USDC
+  SOL
+  BNB
+  ETH
+  LTC
+  BTC
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  name  String
-  email String  @unique
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  password     String
+  name         String?
+  progressPercent Int       @default(0)
+  currentLevelName String?  @default("Bronze")
+  nextLevelName    String?  @default("Silver")
+  username     String    @unique
+  profileImage String?   // URL to profile image
+  documentImages  Json?    // store document info as JSON
+
+  phone        String?   @unique
+  dob          String?
+  referral     String?   @unique
+  role         UserRole  @default(USER)
+  isEmailVerified Boolean @default(false)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLogin    DateTime?
+
+  wallets      Wallet[]  
+  promoUsages      PromoUsage[]
+  transactions Transaction[]
+  bets         Bet[]
+  userGameStats UserGameStats[]
+}
+
+
+model UserGameStats {
+  id             Int     @id @default(autoincrement())
+  userId         Int     @unique
+  game           String
+  consecutiveWins Int    @default(0)
+  totalGames     Int     @default(0)
+  lastResult     String?
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Wallet {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    Int
+  currency  Currency   
+  image   String?   // store image URL for the currency
+  balance   Decimal    @default(0.00) @db.Decimal(20, 12)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  @@unique([userId, currency]) 
+}
+
+
+model Admin {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  password    String
+  username        String?
+  role        UserRole    @default(ADMIN)
+  isActive    Boolean      @default(true)
+  lastLoginAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  logs        ControlLog[]
+}
+
+model ControlLog {
+  id        Int      @id @default(autoincrement())
+  adminId   Int
+  action    String
+  details   String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+
+  admin Admin @relation(fields: [adminId], references: [id])
+}
+
+model BetControl {
+  id           Int       @id @default(autoincrement())
+  mode         String?   // example: "AUTO" | "FORCE"
+  forcedResult String?   // e.g. "WIN" | "LOSE" or null
+  winRatio     Float?    // e.g. 0.8
+  targetUserId Int?      // if applicable
+  targetUserName   String?    
+  active       Boolean   @default(true)
+  updatedAt    DateTime  @updatedAt
+  createdAt    DateTime  @default(now())
+}
+
+model Transaction {
+  id        Int             @id @default(autoincrement())
+  userId    Int
+  type      TransactionType
+  currency  Currency
+  amount    Decimal          @default(0.00) @db.Decimal(12,2)
+  createdAt DateTime         @default(now())
+  status    TransactionStatus @default(PENDING)
+  description String?
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Bet {
+  id           Int        @id @default(autoincrement())
+  userId       Int
+  matchId      Int
+  uniqueBetId     String?  @unique
+  table       String?
+  game         String?
+  sports    String? 
+  room         String?
+  currency     Currency
+  payload      Json
+  odds         Decimal?     @db.Decimal(5,2)
+  potentialWin Decimal?    @db.Decimal(12,2)
+  amount        Decimal     @db.Decimal(12,2)
+  amountInINR  Decimal?  @db.Decimal(18, 2)
+  payout       Decimal?    @db.Decimal(12,2) @default(0.00)
+  status       BetStatus  @default(PENDING)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime?    @updatedAt
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match        Match       @relation(fields: [matchId], references: [id])
+}
+
+model Match {
+  id        Int     @id @default(autoincrement())
+  name      String?
+  tableId     String
+  userId      Int?
+  status      BetStatus  @default(PENDING)     // ACTIVE | SPINNING | FINISHED
+  players       MatchPlayer[]
+  countPlayers Int? @default(0)
+  wins      Int?  @default(0)
+  startTime DateTime
+  endTime   DateTime?
+  bets      Bet[]
+}
+
+model MatchPlayer {
+  id       Int   @id @default(autoincrement())
+  matchId  Int
+  userId   Int
+  username String
+  wins      Int?  @default(0)
+
+  match Match @relation(fields: [matchId], references: [id])
+
+  @@unique([matchId, userId]) 
+}
+
+
+model ClientApp {
+  id         Int      @id @default(autoincrement())
+  name       String
+  apiKey     String   @unique
+  secretKey  String
+  webhookUrl String?
+  isActive   Boolean  @default(true)
+  players    ExternalPlayer[]
+  createdAt  DateTime @default(now())
+}
+model ExternalPlayer {
+  id             Int        @id @default(autoincrement())
+  clientAppId    Int
+  clientApp      ClientApp  @relation(fields: [clientAppId], references: [id])
+  
+  externalUserId String     // ID from client website
+  internalUserId Int?       // local user (optional linking)
+  
+  createdAt      DateTime   @default(now())
+
+  @@unique([clientAppId, externalUserId])
+}
+
+model ExternalWallet {
+  id             Int         @id @default(autoincrement())
+  clientAppId    Int
+  externalUserId String
+  currency       Currency
+  balance        Decimal      @default(0) @db.Decimal(20,8)
+
+  @@unique([clientAppId, externalUserId, currency])
+}
+
+model Promo {
+  id          Int       @id @default(autoincrement())
+  code        String    @unique
+  amount      Float
+  currency    Currency  @default(INR)
+  maxClaims   Int
+  claimed     Int       @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  usages      PromoUsage[]
+}
+
+model PromoUsage {
+  id        Int      @id @default(autoincrement())
+  promoId   Int
+  userId    Int
+  usedAt    DateTime @default(now())
+
+  promo     Promo    @relation(fields: [promoId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([promoId, userId]) // prevents double use
+}
+
+
+model ExchangeRate {
+  id        Int      @id @default(autoincrement())
+  currency  Currency @unique
+  rateInINR Decimal  @db.Decimal(18, 8)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+enum WingoDuration {
+  S30
+  M1
+  M3
+  M5
+}
+
+enum RoundStatus {
+  OPEN
+  CLOSED
+  SETTLED
+}
+
+enum WingoBetType {
+  NUMBER
+  COLOR
+}
+
+enum CoinSide {
+  HEAD
+  TAIL
+}
+
+model WingoBet {
+  id        String       @id @default(uuid())
+  uid       Int           @default(autoincrement())
+  userId    Int
+  status    RoundStatus    @default(OPEN)
+  duration  WingoDuration   @default(S30)
+  betType   WingoBetType
+  currency  Currency?
+  result    Int?
+  value     String
+  amount    Float
+  payout    Float?
+  win       Boolean?
+  startTime DateTime?
+  endTime   DateTime?
+
+  createdAt DateTime    @default(now())
+}
+
+
+model Categories {
+  id Int @id @default(autoincrement())
+  name String?  @unique
+}
+
+model Promotion {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String
+  group       PromotionGroup
+  endsAt      DateTime
+
+  isActive    Boolean  @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum PromotionGroup {
+  casino
+  sport
+  community
+  poker
+}
+
+model Blog {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       String
+  group       String
+  publishedAt DateTime
+
+  isActive    Boolean  @default(true)
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum BlogGroup {
+  AllBlogs
+  Crypto
+  HowToGuides
+  RiseNews
+  Sport
+  Poker
+  Casino
+  Esports
+  Other
 }
 

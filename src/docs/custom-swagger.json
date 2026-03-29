@@ -1,0 +1,15 @@
+{
+  "paths": {
+    "/ping": {
+      "get": {
+        "tags": ["System"],
+        "summary": "Ping API",
+        "responses": {
+          "200": {
+            "description": "Server Online"
+          }
+        }
+      }
+    }
+  }
+}
