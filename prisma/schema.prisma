@@ -7,11 +7,747 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  name  String
-  email String  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+//////////////////////////////////////////////////////
+// ENUMS
+//////////////////////////////////////////////////////
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  BET
+  WIN
+  LOST
+  BONUS
+  REFUND
+  TRANSFER
+  ADJUSTMENT
 }
 
+enum BetStatus {
+  PENDING
+  ACTIVE
+  SPINNING
+  FINISHED
+  WON
+  LOST
+  CANCELLED
+  REFUNDED
+  SETTLING
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+  MODERATOR
+}
+
+enum Currency {
+  INR
+  TRX
+  XRP
+  USDT
+  USDC
+  SOL
+  BNB
+  ETH
+  LTC
+  BTC
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+}
+
+enum LedgerSourceType {
+  BET
+  TRANSACTION
+  BONUS
+  REFUND
+  ADMIN
+  SETTLEMENT
+  PROMOTION
+  MANUAL
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  SUSPENDED
+}
+
+//////////////////////////////////////////////////////
+// USER
+//////////////////////////////////////////////////////
+
+model User {
+  id                Int       @id @default(autoincrement())
+  email             String    @unique
+  password          String
+  name              String?
+  username          String    @unique
+  phone             String?   @unique
+  dob               String?
+
+  progressPercent   Int       @default(0)
+  currentLevelName  String?   @default("Bronze")
+  nextLevelName     String?   @default("Silver")
+
+  profileImage      String?
+  documentImages    Json?
+
+  referral          String?   @unique
+
+  role              UserRole  @default(USER)
+
+  isEmailVerified   Boolean   @default(false)
+  isActive          Boolean   @default(true)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastLogin         DateTime?
+
+  wallets           Wallet[]
+  transactions      Transaction[]
+  bets              Bet[]
+  userGameStats     UserGameStats[]
+  promoUsages       PromoUsage[]
+  wingoBets         WingoBet[]
+  ledgerEntries     LedgerEntry[]
+
+  @@index([email])
+  @@index([username])
+  @@index([phone])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// USER GAME STATS
+//////////////////////////////////////////////////////
+
+model UserGameStats {
+  id               Int      @id @default(autoincrement())
+  userId           Int      @unique
+  game             String
+  consecutiveWins  Int      @default(0)
+  totalGames       Int      @default(0)
+  lastResult       String?
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// WALLET
+//////////////////////////////////////////////////////
+
+model Wallet {
+  id             Int          @id @default(autoincrement())
+  userId         Int
+  currency       Currency
+  image          String?
+
+  // compatibility balance
+  // keep existing code working
+  balance        Decimal      @default(0.00) @db.Decimal(20, 8)
+
+  status         WalletStatus @default(ACTIVE)
+
+  version        Int          @default(1)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledgerEntries  LedgerEntry[]
+
+  @@unique([userId, currency])
+  @@index([userId])
+  @@index([currency])
+}
+
+//////////////////////////////////////////////////////
+// LEDGER (SOURCE OF TRUTH)
+//////////////////////////////////////////////////////
+
+model LedgerEntry {
+  id               BigInt            @id @default(autoincrement())
+
+  userId           Int
+  walletId         Int
+
+  type             LedgerEntryType
+  sourceType       LedgerSourceType
+
+  amount           Decimal           @db.Decimal(20, 8)
+
+  balanceBefore    Decimal           @db.Decimal(20, 8)
+  balanceAfter     Decimal           @db.Decimal(20, 8)
+
+  referenceId      String?
+  externalRef      String?
+
+  description      String?
+  metadata         Json?
+
+  createdAt        DateTime          @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet           Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([walletId])
+  @@index([referenceId])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// TRANSACTION
+//////////////////////////////////////////////////////
+
+model Transaction {
+  id               Int               @id @default(autoincrement())
+
+  userId           Int
+  walletId         Int?
+
+  type             TransactionType
+  status           TransactionStatus @default(PENDING)
+
+  currency         Currency
+
+  amount           Decimal           @default(0.00) @db.Decimal(20, 8)
+
+  idempotencyKey   String?           @unique
+  referenceId      String?           @unique
+  externalRef      String?
+
+  beforeBalance    Decimal?          @db.Decimal(20, 8)
+  afterBalance     Decimal?          @db.Decimal(20, 8)
+
+  description      String?
+  metadata         Json?
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// ADMIN
+//////////////////////////////////////////////////////
+
+model Admin {
+  id             Int         @id @default(autoincrement())
+  email          String      @unique
+  password       String
+  username       String?
+  role           UserRole    @default(ADMIN)
+
+  isActive       Boolean     @default(true)
+
+  lastLoginAt    DateTime?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  logs           ControlLog[]
+}
+
+model ControlLog {
+  id             Int       @id @default(autoincrement())
+  adminId        Int
+
+  action         String
+  details        String?
+  metadata       Json?
+
+  createdAt      DateTime  @default(now())
+
+  admin          Admin     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// BET CONTROL
+//////////////////////////////////////////////////////
+
+model BetControl {
+  id               Int       @id @default(autoincrement())
+
+  mode             String?
+  forcedResult     String?
+  winRatio         Float?
+
+  targetUserId     Int?
+  targetUserName   String?
+
+  active           Boolean   @default(true)
+
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+//////////////////////////////////////////////////////
+// CLIENT APPS
+//////////////////////////////////////////////////////
+
+model ClientApp {
+  id             Int              @id @default(autoincrement())
+  name           String
+
+  apiKey         String           @unique
+  secretKey      String
+
+  webhookUrl     String?
+
+  isActive       Boolean          @default(true)
+
+  createdAt      DateTime         @default(now())
+
+  players        ExternalPlayer[]
+  wallets        ExternalWallet[]
+}
+
+model ExternalPlayer {
+  id               Int         @id @default(autoincrement())
+
+  clientAppId      Int
+  externalUserId   String
+  internalUserId   Int?
+
+  createdAt        DateTime    @default(now())
+
+  clientApp        ClientApp   @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
+
+  @@unique([clientAppId, externalUserId])
+}
+
+model ExternalWallet {
+  id               Int         @id @default(autoincrement())
+
+  clientAppId      Int
+  externalUserId   String
+
+  currency         Currency
+  balance          Decimal     @default(0.00) @db.Decimal(20, 8)
+
+  updatedAt        DateTime    @updatedAt
+  createdAt        DateTime    @default(now())
+
+  clientApp        ClientApp   @relation(fields: [clientAppId], references: [id], onDelete: Cascade)
+
+  @@unique([clientAppId, externalUserId, currency])
+}
+
+//////////////////////////////////////////////////////
+// PROMO
+//////////////////////////////////////////////////////
+
+model Promo {
+  id            Int          @id @default(autoincrement())
+
+  code          String       @unique
+  amount        Decimal      @db.Decimal(20, 8)
+
+  currency      Currency     @default(INR)
+
+  maxClaims     Int
+  claimed       Int          @default(0)
+
+  expiresAt     DateTime?
+
+  createdAt     DateTime     @default(now())
+
+  usages        PromoUsage[]
+}
+
+model PromoUsage {
+  id            Int       @id @default(autoincrement())
+
+  promoId       Int
+  userId        Int
+
+  usedAt        DateTime  @default(now())
+
+  promo         Promo     @relation(fields: [promoId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([promoId, userId])
+}
+
+//////////////////////////////////////////////////////
+// EXCHANGE RATE
+//////////////////////////////////////////////////////
+
+model ExchangeRate {
+  id            Int       @id @default(autoincrement())
+
+  currency      Currency  @unique
+  rateInINR     Decimal   @db.Decimal(18, 8)
+
+  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime  @default(now())
+}
+
+
+//////////////////////////////////////////////////////
+// MATCH
+//////////////////////////////////////////////////////
+
+model Match {
+  id             Int          @id @default(autoincrement())
+
+  name           String?
+  tableId        String
+  userId         Int?
+
+  status         BetStatus    @default(PENDING)
+
+  countPlayers   Int          @default(0)
+  wins           Int          @default(0)
+
+  startTime      DateTime
+  endTime        DateTime?
+
+  // optimistic concurrency
+  version        Int          @default(1)
+
+  players        MatchPlayer[]
+  bets           Bet[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([status])
+  @@index([tableId])
+  @@index([startTime])
+}
+
+//////////////////////////////////////////////////////
+// MATCH PLAYER
+//////////////////////////////////////////////////////
+
+model MatchPlayer {
+  id             Int       @id @default(autoincrement())
+
+  matchId        Int
+  userId         Int
+  username       String
+
+  wins           Int       @default(0)
+
+  createdAt      DateTime  @default(now())
+
+  match          Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+  @@index([matchId])
+  @@index([userId])
+}
+
+//////////////////////////////////////////////////////
+// BET
+//////////////////////////////////////////////////////
+
+model Bet {
+  id                  Int          @id @default(autoincrement())
+
+  userId              Int
+  matchId             Int?
+
+  uniqueBetId         String       @unique
+
+  table               String?
+  game                String?
+  sports              String?
+  room                String?
+
+  currency            Currency
+
+  payload             Json
+
+  odds                Decimal?     @db.Decimal(10, 4)
+
+  amount              Decimal      @db.Decimal(20, 8)
+  amountInINR         Decimal?     @db.Decimal(20, 8)
+
+  potentialWin        Decimal?     @db.Decimal(20, 8)
+  payout              Decimal      @default(0.00) @db.Decimal(20, 8)
+
+  status              BetStatus    @default(PENDING)
+
+  settlementReference String?      @unique
+  idempotencyKey      String?      @unique
+
+  settledAt           DateTime?
+  cancelledAt         DateTime?
+
+  metadata            Json?
+
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match               Match?       @relation(fields: [matchId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([matchId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([game])
+  @@index([sports])
+}
+
+//////////////////////////////////////////////////////
+// WINGO ENUMS
+//////////////////////////////////////////////////////
+
+enum WingoDuration {
+  S30
+  M1
+  M3
+  M5
+}
+
+enum RoundStatus {
+  OPEN
+  CLOSED
+  SETTLED
+  CANCELLED
+}
+
+enum WingoBetType {
+  NUMBER
+  COLOR
+}
+
+enum CoinSide {
+  HEAD
+  TAIL
+}
+
+//////////////////////////////////////////////////////
+// WINGO BET
+//////////////////////////////////////////////////////
+
+model WingoBet {
+  id                  String         @id @default(uuid())
+
+  uid                 Int            @default(autoincrement())
+
+  userId              Int
+
+  status              RoundStatus    @default(OPEN)
+  duration            WingoDuration  @default(S30)
+  betType             WingoBetType
+
+  currency            Currency?
+
+  result              Int?
+  value               String
+
+  amount              Decimal        @db.Decimal(20, 8)
+  payout              Decimal?       @db.Decimal(20, 8)
+
+  win                 Boolean?
+
+  settlementReference String?        @unique
+  idempotencyKey      String?        @unique
+
+  startTime           DateTime?
+  endTime             DateTime?
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([duration])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// CATEGORIES
+//////////////////////////////////////////////////////
+
+model Categories {
+  id             Int       @id @default(autoincrement())
+  name           String?   @unique
+}
+
+//////////////////////////////////////////////////////
+// PROMOTION
+//////////////////////////////////////////////////////
+
+enum PromotionGroup {
+  casino
+  sport
+  community
+  poker
+}
+
+model Promotion {
+  id             Int              @id @default(autoincrement())
+
+  title          String
+  description    String
+  image          String
+
+  group          PromotionGroup
+
+  endsAt         DateTime
+
+  isActive       Boolean          @default(true)
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([group])
+  @@index([isActive])
+}
+
+//////////////////////////////////////////////////////
+// BLOG
+//////////////////////////////////////////////////////
+
+enum BlogGroup {
+  AllBlogs
+  Crypto
+  HowToGuides
+  RiseNews
+  Sport
+  Poker
+  Casino
+  Esports
+  Other
+}
+
+model Blog {
+  id             Int        @id @default(autoincrement())
+
+  title          String
+  description    String
+  image          String
+
+  group          BlogGroup
+
+  publishedAt    DateTime
+
+  isActive       Boolean    @default(true)
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([group])
+  @@index([publishedAt])
+}
+
+//////////////////////////////////////////////////////
+// WEBHOOK EVENT LOG
+//////////////////////////////////////////////////////
+
+model WebhookEventLog {
+  id               BigInt      @id @default(autoincrement())
+
+  source           String
+  eventType        String
+
+  externalRef      String?
+  payload          Json
+
+  processed        Boolean     @default(false)
+  processedAt      DateTime?
+
+  retryCount       Int         @default(0)
+
+  errorMessage     String?
+
+  createdAt        DateTime    @default(now())
+
+  @@index([source])
+  @@index([eventType])
+  @@index([processed])
+  @@index([createdAt])
+}
+
+//////////////////////////////////////////////////////
+// BACKGROUND JOB TRACKING
+//////////////////////////////////////////////////////
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+model JobExecution {
+  id               BigInt       @id @default(autoincrement())
+
+  jobName          String
+  referenceId      String?
+
+  status           JobStatus    @default(PENDING)
+
+  attempts         Int          @default(0)
+
+  payload          Json?
+
+  startedAt        DateTime?
+  completedAt      DateTime?
+
+  errorMessage     String?
+
+  createdAt        DateTime     @default(now())
+
+  @@index([jobName])
+  @@index([status])
+  @@index([referenceId])
+}
+
+//////////////////////////////////////////////////////
+// AUDIT EVENT
+//////////////////////////////////////////////////////
+
+model AuditEvent {
+  id               BigInt      @id @default(autoincrement())
+
+  actorType        String
+  actorId          String
+
+  action           String
+
+  entityType       String
+  entityId         String
+
+  metadata         Json?
+
+  ipAddress        String?
+  userAgent        String?
+
+  createdAt        DateTime    @default(now())
+
+  @@index([actorType])
+  @@index([entityType])
+  @@index([createdAt])
+}
