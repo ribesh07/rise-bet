@@ -9,6 +9,7 @@ COPY package*.json ./
 
 ENV NODE_ENV=development
 
+RUN apt-get update && apt-get install -y openssl
 RUN npm ci --legacy-peer-deps
 
 COPY . .
@@ -28,6 +29,7 @@ COPY package*.json ./
 
 ENV NODE_ENV=production
 
+RUN apt-get update && apt-get install -y openssl
 RUN npm ci --omit=dev --legacy-peer-deps
 
 COPY --from=builder /app/dist ./dist
