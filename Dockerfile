@@ -37,6 +37,6 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/prisma ./prisma
 
-EXPOSE 3088
+EXPOSE 3084
 
 CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
