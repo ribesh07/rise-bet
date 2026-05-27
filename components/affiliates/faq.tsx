@@ -26,7 +26,7 @@ const generalData: AccordionItemType[] = [
   {
     title: "Who can join the rise Affiliate Program?",
     content:
-      "The rise Affiliate Program is open to anyone who has a network or audience to which they can promote rise.",
+      "The rise Affiliate Program is open to anyone who has a networks or audiences to which they can promote rise.",
   },
   {
     title: "How do I join the rise Affiliate Program?",
