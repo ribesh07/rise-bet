@@ -59,7 +59,7 @@ export default function KenoGame() {
       if (res.success) {
         setDashboardDetails(res.data);
         const wallets = res.data.wallets || [];
-        let initialWallet = wallets.find((w: any) => String(w.currency || w.symbol).toUpperCase() === String(currency || "").toUpperCase()) || wallets[0];
+        const initialWallet = wallets.find((w: any) => String(w.currency || w.symbol).toUpperCase() === String(currency || "").toUpperCase()) || wallets[0];
         if (initialWallet) {
           setBalance(parseFloat(initialWallet.balance || initialWallet.amount || 0));
           setCurrency(initialWallet.currency || initialWallet.symbol || "USD");

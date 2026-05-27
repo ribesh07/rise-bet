@@ -72,8 +72,7 @@ export default function BaccaratGame() {
       setBalance(prev => prev + betAmount);
       let message = "Something went wrong";
       if (err && typeof err === "object" && "response" in err && err.response && typeof err.response === "object" && "data" in err.response && err.response.data && typeof err.response.data === "object" && "message" in err.response.data) {
-        // @ts-ignore
-        message = err.response.data.message;
+        message = (err as any).response.data.message;
       }
       alert(message);
       setLoading(false);

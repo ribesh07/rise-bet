@@ -56,7 +56,7 @@ const Preferences = () => {
         <div className="flex items-center justify-between py-2 border-b border-[#1c2a38]">
           <div>
             <p className="font-semibold text-sm text-gray-200">Hide All Your Statistics</p>
-            <p className="text-gray-400 text-xs">Others won't see wins, losses, wagered stats.</p>
+            <p className="text-gray-400 text-xs">Others won&apos;t see wins, losses, wagered stats.</p>
           </div>
           <Switch
             checked={hideStats}

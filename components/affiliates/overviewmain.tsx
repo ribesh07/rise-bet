@@ -190,7 +190,7 @@ const Overview = () => {
               Templates to Help Your Campaign Stand Out
             </h2>
             <p className="text-sm text-white/90 mt-1">
-              We've created digital banner templates to make it easier to
+              We&apos;ve created digital banner templates to make it easier to
               promote your campaigns online.
             </p>
           </div>

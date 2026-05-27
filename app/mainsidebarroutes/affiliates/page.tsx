@@ -244,7 +244,7 @@ const AffiliateProgram: React.FC = () => {
                         setAuthOpen(true);
                       }}
                     >
-                      'Register'
+                      &apos;Register&apos;
                     </span>{' '}
                     button below to get started.
                   </p>
@@ -350,7 +350,7 @@ const AffiliateProgram: React.FC = () => {
                   Templates to Help Your Campaign Stand Out
                 </h2>
                 <p className="text-sm text-white/90 mt-1">
-                  We've created digital banner templates to make it easier to promote your campaigns online.
+                  We&apos;ve created digital banner templates to make it easier to promote your campaigns online.
                 </p>
               </div>
               <img

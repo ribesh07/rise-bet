@@ -138,6 +138,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/utils/ApiHelper";
 import toast from "react-hot-toast";
+import { FaGoogle } from "react-icons/fa";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -256,7 +257,7 @@ export const LoginForm = ({ onSuccess, onSwitch }: LoginFormProps) => {
           <span>🗝️</span> Sign In with Passkey
         </button>
         <button className="w-full flex items-center justify-center gap-2 py-3 bg-[#2b2f42] rounded-md text-white font-semibold hover:bg-[#3a3f5c] transition">
-          <img src="/icons/google.svg" className="w-5 h-5" alt="Google" />
+          <FaGoogle className="w-5 h-5 text-red-500" />
           Sign In with Google
         </button>
         <button className="w-full py-3 bg-[#2b2f42] rounded-md text-white font-semibold hover:bg-[#3a3f5c] transition">
@@ -267,7 +268,7 @@ export const LoginForm = ({ onSuccess, onSwitch }: LoginFormProps) => {
       {/* Switch to Signup */}
       {onSwitch && (
         <p className="mt-6 text-center text-gray-400 text-sm">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <button onClick={onSwitch} className="text-[#00c2ff] hover:underline">
             Sign up
           </button>

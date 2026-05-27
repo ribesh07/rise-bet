@@ -17,7 +17,7 @@ function generateTableId(): string {
 type betupdateid = {
   id: number;}
 
-const ModernRoulette: React.FC<{ tableId?: string }> = ({ tableId: tableIdProp }) => {
+const ModernRoulette = ({ tableId: tableIdProp }: { tableId?: string }) => {
   const [balance, setBalance] = useState<number>(0);
   const [resolutions, setResolutions] = useState<Resolution[]>([]);
   const [resolutionbetupdate, setresolutionbetupdate] = useState<betupdateid[]>([]);
@@ -869,4 +869,7 @@ const OutsideBtn = ({
   );
 };
 
-export default ModernRoulette;
+export default function Page({ params }: { params: Promise<{ tableId: string }> }) {
+  const { tableId } = React.use(params);
+  return <ModernRoulette tableId={tableId} />;
+}

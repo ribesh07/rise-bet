@@ -181,7 +181,7 @@ export default function Footer() {
     </p>
      <div>
          
-            <img src="/logo.png" className="hidden md:block w-28 cursor-pointer" />
+            <img src="/logo.png" alt="Rise Logo" className="hidden md:block w-28 cursor-pointer" />
            
           
         </div>

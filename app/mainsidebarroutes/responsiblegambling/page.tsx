@@ -631,8 +631,8 @@ const ResponsibleGamblingPage = () => {
                                   </div>
                                 )}
                         
-                                {/* ============ RESPONSIBLE GAMBLING FAQ'S ============ */}
-                                {active === "Responsible Gambling FAQ's" && (
+                                {/* ============ RESPONSIBLE GAMBLING FAQ&apos;S ============ */}
+                                {active === "Responsible Gambling FAQ&apos;s" && (
                                   <div className="max-w-4xl mx-auto">
                                     <div className="bg-[#0d1721] rounded-2xl p-6">
                                         <img
@@ -644,24 +644,24 @@ const ResponsibleGamblingPage = () => {
                                         
                                         
                                         <h2 className="text-white text-xl font-bold">
-                                          Responsible Gambling FAQ's
+                                          Responsible Gambling FAQ&apos;s
                                         </h2>
                                       </div>
                         
                                       <div className="text-sm text-gray-300 space-y-6 leading-relaxed">
                                         <p>
-                                          <strong>1. Isn't problem gambling just a financial problem?</strong><br />
+                                          <strong>1. Isn&apos;t problem gambling just a financial problem?</strong><br />
                                           No. Problem gambling is a behavioural addiction that has financial and other consequences. Even if the person pays off their gambling debts, they can still have other problems caused by gambling.
                                         </p>
                         
                                         <p>
                                           <strong>2. Do you have to wager often to be considered as someone being affected by problem gambling?</strong><br />
-                                          It really doesn’t matter how often a person wagers. If a person’s gambling is causing emotional, physical, financial, relationship or other challenges for themselves and the people around them, then they are affected as a result of problem gambling.
+                                          It really doesn&apos;t matter how often a person wagers. If a person&apos;s gambling is causing emotional, physical, financial, relationship or other challenges for themselves and the people around them, then they are affected as a result of problem gambling.
                                         </p>
                         
                                         <p>
                                           <strong>3. How much money do you have to lose before gambling is a problem?</strong><br />
-                                          The amount of money lost or won does not determine when gambling becomes problematic. Problem gambling is a behavioural addiction, of which negatively affects ones finances simply as a direct result of the behavioural addiction. While gambling can cause financial problems, it is not the only warning sign of a gambling problem. When gambling affects an individual’s relationships, job, mental, physical or financial well-being, it is problematic.
+                                          The amount of money lost or won does not determine when gambling becomes problematic. Problem gambling is a behavioural addiction, of which negatively affects ones finances simply as a direct result of the behavioural addiction. While gambling can cause financial problems, it is not the only warning sign of a gambling problem. When gambling affects an individual&apos;s relationships, job, mental, physical or financial well-being, it is problematic.
                                         </p>
                         
                                         <p>

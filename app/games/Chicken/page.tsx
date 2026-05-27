@@ -331,7 +331,7 @@ const ChickenRoadGame = () => {
     gameLoopRef.current = setInterval(() => {
       setVehicles(prev => {
         return prev.map(v => {
-          let newY = v.y + v.speed;
+          const newY = v.y + v.speed;
           
           if (newY > 600) {
             const vehicle = VEHICLES[Math.floor(Math.random() * VEHICLES.length)];

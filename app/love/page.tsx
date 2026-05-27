@@ -80,7 +80,7 @@ export default function ChocolateDay() {
           
           <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed space-y-6">
             <p className="text-xl text-center font-light italic text-rose-700">
-              "Just like chocolate melts in your mouth, you melt my heart with your smile."
+              &quot;Just like chocolate melts in your mouth, you melt my heart with your smile.&quot;
             </p>
             
             <p className="text-lg">

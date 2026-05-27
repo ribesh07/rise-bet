@@ -80,11 +80,11 @@ const trendingGames = [
   { id: 10, name: "Wingo", players: 290, provider: "Rise Bet", image: "/images/wingo.jpg" },
   { id: 11, name: "Coin Flip", players: 1738, provider: "Rise Bet", image: "/games/flip/avove.jpeg" },
   { id: 12, name: "Dragon Tower", players: 384, provider: "Rise Bet", image: "/games/dragontower/avove.jpeg" },
-  { id: 13, name: "Rock paper", players: 0, provider: "Rise Bet", image: "/games/rockpaper/avove.jpeg" },
+  { id: 13, name: "Rock Paper", players: 0, provider: "Rise Bet", image: "/games/rockpaper/avove.jpeg" },
   { id: 14, name: "Chicken", players: 0, provider: "Rise Bet", image: "/games/chicken/avove.png" },
   { id: 15, name: "Limbo", players: 290, provider: "Rise Bet", image: "/images/limbo.png" },
   { id: 16, name: "Diamond", players: 380, provider: "Rise Bet", image: "/games/diamond/avove.jpeg" },
-   { id: 17, name: "Slide", players: 290, provider: "Rise Bet", image: "/games/slide/avove.jpeg" },
+  { id: 17, name: "Slide", players: 290, provider: "Rise Bet", image: "/games/slide/avove.jpeg" },
 
 
 ];

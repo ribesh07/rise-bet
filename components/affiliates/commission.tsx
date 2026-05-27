@@ -11,7 +11,7 @@ const CommissionPage: React.FC = () => {
     <div className="flex-1 bg-[#101b22dd] rounded-2xl p-6 space-y-6 shadow-lg shadow-black/40">
       <h1 className="text-2xl font-semibold mb-3">Commission</h1>
       <p className="text-gray-300 mb-6 text-sm sm:text-base">
-        View and track the earnings you've generated through your referrals. This section provides a clear breakdown of your commissions and payouts, keeping you in control of your earnings.
+        View and track the earnings you&apos;ve generated through your referrals. This section provides a clear breakdown of your commissions and payouts, keeping you in control of your earnings.
       </p>
 
       {/* Sort + Filter + Transfer */}

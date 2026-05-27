@@ -4,9 +4,7 @@ import Image from 'next/image';
 import React, { useEffect, useState } from 'react';
 import Link from "next/link";
 
-interface TopNavbarProps {
-  
-}
+type TopNavbarProps = Record<string, never>;
 
 const TopNavbar: React.FC<TopNavbarProps> = ({  }) => {
   const [isMobile, setIsMobile] = useState(false);

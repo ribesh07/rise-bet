@@ -85,7 +85,7 @@ const TopNavbar: React.FC<TopNavbarProps> = ({
       balance: Number(w.balance || 0),
       icon:
         walletIcons.find((i) => i.symbol === w.currency)?.icon ||
-        "/images/default.svg",
+        "/globe.svg",
     }));
 
     converted.sort((a, b) => (b.balance || 0) - (a.balance || 0));

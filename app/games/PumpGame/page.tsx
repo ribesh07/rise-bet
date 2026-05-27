@@ -24,7 +24,7 @@ const DIFFICULTY_SETTINGS: Record<DifficultyLevel, {
     maxMultiplier: 100, 
     popChanceBase: 0.02, 
     popChanceIncrease: 0.015,
-    millSvg: "/games/pump/mediummill.svg",
+    millSvg: "/games/pump/medium.svg",
     millBalloonSvg: "/games/pump/mediummillballon.svg",
     multipliers: [1.00, 1.23, 1.55, 1.98, 2.56, 3.36, 4.48, 6.05, 8.31, 11.54, 16.22, 23.09]
   },
@@ -32,7 +32,7 @@ const DIFFICULTY_SETTINGS: Record<DifficultyLevel, {
     maxMultiplier: 200, 
     popChanceBase: 0.03, 
     popChanceIncrease: 0.025,
-    millSvg: "/games/pump/hardmill.svg",
+    millSvg: "/games/pump/hard.svg",
     millBalloonSvg: "/games/pump/hardmillballon.svg",
     multipliers: [1.00, 1.37, 1.98, 2.96, 4.69, 8.13, 15.36, 32.00, 75.52, 201.39, 645.12, 2580.48]
   },

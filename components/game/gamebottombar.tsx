@@ -20,7 +20,7 @@ export default function RiseTopBar() {
 
       {/* Center logo */}
       <div className="text-white font-bold text-lg tracking-wide">
-         <img src="/logo.png" className="hidden md:block w-10" />
+         <img src="/logo.png" alt="Rise Logo" className="hidden md:block w-10" />
       </div>
 
       {/* Right Fairness button */}
