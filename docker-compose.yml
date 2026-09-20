@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  # RiseBet Frontend - user-facing casino platform running on port 3044
+  risebet-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: risebet-frontend
+    restart: unless-stopped
+    ports:
+      - "3044:3044"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+    networks:
+      - risebet-net
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3044/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # RiseBet Admin - internal admin dashboard running on port 3045 (requires login)
+  risebet-admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: risebet-admin
+    restart: unless-stopped
+    ports:
+      - "3045:3045"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+    networks:
+      - risebet-net
+    depends_on:
+      - risebet-frontend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3045/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional PostgreSQL database - uncomment to enable persistent data storage
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: risebet-db
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DB=${POSTGRES_DB}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - risebet-net
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # Optional Redis cache - uncomment to enable session caching and pub/sub
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: risebet-redis
+  #   restart: unless-stopped
+  #   command: redis-server --requirepass ${REDIS_PASSWORD}
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - risebet-net
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+networks:
+  risebet-net:
+    driver: bridge
+
+# Optional persistent volumes - uncomment if enabling db/redis above
+volumes:
+  # postgres_data:
+  # redis_data:

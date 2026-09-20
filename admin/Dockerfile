@@ -2,51 +2,39 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files first
 COPY package*.json ./
 
-# Install ALL dependencies including devDeps
 ENV NODE_ENV=development
+
 RUN npm install
 
-# Copy project files (exclude admin/ — it is a separate Next.js app)
 COPY app ./app
 COPY components ./components
-COPY context ./context
 COPY hooks ./hooks
 COPY lib ./lib
 COPY public ./public
-COPY store ./store
-COPY types ./types
-COPY utils ./utils
 COPY next.config.ts ./
-COPY next.config.js* ./
-COPY postcss.config.* ./
-COPY tailwind.config.* ./
+COPY postcss.config.js ./
+COPY tailwind.config.ts ./
 COPY tsconfig.json ./
-COPY eslint.config.* ./
-COPY next-env.d.ts* ./
+COPY next-env.d.ts ./
 
-# Build Next.js app
 RUN npm run build
 
-
-# ---- RUNTIME IMAGE ----
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Standalone output (requires output: 'standalone' in next.config)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/package.json ./
 
-EXPOSE 3044
-ENV PORT=3044
+EXPOSE 3045
+ENV PORT=3045
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

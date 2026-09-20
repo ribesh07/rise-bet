@@ -25,7 +25,26 @@
   "@/*": ["./*"]
 }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/test/page.jsx", "app/games/RouletteGame/[tableId]/page.jsx", "utils/socket.js"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.js",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "components/**/*.js",
+    "context/**/*.ts",
+    "context/**/*.tsx",
+    "hooks/**/*.ts",
+    "hooks/**/*.tsx",
+    "lib/**/*.ts",
+    "store/**/*.ts",
+    "store/**/*.tsx",
+    "types/**/*.ts",
+    "utils/**/*.ts",
+    "utils/**/*.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules", "admin"]
   
 }

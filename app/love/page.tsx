@@ -56,11 +56,11 @@ const HappyBirthday = () => {
             fontSize: "1.1rem",
           }}
         >
-          <p>💖 "You are my today and all of my tomorrows." 💖</p>
-          <p>🌹 "Every love story is beautiful, but ours is my favorite." 🌹</p>
-          <p>✨ "You make my world brighter just by being in it." ✨</p>
-          <p>💕 "Your smile is my favorite notification." 💕</p>
-          <p>🥰 "With you, every moment feels magical." 🥰</p>
+          <p>💖 &ldquo;You are my today and all of my tomorrows.&rdquo; 💖</p>
+          <p>🌹 &ldquo;Every love story is beautiful, but ours is my favorite.&rdquo; 🌹</p>
+          <p>✨ &ldquo;You make my world brighter just by being in it.&rdquo; ✨</p>
+          <p>💕 &ldquo;Your smile is my favorite notification.&rdquo; 💕</p>
+          <p>🥰 &ldquo;With you, every moment feels magical.&rdquo; 🥰</p>
         </div>
 
         <div
