@@ -12,27 +12,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # --------------------------------------------------
+      # -----------------------------
       # CHECKOUT
-      # --------------------------------------------------
-
+      # -----------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --------------------------------------------------
+      # -----------------------------
       # DOCKER HUB LOGIN
-      # --------------------------------------------------
-
+      # -----------------------------
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: guru874
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # --------------------------------------------------
-      # BACKEND
-      # --------------------------------------------------
+      # -----------------------------
+      # CHECK VARIABLES
+      # -----------------------------
+      - name: Check Next.js variables
+        run: |
+          echo "NEXT_PUBLIC_API_BASE_URL configured: ${{ vars.NEXT_PUBLIC_API_BASE_URL != '' }}"
+          echo "NEXT_PUBLIC_WS_URL configured: ${{ vars.NEXT_PUBLIC_WS_URL != '' }}"
 
+      # -----------------------------
+      # BACKEND
+      # -----------------------------
       - name: Build & Push Backend
         uses: docker/build-push-action@v6
         with:
@@ -43,10 +48,9 @@ jobs:
             guru874/risebet-backend:latest
             guru874/risebet-backend:${{ github.sha }}
 
-      # --------------------------------------------------
+      # -----------------------------
       # FRONTEND
-      # --------------------------------------------------
-
+      # -----------------------------
       - name: Build & Push Frontend
         uses: docker/build-push-action@v6
         with:
@@ -60,10 +64,9 @@ jobs:
             guru874/risebet-frontend:latest
             guru874/risebet-frontend:${{ github.sha }}
 
-      # --------------------------------------------------
+      # -----------------------------
       # ADMIN
-      # --------------------------------------------------
-
+      # -----------------------------
       - name: Build & Push Admin
         uses: docker/build-push-action@v6
         with:

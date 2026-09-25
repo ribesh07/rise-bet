@@ -2,34 +2,13 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files first
 COPY package*.json ./
 
-# Install ALL dependencies including devDeps
 ENV NODE_ENV=development
-RUN npm install
 
-# Copy project files (exclude admin/ — it is a separate Next.js app)
-COPY app ./app
-COPY components ./components
-COPY context ./context
-COPY hooks ./hooks
-COPY lib ./lib
-COPY public ./public
-COPY store ./store
-COPY types ./types
-COPY utils ./utils
-COPY next.config.ts ./
-COPY next.config.js* ./
-COPY postcss.config.* ./
-COPY tailwind.config.* ./
-COPY tsconfig.json ./
-COPY eslint.config.* ./
-COPY next-env.d.ts* ./
+RUN npm ci
 
-# Build Next.js app in a standard production environment
-# Clear stale Next.js output first so docker rebuilds do not reuse broken artifacts.
-ENV NODE_ENV=production
+COPY . .
 
 ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WS_URL
@@ -37,27 +16,30 @@ ARG NEXT_PUBLIC_WS_URL
 ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
 
-RUN echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
-RUN echo "API_WS=$NEXT_PUBLIC_WS_URL"
+ENV NODE_ENV=production
 
-RUN rm -rf .next && npm run build
+RUN echo "API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}"
+RUN echo "API_WS_URL=${NEXT_PUBLIC_WS_URL}"
 
-# ---- RUNTIME IMAGE ----
+RUN rm -rf .next
+RUN npm run build
+
+
+# =========================
+# PRODUCTION
+# =========================
 FROM node:22-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PORT=3044
+ENV HOSTNAME=0.0.0.0
 
-# Standalone output (requires output: 'standalone' in next.config)
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./
-COPY --from=builder /app/package.json ./
 
 EXPOSE 3044
-ENV PORT=3044
-ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]

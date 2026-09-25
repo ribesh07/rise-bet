@@ -1,5 +1,5 @@
 # =========================
-# Builder
+# BUILDER
 # =========================
 FROM node:20-alpine AS builder
 
@@ -8,11 +8,11 @@ WORKDIR /app
 RUN apk add --no-cache openssl bash build-base
 
 COPY package*.json ./
+
 RUN npm ci
 
 COPY . .
 
-# Next.js build-time environment variables
 ARG NEXT_PUBLIC_API_BASE_URL
 ARG NEXT_PUBLIC_WS_URL
 
@@ -28,7 +28,7 @@ RUN npm run build
 
 
 # =========================
-# Production
+# PRODUCTION
 # =========================
 FROM node:20-alpine AS runner
 
