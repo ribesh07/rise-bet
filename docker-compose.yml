@@ -292,7 +292,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:3084/"
+          "http://127.0.0.1:3084/"
         ]
       interval: 30s
       timeout: 10s
@@ -334,7 +334,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:3044/"
+          "http://127.0.0.1:3044/"
         ]
       interval: 30s
       timeout: 10s
@@ -376,7 +376,7 @@ services:
           "--no-verbose",
           "--tries=1",
           "--spider",
-          "http://localhost:3045/login"
+          "http://127.0.0.1:3045/login"
         ]
       interval: 30s
       timeout: 10s
