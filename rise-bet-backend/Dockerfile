@@ -2,19 +2,18 @@
 # 1️⃣ BUILD STAGE
 # -----------------------------
 FROM node:20-bookworm-slim AS builder
-
 WORKDIR /app
 
-RUN apt-get update -y && apt-get install -y wget openssl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y \
+ && apt-get install -y wget ca-certificates openssl libssl-dev build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
-
 ENV NODE_ENV=development
-
 RUN npm ci --legacy-peer-deps
 
 COPY . .
-
+# ensure node_modules and prisma schema are present
 RUN npx prisma generate
 RUN npm run build
 
