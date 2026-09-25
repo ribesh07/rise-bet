@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -30,10 +30,20 @@ COPY next-env.d.ts* ./
 # Build Next.js app in a standard production environment
 # Clear stale Next.js output first so docker rebuilds do not reuse broken artifacts.
 ENV NODE_ENV=production
+
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_WS_URL
+
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+
+RUN echo "API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL"
+RUN echo "API_WS=$NEXT_PUBLIC_WS_URL"
+
 RUN rm -rf .next && npm run build
 
 # ---- RUNTIME IMAGE ----
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
