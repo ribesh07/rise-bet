@@ -27,9 +27,10 @@ COPY tsconfig.json ./
 COPY eslint.config.* ./
 COPY next-env.d.ts* ./
 
-# Build Next.js app
-RUN npm run build
-
+# Build Next.js app in a standard production environment
+# Clear stale Next.js output first so docker rebuilds do not reuse broken artifacts.
+ENV NODE_ENV=production
+RUN rm -rf .next && npm run build
 
 # ---- RUNTIME IMAGE ----
 FROM node:20-alpine AS runner

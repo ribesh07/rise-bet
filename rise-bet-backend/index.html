@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LuckyHit WebSocket Test</title>
+</head>
+<body>
+  <h2>LuckyHit WebSocket Console</h2>
+  <pre id="log"></pre>
+
+  <script>
+    const logBox = document.getElementById('log');
+    function log(msg) {
+      console.log(msg);
+      logBox.textContent += msg + " \n ";
+    }
+
+    const token = '80445e0672802520471fc5a497c573dcfd7c113e';
+    const ws = new WebSocket(`wss://wss.clwiz.com/luckyhit_ws/?token=${token}`);
+
+    ws.onopen = () => {
+      log('✅ Connected to LuckyHit WebSocket');
+      
+      // Example: subscribe to a game if needed
+      //ws.send(JSON.stringify({ "type": "place_bet", "amount": 100, "odds": 2.5 }));
+      
+      ws.send("luckyhit_ws");
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        log('📩 Data received: ' + JSON.stringify(data, null, 2));
+      } catch (e) {
+        log('📩 Raw data: ' + event.data);
+      }
+    };
+
+    ws.onclose = () => log('❌ Disconnected');
+    ws.onerror = (err) => log('⚠️ WebSocket error: ' + err.message);
+  </script>
+</body>
+</html>
