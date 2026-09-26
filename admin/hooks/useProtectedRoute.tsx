@@ -1,15 +1,17 @@
 'use client';
 
 import { useEffect, ComponentType } from 'react';
+import { useRouter } from 'next/navigation';
 import { isAuthenticated } from './useAuth';
 
 export const useProtectedRoute = (): void => {
+  const router = useRouter();
+
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     if (!isAuthenticated()) {
-      window.location.replace('/login');
+      router.replace('/login');
     }
-  }, []);
+  }, [router]);
 };
 
 export const withProtectedRoute = <P extends object>(

@@ -1,9 +1,9 @@
 "use client";
 
 import ClientOnly from '@/components/ClientOnly';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { mockLogin, setToken, setRole, getRole } from '@/hooks/useAuth';
+import { mockLogin, setToken, setRole, getRole, isAuthenticated } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -14,12 +14,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+
+useEffect(() => {
+if (isAuthenticated()) {
+  router.replace('/dashboard');
+}
+}, [router]);
+
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error('Please enter email and password');
       return;
     }
+
 
     setLoading(true);
     try {
@@ -28,7 +36,7 @@ export default function LoginPage() {
       setRole(result.role);
       localStorage.setItem('admin_role', result.role);
       toast.success('Welcome back!');
-      router.replace('/');
+      router.replace('/dashboard');
     } catch (err: any) {
       toast.error(err.message || 'Login failed');
     } finally {
